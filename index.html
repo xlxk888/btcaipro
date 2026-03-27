@@ -189,6 +189,22 @@
         </div>
     </div>
 
+    <div class="ad-banner-bottom">
+        <div style="margin-bottom: 15px; color: #f1c40f; font-weight: bold; font-size: 1rem; background-color: rgba(241, 196, 15, 0.1); padding: 8px; border-radius: 5px;">
+            ⚠️ 强烈提示：访问以下网页链接及下载安装，请务必全程开启科学上网环境（VPN）！
+        </div>
+        <div style="margin-bottom: 10px;">
+            1. Bitget Wallet Card 免费注册，零手续费，注册开通返5美金： 
+            <a href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank">🔗 点击专属链接注册</a>
+        </div>
+        <div>
+            2. 请使用您的浏览器访问以下链接，下载币安 App。在注册页面输入我的邀请码可得超级返佣，加入全球最大的加密货币交易平台。<br>
+            <a href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">▶ Android 安装包</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">▶ iOS 下载指南</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            邀请码：<strong style="color:#2ecc71; font-size: 1.1rem;">23017017</strong>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -294,13 +310,12 @@
                 ];
             },
 
-            // 🔥 修复点：C2C 代理请求，直连币安 P2P 接口获取最准汇率
+            // C2C 代理请求，直连币安 P2P 接口获取最准汇率
             fetchRealTimeUsdtCny() {
                 const payload = {
                     "page": 1, "rows": 1, "payTypes": [], "asset": "USDT",
                     "tradeType": "SELL", "fiat": "CNY", "publisherType": null
                 };
-                // 使用 corsproxy 解决前端跨域限制
                 axios.post('https://corsproxy.io/?https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', payload, { timeout: 5000 })
                     .then(res => {
                         if (res.data && res.data.data && res.data.data.length > 0) {
@@ -310,7 +325,6 @@
                         }
                     })
                     .catch(() => {
-                        // 兜底方案：如果代理失败，按国际汇率 + 币安溢价估算，若仍失败则直接显示你所见的 6.94
                         axios.get('https://api.exchangerate-api.com/v4/latest/USD')
                             .then(res => { 
                                 this.usdtCnyPrice = (res.data.rates.CNY * 1.018).toFixed(2); 
@@ -323,7 +337,6 @@
                 const daysSinceGenesis = (Date.now() - new Date('2009-01-03T00:00:00Z').getTime()) / 86400000;
                 this.fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
                 
-                // 修复点：使用免翻墙的 vision 域名计算 AHR999 均线
                 axios.get('https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200')
                     .then(res => {
                         let sumLog = 0; 
@@ -336,7 +349,6 @@
                     }); 
             },
 
-            // 🔥 修复点：增加多个免墙区块查询接口，并在彻底断网时利用时间差反推当前真实区块高度
             fetchBlockHeight() {
                 axios.get('https://mempool.space/api/blocks/tip/height')
                     .then(res => { this.currentBlock = parseInt(res.data); })
@@ -344,8 +356,7 @@
                         axios.get('https://blockstream.info/api/blocks/tip/height')
                             .then(res => { this.currentBlock = parseInt(res.data); })
                             .catch(() => {
-                                // 终极兜底：基于时间的区块反推 (每10分钟一个块)
-                                const baseTime = 1713571200; // 840000块的时间戳 (2024-04-20)
+                                const baseTime = 1713571200; 
                                 const nowTime = Math.floor(Date.now() / 1000);
                                 const estimatedBlocks = 840000 + Math.floor((nowTime - baseTime) / 600);
                                 this.currentBlock = estimatedBlocks;
@@ -389,7 +400,6 @@
                     }).catch(() => {});
             },
 
-            // 🔥 修复点：使用币安官方免墙 WebSocket 域名 (.vision)
             initBinanceWebSocket() {
                 const ws = new WebSocket('wss://stream.binance.vision:9443/stream?streams=btcusdt@trade/usdcusdt@trade');
                 ws.onmessage = (event) => {
@@ -403,7 +413,6 @@
                 ws.onerror = () => ws.close(); ws.onclose = () => { setTimeout(this.initBinanceWebSocket, 5000); };
             },
             
-            // 🔥 修复点：使用免墙 REST API 域名兜底 (.vision)
             fetchPriceFallback() {
                 axios.get('https://api.mexc.com/api/v3/ticker/price?symbol=BTCUSDT').then(res => {
                     if(res.data && res.data.price) { this.updatePriceLogic(parseFloat(res.data.price)); }
