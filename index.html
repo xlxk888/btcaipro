@@ -12,15 +12,9 @@
     
     <style>
         [v-cloak] { display: none !important; }
-        /* 🔥 调整后的背景色：浅深蓝色 */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b1426; color: #e2e8f0; margin: 0; padding: 20px; box-sizing: border-box; }
         h1 { text-align: center; color: #f39c12; margin: 5px 0 25px 0; letter-spacing: 2px; text-shadow: 0 0 10px rgba(243, 156, 18, 0.3); font-size: 2.5rem; }
         
-        /* 🔥 广告栏样式调整 */
-        .ad-banner { background-color: #152238; border: 1px solid #233554; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; color: #e74c3c; font-size: 0.95rem; line-height: 1.7; box-shadow: 0 4px 12px rgba(0,0,0,0.4); box-sizing: border-box; }
-        .ad-banner a { color: #2ecc71; text-decoration: none; font-weight: bold; }
-        .ad-banner a:hover { text-decoration: underline; }
-
         .grid-container { display: grid; gap: 20px; grid-template-columns: repeat(6, 1fr); max-width: 1400px; margin: 0 auto; box-sizing: border-box; }
         .span-2 { grid-column: span 2; } .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } 
         .card { background-color: #152238; padding: 20px; border-radius: 12px; border: 1px solid #233554; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; flex-direction: column; box-sizing: border-box; }
@@ -36,20 +30,22 @@
         
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #090f1d; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
-        
-        /* 🔥 修复 Logo：CoinMarketCap 官方高清图片 */
         .stablecoin-logo img { width: 32px; height: 32px; object-fit: contain; } 
         
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); transition: width 0.5s; }
         
-        /* 手机平板自适应 */
+        /* 🔥 底部广告栏全新样式 */
+        .ad-banner-bottom { background-color: #152238; border: 1px solid #233554; border-radius: 12px; padding: 18px 20px; margin: 20px auto 0 auto; max-width: 1400px; color: #e74c3c; font-size: 0.95rem; line-height: 1.7; box-shadow: 0 4px 12px rgba(0,0,0,0.4); box-sizing: border-box; }
+        .ad-banner-bottom a { color: #2ecc71; text-decoration: none; font-weight: bold; }
+        .ad-banner-bottom a:hover { text-decoration: underline; }
+
         @media (max-width: 992px) {
             body { padding: 10px; }
             h1 { font-size: 2rem; margin-bottom: 15px; }
             .grid-container { display: flex; flex-direction: column; gap: 15px; }
             .span-2, .span-3, .span-4, .card { width: 100%; }
-            .ad-banner { padding: 15px; font-size: 0.85rem; }
+            .ad-banner-bottom { padding: 15px; font-size: 0.85rem; }
             .card .fg-flex-mobile { flex-direction: column !important; align-items: center !important; text-align: center; margin-top: 0 !important; }
             .card #gaugeChart { width: 100% !important; min-height: 170px !important; margin-bottom: 5px; }
             .card .fg-text-mobile { width: 100% !important; padding-left: 0 !important; }
@@ -61,64 +57,10 @@
 
 <div id="app" v-cloak>
     
-    <div class="ad-banner">
-        <div style="margin-bottom: 10px;">
-            1. Bitget Wallet Card 免费注册，零手续费，注册开通返5美金： 
-            <a href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank">🔗 点击专属链接注册</a>
-        </div>
-        <div>
-            2. 请使用您的浏览器访问以下链接，下载币安 App。在注册页面输入我的邀请码可得超级返佣，加入全球最大的加密货币交易平台。<br>
-            <a href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">▶ Android 安装包</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
-            <a href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">▶ iOS 下载指南</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
-            邀请码：<strong style="color:#2ecc71; font-size: 1.1rem;">23017017</strong>
-        </div>
-    </div>
-
     <h1>🚀 Crypto AI</h1>
     
     <div class="grid-container">
         
-        <div class="card span-2 row1-card">
-            <h2 style="margin-bottom: 10px;">🌐 交易所与国际实时动态</h2>
-            <div class="scroll-box">
-                <p v-for="(news, index) in newsList" :key="index">
-                    <strong :style="{ color: getNewsColor(news.timestamp) }">
-                        [{{ news.source }}] 
-                        <span style="font-size: 0.75rem;">({{ getNewsTimeText(news.timestamp) }})</span>
-                    </strong><br>
-                    <span style="color: #cbd5e1;">{{ news.title }}</span>
-                </p>
-                <p v-if="newsList.length === 0" style="color: #64748b; text-align: center; border:none; margin-top: 15px;">通过安全节点极速拉取海外资讯中...</p>
-            </div>
-        </div>
-
-        <div class="card span-2 row1-card">
-            <div class="fg-flex-mobile" style="display: flex; align-items: center; height: 100%; margin-top: -10px;">
-                <div id="gaugeChart" style="width: 50%; height: 160px;"></div>
-                <div class="fg-text-mobile" style="width: 50%; padding-left: 10px;">
-                    <h3 style="margin: 0; font-size: 0.95rem; color: #94a3b8; font-weight: normal;">恐惧 & 贪婪指数</h3>
-                    <div class="big-number" :style="{ color: fgColor }" style="font-size: 2.2rem;">{{ fearGreedClassification }}</div>
-                    <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px; line-height: 1.3;">{{ fgSubtext }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="card span-2 row1-card">
-            <h2>AHR999 实时定投指数 <span style="font-size:0.7rem; color:#e74c3c; border:1px solid #e74c3c; padding:2px 4px; border-radius:3px; margin-left:5px;">Live 毫秒运算</span></h2>
-            <div style="display: flex; justify-content: space-between; align-items: center; height: 100%; margin-top: -10px;">
-                <div class="big-number" style="color: #3498db; font-size: 2.5rem; margin-left: 10px;">{{ liveAhr999 }}</div>
-                <div style="padding-right: 5px;">
-                    <p style="margin: 0 0 5px 0; font-size: 0.85rem;"><strong>指数区间指南:</strong></p>
-                    <ul style="list-style: none; padding-left: 0; margin: 0; font-size: 0.8rem; line-height: 1.5; color:#cbd5e1;">
-                        <li><span style="color: #2ecc71;">■ < 0.45</span> 抄底 (强烈买入)</li>
-                        <li><span style="color: #f1c40f;">■ 0.45 - 1.2</span> 定投 (纪律买入)</li>
-                        <li><span style="color: #e67e22;">■ 1.2 - 5.0</span> 等待 (持有)</li>
-                        <li><span style="color: #e74c3c;">■ > 5.0</span> 逃顶 (考虑卖出)</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
         <div class="card span-4" style="min-height: 220px;">
             <h2>比特币实时价格 (毫秒级，抗封锁) & 2%波动报警</h2>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
@@ -169,6 +111,47 @@
             </div>
         </div>
 
+        <div class="card span-2 row1-card">
+            <h2 style="margin-bottom: 10px;">🌐 交易所与国际实时动态</h2>
+            <div class="scroll-box">
+                <p v-for="(news, index) in newsList" :key="index">
+                    <strong :style="{ color: getNewsColor(news.timestamp) }">
+                        [{{ news.source }}] 
+                        <span style="font-size: 0.75rem;">({{ getNewsTimeText(news.timestamp) }})</span>
+                    </strong><br>
+                    <span style="color: #cbd5e1;">{{ news.title }}</span>
+                </p>
+                <p v-if="newsList.length === 0" style="color: #64748b; text-align: center; border:none; margin-top: 15px;">通过安全节点极速拉取海外资讯中...</p>
+            </div>
+        </div>
+
+        <div class="card span-2 row1-card">
+            <div class="fg-flex-mobile" style="display: flex; align-items: center; height: 100%; margin-top: -10px;">
+                <div id="gaugeChart" style="width: 50%; height: 160px;"></div>
+                <div class="fg-text-mobile" style="width: 50%; padding-left: 10px;">
+                    <h3 style="margin: 0; font-size: 0.95rem; color: #94a3b8; font-weight: normal;">恐惧 & 贪婪指数</h3>
+                    <div class="big-number" :style="{ color: fgColor }" style="font-size: 2.2rem;">{{ fearGreedClassification }}</div>
+                    <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px; line-height: 1.3;">{{ fgSubtext }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card span-2 row1-card">
+            <h2>AHR999 实时定投指数 <span style="font-size:0.7rem; color:#e74c3c; border:1px solid #e74c3c; padding:2px 4px; border-radius:3px; margin-left:5px;">Live 毫秒运算</span></h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; height: 100%; margin-top: -10px;">
+                <div class="big-number" style="color: #3498db; font-size: 2.5rem; margin-left: 10px;">{{ liveAhr999 }}</div>
+                <div style="padding-right: 5px;">
+                    <p style="margin: 0 0 5px 0; font-size: 0.85rem;"><strong>指数区间指南:</strong></p>
+                    <ul style="list-style: none; padding-left: 0; margin: 0; font-size: 0.8rem; line-height: 1.5; color:#cbd5e1;">
+                        <li><span style="color: #2ecc71;">■ < 0.45</span> 抄底 (强烈买入)</li>
+                        <li><span style="color: #f1c40f;">■ 0.45 - 1.2</span> 定投 (纪律买入)</li>
+                        <li><span style="color: #e67e22;">■ 1.2 - 5.0</span> 等待 (持有)</li>
+                        <li><span style="color: #e74c3c;">■ > 5.0</span> 逃顶 (考虑卖出)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <div class="card span-3">
             <h2>主流矿机关关机价监控 (电费按 0.4 元计)</h2>
             <div style="display: flex; justify-content: space-between; font-size: 0.95rem; line-height: 1.7;">
@@ -197,6 +180,23 @@
             <div class="progress-bar-bg"><div class="progress-bar-fill" :style="{ width: halvingProgress + '%' }"></div></div>
         </div>
     </div>
+
+    <div class="ad-banner-bottom">
+        <div style="margin-bottom: 15px; color: #f1c40f; font-weight: bold; font-size: 1rem;">
+            ⚠️ 提示：访问以下网页及下载安装，请务必全程开启科学上网环境。
+        </div>
+        <div style="margin-bottom: 10px;">
+            1. Bitget Wallet Card 免费注册，零手续费，注册开通返5美金： 
+            <a href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank">🔗 点击专属链接注册</a>
+        </div>
+        <div>
+            2. 请使用您的浏览器访问以下链接，下载币安 App。在注册页面输入我的邀请码可得超级返佣，加入全球最大的加密货币交易平台。<br>
+            <a href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">▶ Android 安装包</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">▶ iOS 下载指南</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            邀请码：<strong style="color:#2ecc71; font-size: 1.1rem;">23017017</strong>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -211,7 +211,6 @@
             currentBlock: 0, targetBlock: 1050000, startBlock: 840000 
         },
         computed: {
-            // 🔥 修复：毫秒级实时计算，采用均线+几何平均防干扰算法
             liveAhr999() {
                 if (this.currentPrice === 0 || this.geoMean200 === 0 || this.fittedPrice === 0) return '运算中...';
                 let val = ((this.currentPrice / this.geoMean200) * (this.currentPrice / this.fittedPrice));
@@ -222,14 +221,9 @@
             priceChangePercent() { return this.baselinePrice === 0 ? 0 : (((this.currentPrice - this.baselinePrice) / this.baselinePrice) * 100).toFixed(2); },
             priceColor() { return this.currentPrice > this.baselinePrice ? 'price-up' : (this.currentPrice < this.baselinePrice ? 'price-down' : ''); },
             blocksRemaining() { return Math.max(0, this.targetBlock - this.currentBlock); },
-            halvingDays() { return Math.max(0, Math.floor((this.blocksRemaining * 10) / (60 * 24))); }, // 使用10分钟均值计算天数
-            
-            // 🔥 修复减半日期问题：设定的截止日期为亚洲/上海时区，动态计算
+            halvingDays() { return Math.max(0, Math.floor((this.blocksRemaining * 10) / (60 * 24))); }, 
             halvingDateFormatted() {
                 if(this.currentBlock === 0) return '-';
-                const d = new Date(); 
-                d.setDate(d.getDate() + this.halvingDays);
-                // 强制显示目标日期，不论本地时区，统一显示符合预期的精准日期
                 const targetY = 2028;
                 const targetM = 4;
                 const targetD = 12; 
@@ -249,10 +243,7 @@
             setInterval(this.fetchCryptoNews, 60000); setInterval(this.fetchRealTimeUsdtCny, 60000); 
             setInterval(() => { this.nowSeconds = Math.floor(Date.now() / 1000); }, 1000);
             
-            // 🔥 延迟拉取 AHR999 计算均线，绕过开屏拉取过多数据的阻断
             setTimeout(this.calculateAhr999Base, 1500); 
-            
-            // 监听平板旋转，重绘图表防止错位
             window.addEventListener('resize', () => { if(this.gaugeChartInstance) this.gaugeChartInstance.resize(); this.updateGaugeData(this.fearGreedIndex); });
         },
         methods: {
@@ -268,10 +259,8 @@
                 return Math.floor(diffMins/60) + '小时前';
             },
 
-            // 🔥 修复：资讯直连通道 (采用代理节点轮询防封锁定)
             async fetchCryptoNews() {
                 const cnFeedUrl = encodeURIComponent('https://www.panewslab.com/zh/rss/all.xml');
-                // 代理池，即使一个通道挂了，也会尝试另一个
                 const proxies = [
                     `https://api.codetabs.com/v1/proxy?quest=https://www.panewslab.com/zh/rss/all.xml`,
                     `https://api.rss2json.com/v1/api.json?rss_url=${cnFeedUrl}`
@@ -285,12 +274,11 @@
                             this.newsList = items.slice(0, 8).map(item => ({
                                 source: 'PANews', title: item.title, timestamp: Math.floor(new Date(item.pubDate).getTime() / 1000)
                             }));
-                            return; // 成功获取，退出循环
+                            return; 
                         }
-                    } catch (e) { continue; /* 通道受限，尝试下一个代理 */ }
+                    } catch (e) { continue; }
                 }
                 
-                // 终极兜底方案：如果代理均受限，显示一条提示
                 if (this.newsList.length === 0) {
                     this.newsList = [{ source: 'System', title: '🌐 正在通过备用安全节点极速建立资讯直连中...', timestamp: this.nowSeconds }];
                 }
@@ -302,21 +290,17 @@
                     .catch(() => { this.usdtCnyPrice = '7.28 (估算)'; });
             },
 
-            // 🔥 AHR999 核心运算 (毫秒级防干扰)
             calculateAhr999Base() {
-                // 精准拟合天数 (从创世区块计算)
                 const daysSinceGenesis = (Date.now() - new Date('2009-01-03T00:00:00Z').getTime()) / 86400000;
-                // 拟合公式参考主流数据源
                 this.fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
                 
-                // 采用币安防干扰毫秒级均线专用接口
                 axios.get('https://data-stream.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200')
                     .then(res => {
                         let sumLog = 0; 
                         res.data.forEach(k => { sumLog += Math.log(parseFloat(k[4])); });
                         this.geoMean200 = Math.exp(sumLog / res.data.length);
                     })
-                    .catch(() => { this.geoMean200 = 61500; }); // 防阻断兜底数据
+                    .catch(() => { this.geoMean200 = 61500; }); 
             },
 
             fetchBlockHeight() {
@@ -331,14 +315,13 @@
                 this.updateGaugeData(this.fearGreedIndex);
             },
 
-            // 专门适配手机和平板的图表圆心比例调整
             updateGaugeData(val) {
                 const isMobile = window.innerWidth <= 992;
                 this.gaugeChartInstance.setOption({
                     series: [{
                         type: 'gauge', startAngle: 180, endAngle: 0, min: 0, max: 100, splitNumber: 4, splitLine:{show:false},
-                        center: ['50%', isMobile ? '70%' : '80%'], // 手机端调整圆心比例防止切角
-                        radius: isMobile ? '100%' : '110%',        // 平板手机全屏半径
+                        center: ['50%', isMobile ? '70%' : '80%'], 
+                        radius: isMobile ? '100%' : '110%',        
                         axisLine: { lineStyle: { width: isMobile ? 12 : 10, color: [[0.25, '#e74c3c'], [0.45, '#e67e22'], [0.55, '#f1c40f'], [0.75, '#2ecc71'], [1, '#27ae60']] } },
                         pointer: { length: '50%', width: 5, itemStyle: { color: '#e2e8f0' } },
                         axisTick: { show: false }, axisLabel: { show: false },
