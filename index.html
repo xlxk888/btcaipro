@@ -12,7 +12,7 @@
     
     <style>
         [v-cloak] { display: none !important; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #10172a; color: #e2e8f0; margin: 0; padding: 20px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #131c2f; color: #e2e8f0; margin: 0; padding: 20px; box-sizing: border-box; }
         h1 { text-align: center; color: #f39c12; margin: 5px 0 25px 0; letter-spacing: 2px; text-shadow: 0 0 10px rgba(243, 156, 18, 0.3); font-size: 2.5rem; }
         
         .grid-container { display: grid; gap: 20px; grid-template-columns: repeat(6, 1fr); max-width: 1400px; margin: 0 auto; box-sizing: border-box; width: 100%; }
@@ -30,14 +30,17 @@
         
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #0f1625; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
-        .stablecoin-logo img { width: 32px; height: 32px; object-fit: contain; } 
         
-        .ad-banner-bottom { background-color: #1a263c; border: 1px solid #2a3b59; border-radius: 12px; padding: 18px 20px; margin: 25px auto 0 auto; max-width: 1400px; width: 100%; color: #e74c3c; font-size: 0.95rem; line-height: 1.7; box-shadow: 0 4px 12px rgba(0,0,0,0.3); box-sizing: border-box; }
-        .ad-banner-bottom a { color: #2ecc71; text-decoration: none; font-weight: bold; }
-        .ad-banner-bottom a:hover { text-decoration: underline; }
+        /* 🔥 图标基础约束 */
+        .stablecoin-logo img, .btc-logo-container img { width: 32px; height: 32px; object-fit: contain; }
         
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); transition: width 0.5s; }
+        
+        /* 🔥 广告栏底部专用样式 */
+        .ad-banner-bottom { background-color: #1a263c; border: 1px solid #2a3b59; border-radius: 12px; padding: 18px 20px; margin: 25px auto 0 auto; max-width: 1400px; width: 100%; color: #e74c3c; font-size: 0.95rem; line-height: 1.7; box-shadow: 0 4px 12px rgba(0,0,0,0.3); box-sizing: border-box; }
+        .ad-banner-bottom a { color: #2ecc71; text-decoration: none; font-weight: bold; }
+        .ad-banner-bottom a:hover { text-decoration: underline; }
         
         @media (max-width: 1024px) {
             body { padding: 10px; }
@@ -61,11 +64,11 @@
     <div class="grid-container">
         
         <div class="card span-4" style="min-height: 220px;">
-            <h2>比特币实时价格 (全网防墙多引擎) & 2%波动报警</h2>
+            <h2>比特币实时价格 (全网防墙双引擎) & 2%波动报警</h2>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
                 <div>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                        <svg viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="16" fill="#f7931a"/><path fill="#fff" d="M22.5 13.5c.3-2.1-1.3-3.2-3.4-3.9l.7-2.8-1.7-.4-.7 2.8c-.4-.1-.9-.2-1.4-.3l.7-2.7-1.7-.4-.7 2.8c-.4-.1-.8-.2-1.2-.3L10 8l-.3 1.3s.8.2.8.2c.4.1.5.3.4.5l-1.3 5.3c0 .1-.1.2-.2.2l-.9-.2-.3 1.4 1.3.3c.4.1.8.2 1.2.3l-.7 2.9 1.7.4.7-2.8c.4.1.9.2 1.4.3l-.7 2.8 1.7.4.7-2.8c2.4.5 4.3.3 4.9-1.9.5-1.7-.1-2.7-1.2-3.4 1-.2 1.7-.9 1.9-2zm-3.8 5.6c-.4 1.6-3.1.7-4 .5l.7-2.9c.9.2 3.7.6 3.3 2.4zm.4-4.2c-.4 1.5-2.6.7-3.4.5l.6-2.6c.8.2 3.2.5 2.8 2.1z"/></svg>
+                    <div class="btc-logo-container" style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                        <img :src="iconBtc" alt="BTC">
                         <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12; letter-spacing: 1px;">BTC</span>
                     </div>
                     <div class="big-number" :class="priceColor" style="font-size: 3.8rem; margin: 0;">
@@ -91,17 +94,17 @@
             <div style="margin-top: 5px;">
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <svg viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path fill="#fff" d="M17.9 11.2v2.8L16 9.3l-1.9 4.7v-2.8H9.7v3.4h4.4v2.8c-3.7.2-6.6 1.3-6.6 2.6s2.9 2.4 6.6 2.6v7.6h3.8v-7.6c3.7-.2 6.6-1.3 6.6-2.6s-2.9-2.4-6.6-2.6c0 0 0 0 0 0zm-6 4.1c0-.9 2.4-1.7 5.4-1.7 2.9 0 5.4.8 5.4 1.7 0 .9-2.5 1.7-5.4 1.7-2.9 0-5.4-.8-5.4-1.7z"/></svg>
+                        <img :src="iconUsdt" alt="USDT">
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
                     <div style="text-align: right;">
                         <div class="big-number" style="font-size: 1.5rem; margin:0;">¥ {{ usdtCnyPrice }}</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">实时估算 (已含 C2C 溢价)</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">(已匹配 C2C 折扣溢价)</div>
                     </div>
                 </div>
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <svg viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="16" fill="#2775CA"/><path fill="#fff" d="M21.2 11.4c-1.2-1.4-2.9-2.2-4.9-2.2-3.8 0-6.8 3.1-6.8 6.8s3.1 6.8 6.8 6.8c2 0 3.7-.8 4.9-2.2l-2-1.9c-.8.8-1.8 1.3-2.9 1.3-2.2 0-3.9-1.8-3.9-3.9s1.8-3.9 3.9-3.9c1.1 0 2.1.5 2.9 1.3l2-2.1z"/></svg>
+                        <img :src="iconUsdc" alt="USDC">
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
                     <div style="text-align: right;">
@@ -153,7 +156,7 @@
         </div>
 
         <div class="card span-3">
-            <h2>主流矿机关机价及状态监控 (电费 0.4 元/度)</h2>
+            <h2>主流矿机关机价及状态监控 (电费按 0.4 元计)</h2>
             <div style="display: flex; justify-content: space-between; font-size: 0.95rem; line-height: 1.7;">
                 <div>
                     <p style="margin:0; color:#2ecc71;"><strong>世代:</strong> <span style="color:#cbd5e1;">蚂蚁 S21 ~32500，S19 XP ~42100</span></p>
@@ -183,7 +186,7 @@
 
     <div class="ad-banner-bottom">
         <div style="margin-bottom: 15px; color: #f1c40f; font-weight: bold; font-size: 1rem;">
-            ⚠️ 提示：访问以下网页及下载安装，请务必全程开启科学上网环境。
+            ⚠️ 提示：访问以下网页及下载安装，请务必全程开启科学上网环境（VPN）。
         </div>
         <div style="margin-bottom: 10px;">
             1. Bitget Wallet Card 免费注册，零手续费，注册开通返5美金： 
@@ -203,6 +206,11 @@
     new Vue({
         el: '#app',
         data: {
+            // 🔥 纯 URL Encoded 矢量图片代码。没有图片加载，绝对不会裂开。
+            iconBtc: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F7931A'/%3E%3Cpath fill='%23FFF' d='M22.5 13.5c.3-2.1-1.3-3.2-3.4-3.9l.7-2.8-1.7-.4-.7 2.8c-.4-.1-.9-.2-1.4-.3l.7-2.7-1.7-.4-.7 2.8c-.4-.1-.8-.2-1.2-.3L10 8l-.3 1.3s.8.2.8.2c.4.1.5.3.4.5l-1.3 5.3c0 .1-.1.2-.2.2l-.9-.2-.3 1.4 1.3.3c.4.1.8.2 1.2.3l-.7 2.9 1.7.4.7-2.8c.4.1.9.2 1.4.3l-.7 2.8 1.7.4.7-2.8c2.4.5 4.3.3 4.9-1.9.5-1.7-.1-2.7-1.2-3.4 1-.2 1.7-.9 1.9-2zm-3.8 5.6c-.4 1.6-3.1.7-4 .5l.7-2.9c.9.2 3.7.6 3.3 2.4zm.4-4.2c-.4 1.5-2.6.7-3.4.5l.6-2.6c.8.2 3.2.5 2.8 2.1z'/%3E%3C/svg%3E",
+            iconUsdt: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2326A17B'/%3E%3Cpath fill='%23FFF' d='M17.9 11.2V8.4h4.4V5H9.7v3.4h4.4v2.8c-3.7.2-6.6 1.3-6.6 2.6s2.9 2.4 6.6 2.6v7.6h3.8v-7.6c3.7-.2 6.6-1.3 6.6-2.6s-2.9-2.4-6.6-2.6zm-1.9 4.1c-2.9 0-5.4-.8-5.4-1.7 0-.9 2.4-1.7 5.4-1.7 2.9 0 5.4.8 5.4 1.7 0 .9-2.5 1.7-5.4 1.7z'/%3E%3C/svg%3E",
+            iconUsdc: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%232775CA'/%3E%3Cpath fill='%23FFF' d='M21.2 11.4c-1.2-1.4-2.9-2.2-4.9-2.2-3.8 0-6.8 3.1-6.8 6.8s3.1 6.8 6.8 6.8c2 0 3.7-.8 4.9-2.2l-2-1.9c-.8.8-1.8 1.3-2.9 1.3-2.2 0-3.9-1.8-3.9-3.9s1.8-3.9 3.9-3.9c1.1 0 2.1.5 2.9 1.3l2-2.1z'/%3E%3C/svg%3E",
+
             nowSeconds: Math.floor(Date.now() / 1000),
             currentPrice: 0, baselinePrice: 0, usdcPegPrice: 1.0000, usdtCnyPrice: '获取中...', 
             geoMean200: 0, fittedPrice: 0, alertLogs: [], newsList: [],
@@ -236,8 +244,7 @@
             this.initChart(); this.fetchFearAndGreed(); 
             this.fetchBlockHeight(); this.fetchRealTimeUsdtCny(); 
             
-            // 启动防墙三引擎价格监听
-            this.initBinanceWebSocket();
+            this.initBinanceWebSocket(); 
             this.fetchPriceFallback();
             setInterval(this.fetchPriceFallback, 3000); 
 
@@ -251,7 +258,6 @@
             window.addEventListener('resize', () => { if(this.gaugeChartInstance) this.gaugeChartInstance.resize(); this.updateGaugeData(this.fearGreedIndex); });
         },
         methods: {
-            isShutdown(shutdownPrice) { return this.currentPrice !== 0 && this.currentPrice < shutdownPrice; },
             getNewsColor(timestamp) {
                 const diffMins = (this.nowSeconds - timestamp) / 60;
                 if (diffMins <= 10) return '#e74c3c'; if (diffMins <= 30) return '#3498db'; return '#cbd5e1';                     
@@ -263,25 +269,24 @@
                 return Math.floor(diffMins/60) + '小时前';
             },
 
-            // 🔥 资讯多重代理轮询 + 极速超时检测
+            // 🔥 资讯新闻强力抗墙轮询
             async fetchCryptoNews() {
                 this.newsList = [{ source: 'System', title: '正在连接资讯数据源...', timestamp: this.nowSeconds }];
-                const targetUrl = encodeURIComponent('https://www.theblockbeats.info/rss.xml');
+                
                 const proxies = [
-                    `https://api.rss2json.com/v1/api.json?rss_url=${targetUrl}`,
-                    `https://api.allorigins.win/get?url=${targetUrl}`
+                    `https://api.allorigins.win/raw?url=https://www.theblockbeats.info/rss.xml`,
+                    `https://api.rss2json.com/v1/api.json?rss_url=https://www.theblockbeats.info/rss.xml`
                 ];
                 
                 for (let proxy of proxies) {
                     try {
-                        // 设置严格的 3 秒超时，防止卡死
-                        const res = await axios.get(proxy, { timeout: 3500 });
-                        
+                        const res = await axios.get(proxy, { timeout: 4000 });
                         let items = [];
+                        
                         if (res.data && res.data.items) { items = res.data.items; } // rss2json
-                        else if (res.data && res.data.contents) { // allorigins
+                        else if (typeof res.data === 'string' && res.data.includes('<item>')) { // allorigins
                             const parser = new DOMParser();
-                            const xmlDoc = parser.parseFromString(res.data.contents, "text/xml");
+                            const xmlDoc = parser.parseFromString(res.data, "text/xml");
                             const nodes = xmlDoc.getElementsByTagName("item");
                             for(let i=0; i<Math.min(nodes.length, 8); i++) {
                                 items.push({ title: nodes[i].getElementsByTagName("title")[0].textContent, pubDate: nodes[i].getElementsByTagName("pubDate")[0].textContent });
@@ -297,19 +302,22 @@
                     } catch (e) { continue; }
                 }
                 
-                // 终极兜底提示：如果全军覆没
+                // 彻底被墙时的优雅提示
                 this.newsList = [
-                    { source: 'System', title: '🔴 检测到当前网络（如移动/电信基站）拦截了海外资讯源，拉取失败。', timestamp: this.nowSeconds - 10 },
+                    { source: 'System', title: '🔴 检测到当前网络（如国内移动/电信）拦截了海外资讯源，拉取失败。', timestamp: this.nowSeconds - 10 },
                     { source: 'System', title: '💡 建议：请开启手机/电脑的全局科学上网模式（VPN），刷新后即可正常浏览。', timestamp: this.nowSeconds - 60 },
                     { source: 'Market', title: '在此期间，抗干扰行情引擎和毫秒预警系统将继续为您保持正常运作！', timestamp: this.nowSeconds - 120 }
                 ];
             },
 
-            // 🔥 加上 1.5% 的智能 OTC 溢价，逼近币安真实 C2C 汇率
+            // 🔥 USDT 智能折扣率，逼近币安真实的 6.92 左右
             fetchRealTimeUsdtCny() {
                 axios.get('https://api.exchangerate-api.com/v4/latest/USD')
-                    .then(res => { this.usdtCnyPrice = (res.data.rates.CNY * 1.015).toFixed(2); }) // 1.015 为溢价乘数
-                    .catch(() => { this.usdtCnyPrice = '7.35 (估算)'; });
+                    .then(res => { 
+                        // 将国际汇率（如 7.22）乘以 0.958 的折扣系数，得到 6.92 左右
+                        this.usdtCnyPrice = (res.data.rates.CNY * 0.958).toFixed(2); 
+                    })
+                    .catch(() => { this.usdtCnyPrice = '6.92 (估算)'; });
             },
 
             calculateAhr999Base() {
@@ -377,18 +385,13 @@
                         this.usdcPegPrice = parseFloat(payload.data.p);
                     }
                 };
-                ws.onerror = () => ws.close(); ws.onclose = () => { setTimeout(this.initBinanceWebSocket, 5000); };
+                ws.onclose = () => { setTimeout(this.initBinanceWebSocket, 5000); };
             },
             
-            // 🔥 手机端防断连：引入 MEXC（抹茶）作为第三重无墙价格引擎
             fetchPriceFallback() {
-                // 尝试抹茶 API（国内无墙）
                 axios.get('https://api.mexc.com/api/v3/ticker/price?symbol=BTCUSDT').then(res => {
-                    if(res.data && res.data.price) {
-                        this.updatePriceLogic(parseFloat(res.data.price));
-                    }
+                    if(res.data && res.data.price) { this.updatePriceLogic(parseFloat(res.data.price)); }
                 }).catch(()=>{
-                    // 如果抹茶失败，再尝试币安 REST API
                     axios.get('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(res => {
                         if(res.data && res.data.price) this.updatePriceLogic(parseFloat(res.data.price));
                     }).catch(()=>{});
