@@ -51,7 +51,7 @@
             .card .fg-flex-mobile { flex-direction: column !important; align-items: center !important; text-align: center; margin-top: 0 !important; }
             .card #gaugeChart { width: 100% !important; min-height: 190px !important; margin-bottom: 5px; }
             .card .fg-text-mobile { width: 100% !important; padding-left: 0 !important; }
-            .btc-price-text { font-size: 2.5rem !important; } /* 确保手机端完美缩放 */
+            .btc-price-text { font-size: 2.5rem !important; }
         }
         ::-webkit-scrollbar { width: 0; background: transparent; }
     </style>
@@ -100,7 +100,7 @@
                     <div class="stablecoin-logo">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="crypto-logo">
                             <circle cx="16" cy="16" r="16" fill="#26a17b"/>
-                            <path fill="#fff" d="M17.8 13.5v7.7h-3.6v-7.7c-3.5-.2-6.6-1-6.6-2.2s3.1-2 6.6-2.2V6.6h3.6v2.5c3.5.2 6.6 1 6.6 2.2s-3.1 2-6.6 2.2zm-1.8-2.6c-2.9 0-5.3.5-5.3 1.1s2.4 1.1 5.3 1.1 5.3-.5 5.3-1.1-2.4-1.1-5.3-1.1z"/>
+                            <path fill="#fff" fill-rule="evenodd" clip-rule="evenodd" d="M17.8 13.5v7.7h-3.6v-7.7c-3.5-.2-6.6-1-6.6-2.2s3.1-2 6.6-2.2V6.6h3.6v2.5c3.5.2 6.6 1 6.6 2.2s-3.1 2-6.6 2.2zm-1.8-2.6c-2.9 0-5.3.5-5.3 1.1s2.4 1.1 5.3 1.1 5.3-.5 5.3-1.1-2.4-1.1-5.3-1.1z"/>
                         </svg>
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
@@ -112,8 +112,8 @@
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="crypto-logo">
-                            <circle cx="16" cy="16" r="16" fill="#2775ca"/>
-                            <path fill="#fff" d="M20.2 13.5c-.4-1.8-2-2.8-4-2.8V8.3h-1.6v2.3c-1.9.1-3.7 1.1-3.8 3.2v.1c.1 1.9 1.9 2.5 3.6 2.9 1.4.3 2 .6 2 1.4s-.8 1.5-1.9 1.5c-1.4 0-2.3-.6-2.7-1.8l-1.6.5c.5 1.6 1.9 2.6 4 2.8v2.3h1.6v-2.3c1.9-.1 3.7-1.1 3.9-3.2v-.1c-.1-1.8-1.5-2.6-3.6-3-1.5-.3-2.1-.6-2.1-1.3 0-.8.6-1.4 1.8-1.4 1.3 0 2 .6 2.4 1.6l1.4-.5z"/>
+                            <circle cx="16" cy="16" r="16" fill="#2775CA"/>
+                            <path fill="#FFF" d="M21.1 17.5c-.4-1.9-2.1-3-4.3-3v-4.1h-1.7v2.4c-2 .1-3.9 1.2-4 3.4v.1c.1 2 2 2.6 3.8 3.1 1.5.3 2.1.6 2.1 1.5 0 .8-.8 1.6-2 1.6-1.5 0-2.4-.6-2.8-1.9l-1.7.5c.5 1.7 2 2.7 4.2 2.9v2.4h1.7v-2.4c2-.1 3.9-1.2 4.1-3.4v-.1c-.1-1.9-1.6-2.7-3.8-3.1-1.6-.3-2.2-.6-2.2-1.4 0-.8.6-1.5 1.9-1.5 1.4 0 2.1.6 2.5 1.7l1.5-.5z"/>
                         </svg>
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
@@ -226,7 +226,7 @@
             currentPrice: 0, 
             baselinePrice: 0, 
             usdcPegPrice: 1.0000, 
-            usdtCnyPrice: '6.94', // 死锁 6.94 汇率
+            usdtCnyPrice: '6.94', 
             geoMean200: 0, 
             fittedPrice: 0, 
             alertLogs: [], 
@@ -250,7 +250,6 @@
             priceChangePercent() { return this.baselinePrice === 0 ? 0 : (((this.currentPrice - this.baselinePrice) / this.baselinePrice) * 100).toFixed(2); },
             priceColor() { return this.currentPrice > this.baselinePrice ? 'price-up' : (this.currentPrice < this.baselinePrice ? 'price-down' : ''); },
             
-            // 🔥 绝对锁死日期与天数，严格同步
             halvingDateFormatted() {
                 return '2028-04-12';
             },
@@ -259,7 +258,6 @@
                 const now = Date.now();
                 return Math.max(0, Math.floor((targetDate - now) / (1000 * 60 * 60 * 24))); 
             },
-            // 🔥 区块高度根据剩余天数严密倒推，保证逻辑自洽 (每天144个块)
             calculatedBlock() {
                 return this.targetBlock - (this.halvingDays * 144);
             },
@@ -298,7 +296,6 @@
                 return Math.floor(diffMins/60) + '小时前';
             },
 
-            // 🔥 终极防卡死新闻获取机制
             async fetchCryptoNews() {
                 this.newsList = [{ source: 'System', title: '正在连接全球资讯节点...', timestamp: this.nowSeconds }];
                 
@@ -316,7 +313,6 @@
                             }));
                         } else { throw new Error(); }
                     } catch (e2) {
-                        // 如果两个接口都在 3 秒内失败了，立刻启用本地缓存，绝不卡死！
                         this.newsList = [
                             { source: 'System', title: '🔴 代理线路受阻，开启 VPN 后可自动恢复实时直连源', timestamp: this.nowSeconds - 120 },
                             { source: 'Global', title: '美联储主席发表讲话，加密市场波动加剧', timestamp: this.nowSeconds - 1200 },
