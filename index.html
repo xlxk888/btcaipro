@@ -13,7 +13,7 @@
 [v-cloak] { display: none !important; }
 
 body {
-    font-family: 'Segoe UI', Tahoma;
+    font-family: 'Segoe UI', Tahoma, Geneva;
     background-color: #10172a;
     color: #e2e8f0;
     margin: 0;
@@ -25,7 +25,6 @@ h1 {
     color: #f39c12;
 }
 
-/* 网格 */
 .grid-container {
     display: grid;
     gap: 20px;
@@ -38,21 +37,15 @@ h1 {
 .span-3 { grid-column: span 3; }
 .span-4 { grid-column: span 4; }
 
-/* 卡片 */
 .card {
     background-color: #1a263c;
     padding: 20px;
     border-radius: 12px;
 }
 
-/* BTC价格 */
-.btc-price {
-    font-size: 3.2rem;
-    font-weight: bold;
-    word-break: break-all;
-}
+.price-up { color: #2ecc71; }
+.price-down { color: #e74c3c; }
 
-/* 防溢出 */
 .big-number {
     max-width: 100%;
     overflow: hidden;
@@ -60,32 +53,31 @@ h1 {
     white-space: nowrap;
 }
 
-/* 手机适配 */
-@media (max-width:1024px){
+/* 🔥 BTC修复 */
+.btc-price {
+    font-size: 3.2rem;
+    font-weight: bold;
+    word-break: break-all;
+}
+
+/* 🔥 手机适配 */
+@media (max-width: 1024px) {
     .grid-container {
-        display:flex;
-        flex-direction:column;
+        display: flex;
+        flex-direction: column;
     }
     .btc-price {
         font-size: 2rem !important;
+        line-height: 1.2;
     }
 }
 
-/* logo */
+/* 🔥 logo修复 */
 .crypto-logo {
     width: 28px;
     height: 28px;
     border-radius: 50%;
     object-fit: cover;
-}
-
-/* 颜色 */
-.price-up { color:#2ecc71; }
-.price-down { color:#e74c3c; }
-
-.scroll-box {
-    overflow-y:auto;
-    max-height:120px;
 }
 </style>
 </head>
@@ -111,19 +103,13 @@ h1 {
 </div>
 
 <div class="big-number btc-price" :class="priceColor">
-{{ currentPrice===0 ? '连接中...' : '$ '+formatPrice(currentPrice) }}
+{{ currentPrice === 0 ? '连接中...' : '$ ' + formatPrice(currentPrice) }}
 </div>
 
 <p>
-基准: ${{ formatPrice(baselinePrice) }} |
+基准: $ {{ formatPrice(baselinePrice) }} |
 波动: <span :class="priceColor">{{ priceChangePercent }}%</span>
 </p>
-</div>
-
-<div style="width:300px;">
-<div class="scroll-box">
-<p v-for="(log,i) in alertLogs" :key="i">{{ log }}</p>
-</div>
 </div>
 
 </div>
@@ -136,7 +122,7 @@ h1 {
 <div style="display:flex;justify-content:space-between;">
 <div style="display:flex;align-items:center;gap:6px;">
 <img class="crypto-logo" src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=029">
-USDT/CNY
+USDT / CNY
 </div>
 <div>¥ {{ usdtCnyPrice }}</div>
 </div>
@@ -144,7 +130,7 @@ USDT/CNY
 <div style="display:flex;justify-content:space-between;margin-top:10px;">
 <div style="display:flex;align-items:center;gap:6px;">
 <img class="crypto-logo" src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=029">
-USDC/USDT
+USDC / USDT
 </div>
 <div :class="usdcColor">$ {{ usdcPegPrice.toFixed(4) }}</div>
 </div>
@@ -162,8 +148,7 @@ data:{
 currentPrice:0,
 baselinePrice:0,
 usdtCnyPrice:"6.94",
-usdcPegPrice:1.0000,
-alertLogs:[]
+usdcPegPrice:1.0000
 },
 
 computed:{
@@ -190,12 +175,14 @@ setInterval(this.fetchPrice,5000);
 
 methods:{
 
+/* 🔥 价格修复核心 */
 formatPrice(price){
 if(!price) return '0.00';
 
 if(window.innerWidth<=768){
 return price.toLocaleString(undefined,{maximumFractionDigits:2});
 }
+
 return price.toLocaleString(undefined,{maximumFractionDigits:4});
 },
 
@@ -210,9 +197,10 @@ const apis=[
 for(let url of apis){
 try{
 let res=await axios.get(url,{timeout:3000});
-if(res.data && res.data.price){
 
+if(res.data && res.data.price){
 let p=parseFloat(res.data.price);
+
 this.currentPrice=p;
 
 if(this.baselinePrice===0){
