@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto AI</title>
+    <script src="https://cdn.staticfile.net/vue/2.6.14/vue.min.js"></script>
+    <script src="https://cdn.staticfile.net/axios/0.27.2/axios.min.js"></script>
+    <script src="https://cdn.staticfile.net/echarts/5.5.0/echarts.min.js"></script>
+    
+    <style>
+        [v-cloak] { display: none !important; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b1426; color: #e2e8f0; margin: 0; padding: 20px; }
+        
+        /* 网站大标题样式 */
+        h1 { text-align: center; color: #f39c12; margin: 5px 0 25px 0; letter-spacing: 2px; text-shadow: 0 0 10px rgba(243, 156, 18, 0.3); font-size: 2.5rem; }
+        
+        /* 顶部广告栏专属样式（红字，绿链接） */
+        .top-ad-banner {
+            background-color: #152238; 
+            border: 1px dashed #e74c3c; 
+            border-radius: 8px; 
+            padding: 15px 20px; 
+            margin: 0 auto 20px auto; 
+            max-width: 1360px;
+            color: #e74c3c; /* 红色字体 */
+            font-size: 0.95rem;
+            line-height: 1.7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .top-ad-banner a {
+            color: #2ecc71; /* 绿色链接 */
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .top-ad-banner a:hover {
+            text-decoration: underline;
+        }
+
+        .grid-container { display: grid; gap: 20px; grid-template-columns: repeat(6, 1fr); max-width: 1400px; margin: 0 auto; }
+        .span-2 { grid-column: span 2; } .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } 
+        .card { background-color: #152238; padding: 20px; border-radius: 12px; border: 1px solid #233554; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; flex-direction: column; }
+        .card h2 { margin: 0 0 15px 0; font-size: 1.15rem; color: #94a3b8; border-bottom: 1px solid #233554; padding-bottom: 10px; }
+        .row1-card { height: 210px; } 
+        .price-up { color: #2ecc71; font-weight: bold; }
+        .price-down { color: #e74c3c; font-weight: bold; }
+        .big-number { font-size: 2.2rem; font-weight: bold; margin: 5px 0; }
+        .scroll-box { flex-grow: 1; overflow-y: auto; background: #090f1d; padding: 10px; border-radius: 8px; font-size: 0.85rem; border: 1px solid #1e293b; }
+        .scroll-box p { margin: 6px 0; line-height: 1.5; border-bottom: 1px dashed #1e293b; padding-bottom: 6px; }
+        .scroll-box p:last-child { border-bottom: none; }
+        .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #090f1d; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
+        .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
+        .stablecoin-logo img { width: 30px; height: 30px; }
+        .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); transition: width 0.5s; }
+        @media (max-width: 992px) { .span-2, .span-3, .span-4 { grid-column: span 6; } .row1-card { height: auto; } }
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+    
+    <div class="top-ad-banner">
+        <div style="margin-bottom: 10px;">
+            1. Bitget Wallet Card 免费注册，零手续费，注册开通返5美金： 
+            <a href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank">🔗 点击专属链接注册</a>
+        </div>
+        <div>
+            2. 请使用您的浏览器访问以下链接，下载币安 App。在注册页面输入我的邀请码可得超级返佣，加入全球最大的加密货币交易平台。<br>
+            <a href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">▶ Android 安装包</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">▶ iOS 下载指南</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            邀请码：<strong style="color:#2ecc71; font-size: 1.1rem;">23017017</strong>
+        </div>
+    </div>
+
+    <h1>🚀 Crypto AI</h1>
+    
+    <div class="grid-container">
+        
+        <div class="card span-2 row1-card">
+            <h2 style="margin-bottom: 10px;">🌐 交易所与国际实时动态</h2>
+            <div class="scroll-box">
+                <p v-for="(news, index) in newsList" :key="index">
+                    <strong :style="{ color: getNewsColor(news.timestamp) }">
+                        [{{ news.source }}] 
+                        <span style="font-size: 0.75rem;">({{ getNewsTimeText(news.timestamp) }})</span>
+                    </strong><br>
+                    <span :style="{ color: getNewsColor(news.timestamp) }">{{ news.title }}</span>
+                </p>
+                <p v-if="newsList.length === 0" style="color: #64748b; text-align: center;">正在直连拉取中文资讯...</p>
+            </div>
+        </div>
+
+        <div class="card span-2 row1-card">
+            <div style="display: flex; align-items: center; height: 100%; margin-top: -10px;">
+                <div id="gaugeChart" style="width: 50%; height: 160px;"></div>
+                <div style="width: 50%; padding-left: 10px;">
+                    <h3 style="margin: 0; font-size: 0.95rem; color: #94a3b8; font-weight: normal;">恐惧 & 贪婪指数</h3>
+                    <div class="big-number" :style="{ color: fgColor }" style="font-size: 2.2rem;">{{ fearGreedClassification }}</div>
+                    <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 5px; line-height: 1.3;">{{ fgSubtext }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card span-2 row1-card">
+            <h2>AHR999 实时定投指数 <span style="font-size:0.7rem; color:#e74c3c; border:1px solid #e74c3c; padding:2px 4px; border-radius:3px; margin-left:5px;">Live 运算</span></h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; height: 100%; margin-top: -10px;">
+                <div class="big-number" style="color: #3498db; font-size: 2.5rem; margin-left: 10px;">{{ liveAhr999 }}</div>
+                <div style="padding-right: 5px;">
+                    <p style="margin: 0 0 5px 0; font-size: 0.85rem;"><strong>指数区间指南:</strong></p>
+                    <ul style="list-style: none; padding-left: 0; margin: 0; font-size: 0.8rem; line-height: 1.5;">
+                        <li><span style="color: #2ecc71;">■ < 0.45</span> 抄底 (强烈买入)</li>
+                        <li><span style="color: #f1c40f;">■ 0.45 - 1.2</span> 定投 (纪律买入)</li>
+                        <li><span style="color: #e67e22;">■ 1.2 - 5.0</span> 等待 (持有)</li>
+                        <li><span style="color: #e74c3c;">■ > 5.0</span> 逃顶 (考虑卖出)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card span-4" style="min-height: 220px;">
+            <h2>比特币实时价格 (Binance 毫秒级) & 2%波动报警</h2>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                        <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.svg?v=029" alt="BTC" style="width: 32px; height: 32px;">
+                        <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12; letter-spacing: 1px;">BTC</span>
+                    </div>
+                    <div class="big-number" :class="priceColor" style="font-size: 3.8rem; margin: 0;">$ {{ currentPrice.toFixed(2) }}</div>
+                    <p style="margin: 10px 0; font-size: 1rem; color: #94a3b8;">
+                        监控基准: <strong style="color:#e2e8f0;">$ {{ baselinePrice.toFixed(2) }}</strong> | 波动: <span :class="priceColor" style="font-size: 1.2rem;">{{ priceChangePercent }}%</span>
+                    </p>
+                </div>
+                
+                <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; height: 100%;">
+                    <h3 style="font-size: 0.95rem; margin: 0 0 8px 0; color: #94a3b8;">报警系统日志</h3>
+                    <div class="scroll-box" style="max-height: 120px;">
+                        <p v-for="(log, index) in alertLogs" :key="index" :class="log.type === 'up' ? 'price-up' : 'price-down'">[{{ log.time }}] {{ log.msg }}</p>
+                        <p v-if="alertLogs.length === 0" style="color: #64748b; text-align: center; border:none; margin-top: 15px;">🟢 暂无达到 2% 振幅的记录...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card span-2" style="min-height: 220px;">
+            <h2>💵 稳定币实时汇率监控</h2>
+            <div style="margin-top: 5px;">
+                <div class="stablecoin-row">
+                    <div class="stablecoin-logo">
+                        <img src="https://cryptologos.cc/logos/tether-usdt-logo.svg?v=029" alt="USDT">
+                        <span style="color:#26a17b;">USDT / CNY</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="big-number" style="font-size: 1.5rem; margin:0;">¥ {{ usdtCnyPrice }}</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">智能贴水计算 (基于实时外汇)</div>
+                    </div>
+                </div>
+                <div class="stablecoin-row">
+                    <div class="stablecoin-logo">
+                        <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.svg?v=029" alt="USDC">
+                        <span style="color:#2775ca;">USDC / USDT</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="big-number" style="font-size: 1.5rem; margin:0;" :class="usdcColor">$ {{ usdcPegPrice.toFixed(4) }}</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Binance 毫秒级锚定</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card span-3">
+            <h2>主流矿机关机价及状态监控</h2>
+            <div style="display: flex; justify-content: space-between; font-size: 0.95rem; line-height: 1.7;">
+                <div>
+                    <p style="margin:0; color:#2ecc71;"><strong>新世代高能效:</strong></p>
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li v-for="m in miners.new" :key="m.name" :style="{ color: isShutdown(m.price) ? '#e74c3c' : '#e2e8f0' }">
+                            {{ m.name }}: ~${{ m.price.toLocaleString() }} <span v-if="isShutdown(m.price)" style="font-weight:bold;">(已关机)</span>
+                        </li>
+                    </ul>
+                    <p style="margin:10px 0 0 0; color:#f1c40f;"><strong>主流机型:</strong></p>
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li v-for="m in miners.main" :key="m.name" :style="{ color: isShutdown(m.price) ? '#e74c3c' : '#e2e8f0' }">
+                            {{ m.name }}: ~${{ m.price.toLocaleString() }} <span v-if="isShutdown(m.price)" style="font-weight:bold;">(已关机)</span>
+                        </li>
+                    </ul>
+                </div>
+                <div style="padding-right: 10px;">
+                    <p style="margin:0; color:#e74c3c;"><strong>已淘汰/高成本老旧设备:</strong></p>
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li v-for="m in miners.old" :key="m.name" :style="{ color: isShutdown(m.price) ? '#e74c3c' : '#e2e8f0' }">
+                            {{ m.name }}: ~${{ m.price.toLocaleString() }} <span v-if="isShutdown(m.price)" style="font-weight:bold;">(已关机)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card span-3">
+            <h2>⏳ 减半倒计时</h2>
+            <div class="big-number" style="color: #f39c12; margin: 0;">{{ halvingDays }} <span style="font-size: 1rem; color: #94a3b8;">天</span></div>
+            <div style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
+                当前区块 <strong style="color:#e2e8f0;">{{ currentBlock.toLocaleString() }}</strong> / 目标 <strong style="color:#e2e8f0;">1,050,000</strong><br>
+                奖励 3.125 ➔ <strong style="color:#e2e8f0;">1.5625 BTC</strong> · 预计 <strong style="color:#e2e8f0;">{{ halvingDateFormatted }}</strong>
+            </div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" :style="{ width: halvingProgress + '%' }"></div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            nowSeconds: Math.floor(Date.now() / 1000),
+            currentPrice: 0, baselinePrice: 0, usdcPegPrice: 1.0000, usdtCnyPrice: '获取中...', 
+            geoMean200: 0, fittedPrice: 0, alertLogs: [], newsList: [],
+            fearGreedIndex: 50, fearGreedClassification: '获取中...', fgColor: '#f1c40f', fgSubtext: '正在拉取市场情绪数据',
+            gaugeChartInstance: null,
+            miners: {
+                new: [ { name
