@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto AI Dashboard</title>
+    <title>Crypto AI</title>
     
     <script src="https://cdn.staticfile.net/vue/2.6.14/vue.min.js"></script>
     <script src="https://cdn.staticfile.net/axios/0.27.2/axios.min.js"></script>
@@ -69,7 +69,7 @@
 <body>
 
 <div id="app" v-cloak>
-    <h1>🚀 Crypto AI Dashboard</h1>
+    <h1>🚀 Crypto AI</h1>
     
     <div class="grid-container">
         <div class="card span-4" style="min-height: 220px;">
@@ -81,7 +81,7 @@
                         <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12; letter-spacing: 1px;">BTC</span>
                     </div>
                     <div class="btc-price-text" :class="priceColor">
-                        {{ currentPrice === 0 ? '连接中...' : '$ ' + currentPrice.toFixed(2) }}
+                        {{ currentPrice === 0 ? '连接穿透中...' : '$ ' + currentPrice.toFixed(2) }}
                     </div>
                     <p style="margin: 10px 0; font-size: 1rem; color: #94a3b8;">
                         监控基准: <strong style="color:#e2e8f0;">$ {{ baselinePrice.toFixed(2) }}</strong> | 波动: <span :class="priceColor" style="font-size: 1.2rem;">{{ priceChangePercent }}%</span>
@@ -103,7 +103,7 @@
             <div style="margin-top: 5px;">
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <img class="crypto-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMyNkExN0IiLz48cGF0aCBmaWxsPSIjRkZGIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iMTE3LjkyMiAxMy41ODN2Ny4wMzRoLTMuODQ0di03LjAzNGMtMy41MzUtLjIyNC02LjMwNC0uOTgtNi4zMDQtMS44ODMgMC0uOTAxIDIuNzctMS42NiA2LjMwNC0xLjg4M3YtMi4yNGgtNi44MlY0LjU0NGgxNy40ODV2My4wMzNoLTYuODJ2Mi4yNGMzLjUzNS4yMjQgNi4zMDQuOTgxIDYuMzA0IDEuODgzIDAgLjkwMi0yLjc3IDEuNjYtNi4zMDQgMS44ODN6TTE2IDE0LjM3M2MyLjI1IDAgNC4yOTUtLjMxNiA1LjU2Ny0uODQ3LTEuMjcyLS41My0zLjMxNy0uODQ3LTUuNTY3LS44NDctMi4yNSAwLTQuMjk1LjMxNy01LjU2Ny44NDcgMS4yNzIuNTMgMy4zMTcuODQ3IDUuNTY3Ljg0N3oiLz48L3N2Zz4=" alt="USDT">
+                        <img class="crypto-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMyNkExN0IiLz48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMTcuOTIyIDEzLjU4M3Y3LjAzNGgtMy44NDR2LTcuMDM0Yy0zLjUzNS0uMjI0LTYuMzA0LS45OC02LjMwNC0xLjg4MyAwLS45MDEgMi43Ny0xLjY2IDYuMzA0LTEuODgzdi0yLjI0aC02Ljgydi0zLjAzM2gxNy40ODV2My4wMzNoLTYuODJ2Mi4yNGMzLjUzNS4yMjQgNi4zMDQuOTgxIDYuMzA0IDEuODgzIDAgLjkwMi0yLjc3IDEuNjYtNi4zMDQgMS44ODN6Ii8+PC9zdmc+" alt="USDT">
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
                     <div style="text-align: right;">
@@ -113,7 +113,7 @@
                 </div>
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <img class="crypto-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMyNzc1Q0EiLz48cGF0aCBmaWxsPSIjRkZGIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTIxLjU3NSAxNC4xMmMtLjIyNS0xLjkyOC0xLjU3NC0zLjEzNC0zLjgxLTMuMjM4di0yLjU1aC0yLjU4NXYyLjUzNmMtMS45NDIuMTI4LTMuNDE0IDEuMjE4LTMuNDQ3IDIuOTkydjAuMDNjMC4wMTUgMS41ODggMS4xMzggMi4zMDggMi44OSAyLjc2IDEuNDgzLjM3NiAxLjk2NC42NzUgMS45NjQgMS4yNDQgMCAuNTk4LS42MTQgMS4xMDgtMS42MzMgMS4xMDgtMS40MjMgMC0yLjE4Ny0uNjYtMi41NDYtMS43OGwtMi4zODMuNDcyYy40NjUgMS44OTUgMS44NTcgMi45NTUgNC41NjQgMy4xMnYyLjYwOGgyLjU4M1YyMC44MWMyLjE5NS0uMTIgMy42OTgtMS4yMzMgMy43My0zLjE1di0wLjAzYy0wLjAxNS0xLjY2Mi0xLjA3Ny0yLjQyNy0zLjI2NC0yLjkyLTEuMzUtLjMxNS0xLjg0My0uNjMtMS44NDMtMS4xODMgMC0uNTg1LjU3LTEuMTEgMS41NzQtMS4xMSAxLjI1OCAwIDEuOTkyLjU0IDIuMzM4IDEuNTc0bDIuMjgtLjQ3ek0xNiAyNi41QTEwLjUgMTAuNSAwIDEgMSAxNiA1LjVhMTAuNSAxMC41IDAgMCAxIDAgMjF6bTAtMi4zMzNhOC4xNjcgOC4xNjcgMCAxIDAgMC0xNi4zMzQgOC4xNjcgOC4xNjcgMCAwIDAgMCAxNi4zMzR6Ii8+PC9zdmc+" alt="USDC">
+                        <img class="crypto-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMyNzc1Q0EiLz48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMjEuNTc1IDE0LjEyYy0uMjI1LTEuOTI4LTEuNTc0LTMuMTM0LTMuODEtMy4yMzh2LTIuNTVoLTIuNTg1djIuNTM2Yy0xLjk0Mi4xMjgtMy40MTQgMS4yMTgtMy40NDcgMi45OTJ2LjAzYy4wMTUgMS41ODggMS4xMzggMi4zMDggMi44OSAyLjc2IDEuNDgzLjM3NiAxLjk2NC42NzUgMS45NjQgMS4yNDQgMCAuNTk4LS42MTQgMS4xMDgtMS42MzMgMS4xMDgtMS40MjMgMC0yLjE4Ny0uNjYtMi41NDYtMS43OGwtMi4zODMuNDcyYy40NjUgMS44OTUgMS44NTcgMi45NTUgNC41NjQgMy4xMnYyLjYwOGgyLjU4M3YtMi41OWMyLjE5NS0uMTIgMy42OTgtMS4yMzMgMy43My0zLjE1di0uMDNjLS4wMTUtMS42NjItMS4wNzctMi40MjctMy4yNjQtMi45Mi0xLjM1LS4zMTUtMS44NDMtLjYzLTEuODQzLTEuMTgzIDAtLjU4NS41Ny0xLjExIDEuNTc0LTEuMTEgMS4yNTggMCAxLjk5Mi41NCAyLjMzOCAxLjU3NGwyLjI4LS40N3oiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMC41IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkYiIHN0cm9rZS13aWR0aD0iMi4zMzMiLz48L3N2Zz4=" alt="USDC">
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
                     <div style="text-align: right;">
@@ -216,14 +216,13 @@
             alertLogs: [], 
             newsList: [],
             fearGreedIndex: 50, 
-            fearGreedClassification: '获取中...', 
+            fearGreedClassification: '拉取中...', 
             fgColor: '#f1c40f', 
-            fgSubtext: '正在拉取市场情绪数据',
+            fgSubtext: '正在连接节点',
             gaugeChartInstance: null,
             targetBlock: 1050000, 
             startBlock: 840000,
             
-            // 新增：请求锁机制，防止异步并发导致内存泄漏
             isFetchingPrice: false,
             isFetchingStablecoin: false
         },
@@ -231,7 +230,7 @@
             liveAhr999() {
                 if (this.currentPrice === 0 || this.geoMean200 === 0 || this.fittedPrice === 0) return '运算中...';
                 let val = ((this.currentPrice / this.geoMean200) * (this.currentPrice / this.fittedPrice));
-                if(val > 10 || val < 0.05 || isNaN(val)) return '同步校准中...';
+                if(isNaN(val)) return '同步中...';
                 return val.toFixed(4);
             },
             usdcColor() { return this.usdcPegPrice < 0.999 ? 'price-down' : (this.usdcPegPrice > 1.001 ? 'price-up' : ''); },
@@ -253,22 +252,19 @@
         },
         mounted() {
             this.initChart(); 
-            this.fetchFearAndGreed(); 
             this.fetchBaseCnyRate();
-
-            this.fetchPriceData();
-            this.fetchStablecoinPriceData();
+            this.fetchAhr999Data(); // 立即获取真正的 200 天几何平均值
+            this.fetchFearAndGreed(); 
             this.fetchCryptoNews();
 
-            // 修正：采用 setTimeout 链式调用替代 setInterval，避免请求堵塞堆积
             this.startPolling();
             
             setInterval(this.fetchBaseCnyRate, 600000); 
             setInterval(this.fetchCryptoNews, 45000); 
             setInterval(this.fetchFearAndGreed, 3600000); 
+            setInterval(this.fetchAhr999Data, 14400000); // 4小时更新一次 200天均线即可
             setInterval(() => { this.nowSeconds = Math.floor(Date.now() / 1000); }, 1000);
             
-            // 修正：Echarts 缩放防抖，避免拖动窗口时性能暴跌
             let resizeTimer;
             window.addEventListener('resize', () => {
                 clearTimeout(resizeTimer);
@@ -279,6 +275,28 @@
             });
         },
         methods: {
+            // 🔥 核心重构：防墙穿透路由机制（无需 VPN 也能获取数据）
+            async smartFetch(targetUrl, timeoutMs = 4000) {
+                const ts = Date.now();
+                const cleanUrl = targetUrl.includes('?') ? `${targetUrl}&_t=${ts}` : `${targetUrl}?_t=${ts}`;
+                // 三路路由：1. 直连去代理化 2. AllOrigins 代理 3. CorsProxy 备用穿透
+                const endpoints = [
+                    cleanUrl, 
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(cleanUrl)}`,
+                    `https://corsproxy.io/?${encodeURIComponent(cleanUrl)}`
+                ];
+                
+                for (let url of endpoints) {
+                    try {
+                        let res = await axios.get(url, { timeout: timeoutMs });
+                        if (res && res.data) return res;
+                    } catch (e) {
+                        continue; // 如果被墙或超时，自动无缝切换到备用代理
+                    }
+                }
+                throw new Error('All routing nodes blocked or failed');
+            },
+
             startPolling() {
                 const pollPrice = async () => {
                     await this.fetchPriceData();
@@ -293,74 +311,79 @@
             },
 
             fetchBaseCnyRate() {
-                axios.get(`https://api.exchangerate-api.com/v4/latest/USD?t=${Date.now()}`)
+                this.smartFetch('https://api.exchangerate-api.com/v4/latest/USD')
                     .then(res => { if(res.data && res.data.rates) this.baseUsdCnyRate = res.data.rates.CNY; })
                     .catch(() => {});
+            },
+
+            // 重构 AHR999 底层数据拉取（获取真实的200天日线数据）
+            async fetchAhr999Data() {
+                try {
+                    // 拉取币安过去 200 天日线数据
+                    let res = await this.smartFetch(`https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200`, 8000);
+                    if (res && res.data && res.data.length > 0) {
+                        // 提取收盘价 (索引 4)
+                        const prices = res.data.map(k => parseFloat(k[4])).filter(p => p > 0);
+                        if (prices.length > 0) {
+                            // 对数求和以计算几何平均值，避免直接相乘导致的数值溢出
+                            const sumLog = prices.reduce((sum, p) => sum + Math.log(p), 0);
+                            this.geoMean200 = Math.exp(sumLog / prices.length);
+                        }
+                    }
+                } catch(e) {
+                    // 极端情况下若所有节点失效，才采用临时降级策略
+                    if(this.currentPrice > 0 && this.geoMean200 === 0) this.geoMean200 = this.currentPrice * 0.85; 
+                }
+                this.calculateFittedPrice();
+            },
+
+            calculateFittedPrice() {
+                const daysSinceGenesis = (Date.now() - new Date('2009-01-03T00:00:00Z').getTime()) / 86400000;
+                this.fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
             },
 
             async fetchStablecoinPriceData() {
                 if (this.isFetchingStablecoin) return;
                 this.isFetchingStablecoin = true;
-                const ts = Date.now();
-                const apis = [
-                    `https://data-api.binance.vision/api/v3/ticker/price?symbol=USDCUSDT&t=${ts}`,
-                    `https://api.huobi.pro/market/detail/merged?symbol=usdcusdt&t=${ts}`
-                ];
-
-                for (let url of apis) {
-                    try {
-                        let res = await axios.get(url, { timeout: 1500 });
-                        let price = null;
-                        if (res.data && res.data.price) price = parseFloat(res.data.price);
-                        else if (res.data && res.data.tick && res.data.tick.close) price = parseFloat(res.data.tick.close);
-                        
-                        if (price && !isNaN(price)) {
-                            this.usdcPegPrice = price;
-                            const jitter = (Math.random() * 0.006 - 0.003);
-                            const dynamicC2C = (this.baseUsdCnyRate + 0.025) + jitter; 
-                            if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = dynamicC2C;
-                            this.usdtCnyPrice = dynamicC2C.toFixed(3);
-                            break; // 修正：一旦成功获取即跳出循环，不再请求备用节点
-                        }
-                    } catch (error) {}
-                }
+                try {
+                    let res = await this.smartFetch(`https://data-api.binance.vision/api/v3/ticker/price?symbol=USDCUSDT`, 2500);
+                    let price = res.data?.price || res.data?.tick?.close;
+                    
+                    if (price && !isNaN(price)) {
+                        this.usdcPegPrice = parseFloat(price);
+                        const jitter = (Math.random() * 0.006 - 0.003);
+                        const dynamicC2C = (this.baseUsdCnyRate + 0.025) + jitter; 
+                        if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = dynamicC2C;
+                        this.usdtCnyPrice = dynamicC2C.toFixed(3);
+                    }
+                } catch (error) {}
                 this.isFetchingStablecoin = false;
             },
 
             async fetchPriceData() {
                 if (this.isFetchingPrice) return;
                 this.isFetchingPrice = true;
-                const ts = Date.now();
-                const apis = [
-                    `https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT&t=${ts}`, 
-                    `https://api.huobi.pro/market/detail/merged?symbol=btcusdt&t=${ts}`,
-                    `https://api.coindesk.com/v1/bpi/currentprice.json?t=${ts}`
-                ];
-
-                for (let url of apis) {
-                    try {
-                        let res = await axios.get(url, { timeout: 2000 });
-                        let price = null;
-                        if (res.data && res.data.price) price = parseFloat(res.data.price);
-                        else if (res.data && res.data.tick && res.data.tick.close) price = parseFloat(res.data.tick.close);
-                        else if (res.data && res.data.bpi && res.data.bpi.USD) price = parseFloat(res.data.bpi.USD.rate_float);
-                        
-                        if (price && !isNaN(price)) {
-                            this.updatePriceLogic(price);
-                            break; // 修正：成功获取即跳出循环
-                        }
-                    } catch (error) {}
-                }
+                
+                try {
+                    let res = await this.smartFetch(`https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT`, 2500);
+                    let price = res.data?.price || res.data?.tick?.close || res.data?.bpi?.USD?.rate_float;
+                    
+                    if (price && !isNaN(price)) {
+                        this.updatePriceLogic(parseFloat(price));
+                    }
+                } catch (error) {}
                 this.isFetchingPrice = false;
             },
 
             isShutdown(shutdownPrice) { 
                 return this.currentPrice !== 0 && this.currentPrice < shutdownPrice; 
             },
+            
             getNewsColor(timestamp) {
                 const diffMins = (this.nowSeconds - timestamp) / 60;
                 if (diffMins <= 10) return '#e74c3c'; if (diffMins <= 30) return '#3498db'; return '#cbd5e1';                     
             },
+            
             getNewsTimeText(timestamp) {
                 const diffMins = Math.floor((this.nowSeconds - timestamp) / 60);
                 if(diffMins < 1 || isNaN(diffMins)) return '刚刚';
@@ -370,14 +393,12 @@
 
             async fetchCryptoNews() {
                 if (this.newsList.length === 0) {
-                    this.newsList = [{ source: 'System', title: '正在连接全球资讯...', timestamp: this.nowSeconds }];
+                    this.newsList = [{ source: 'System', title: '智能路由穿墙中...', timestamp: this.nowSeconds }];
                 }
-                const ts = Date.now();
                 try {
-                    let res = await axios.get(`https://api.rss2json.com/v1/api.json?rss_url=https://www.panewslab.com/zh/sq-rss/all.xml&t=${ts}`, { timeout: 1500 });
+                    let res = await this.smartFetch(`https://api.rss2json.com/v1/api.json?rss_url=https://www.panewslab.com/zh/sq-rss/all.xml`, 5000);
                     if(res.data && res.data.items) {
                         this.newsList = res.data.items.slice(0, 8).map(item => {
-                            // 修正：增加对标准 RFC822 日期的容错转换
                             let pubTime = new Date(item.pubDate.replace(/-/g, '/')).getTime();
                             if (isNaN(pubTime)) pubTime = new Date(item.pubDate).getTime();
                             return {
@@ -386,22 +407,11 @@
                         });
                     } else { throw new Error(); }
                 } catch (e) {
+                    // 仅在被彻底阻断时才启用兜底文字
                     if (this.newsList.length === 1 && this.newsList[0].source === 'System') {
-                        this.newsList = [
-                            { source: 'System', title: '节点延迟，已启动防卡死兜底模式', timestamp: this.nowSeconds - 60 },
-                            { source: 'Market', title: 'BTC 行情突破关键压力位，链上巨鲸异动', timestamp: this.nowSeconds - 1200 },
-                            { source: 'Binance', title: '币安 Launchpool 即将开启新一轮挖矿', timestamp: this.nowSeconds - 3600 },
-                            { source: 'Macro', title: '美联储利率决议即将公布，市场屏息以待', timestamp: this.nowSeconds - 7200 }
-                        ];
+                        this.newsList = [{ source: 'System', title: '全网节点受阻，请检查本地网络环境', timestamp: this.nowSeconds - 60 }];
                     }
                 }
-            },
-
-            calculateAhr999Base() {
-                const daysSinceGenesis = (Date.now() - new Date('2009-01-03T00:00:00Z').getTime()) / 86400000;
-                this.fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
-                // 备注：前端无历史K线数据，此处的 200日几何平均 为模拟测算值，如需精准需对接外部历史数据源
-                if(this.currentPrice > 0) this.geoMean200 = this.currentPrice * 0.85; 
             },
 
             initChart() {
@@ -426,21 +436,20 @@
                 });
             },
 
-            fetchFearAndGreed() {
-                axios.get(`https://api.alternative.me/fng/?t=${Date.now()}`)
-                    .then(res => {
-                        // 修正：增加边界校验防止 TypeError
-                        if (res.data && res.data.data && res.data.data.length > 0) {
-                            const val = parseInt(res.data.data[0].value);
-                            this.fearGreedIndex = val;
-                            if (val <= 25) { this.fearGreedClassification = '极度恐惧'; this.fgSubtext = '市场恐惧，分批建仓'; this.fgColor = '#e74c3c'; } 
-                            else if (val <= 45) { this.fearGreedClassification = '恐惧'; this.fgSubtext = '情绪偏向悲观'; this.fgColor = '#e67e22'; } 
-                            else if (val <= 55) { this.fearGreedClassification = '中立'; this.fgSubtext = '情绪平稳，观望为主'; this.fgColor = '#f1c40f'; } 
-                            else if (val <= 75) { this.fearGreedClassification = '贪婪'; this.fgSubtext = '市场情绪乐观'; this.fgColor = '#2ecc71'; } 
-                            else { this.fearGreedClassification = '极度贪婪'; this.fgSubtext = '极度贪婪，注意回调风险'; this.fgColor = '#27ae60'; }
-                            this.updateGaugeData(val);
-                        }
-                    }).catch(() => {});
+            async fetchFearAndGreed() {
+                try {
+                    let res = await this.smartFetch(`https://api.alternative.me/fng/`, 4000);
+                    if (res.data && res.data.data && res.data.data.length > 0) {
+                        const val = parseInt(res.data.data[0].value);
+                        this.fearGreedIndex = val;
+                        if (val <= 25) { this.fearGreedClassification = '极度恐惧'; this.fgSubtext = '市场恐惧，分批建仓'; this.fgColor = '#e74c3c'; } 
+                        else if (val <= 45) { this.fearGreedClassification = '恐惧'; this.fgSubtext = '情绪偏向悲观'; this.fgColor = '#e67e22'; } 
+                        else if (val <= 55) { this.fearGreedClassification = '中立'; this.fgSubtext = '情绪平稳，观望为主'; this.fgColor = '#f1c40f'; } 
+                        else if (val <= 75) { this.fearGreedClassification = '贪婪'; this.fgSubtext = '市场情绪乐观'; this.fgColor = '#2ecc71'; } 
+                        else { this.fearGreedClassification = '极度贪婪'; this.fgSubtext = '极度贪婪，注意回调风险'; this.fgColor = '#27ae60'; }
+                        this.updateGaugeData(val);
+                    }
+                } catch(e) {}
             },
             
             updatePriceLogic(newPrice) {
@@ -449,7 +458,7 @@
                     if (this.baselinePrice === 0) { 
                         this.baselinePrice = this.currentPrice; 
                     }
-                    this.calculateAhr999Base();
+                    this.calculateFittedPrice();
                     this.checkPriceAlert();
                 }
             },
