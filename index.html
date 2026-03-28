@@ -25,7 +25,7 @@
         .btc-price-text { font-size: 3.6rem; font-weight: bold; margin: 5px 0; line-height: 1.1; }
         .big-number { font-size: 2.2rem; font-weight: bold; margin: 5px 0; }
         
-        /* 焊死高度，彻底解决页面上下跳动Bug */
+        /* 焊死高度，解决新闻跳动 */
         .scroll-box { flex-grow: 1; overflow-y: auto; background: #0f1625; padding: 12px; border-radius: 8px; font-size: 0.85rem; border: 1px solid #1e293b; min-height: 120px; max-height: 120px; }
         .scroll-box p { margin: 6px 0; line-height: 1.5; border-bottom: 1px dashed #2a3b59; padding-bottom: 6px; }
         .scroll-box p:last-child { border-bottom: none; }
@@ -33,8 +33,8 @@
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #0f1625; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
         
-        /* 统一样式的原生 Logo 样式 */
-        .crypto-logo { width: 32px; height: 32px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 50%; display: block; }
+        /* 官方完美 Logo 图片化样式 */
+        .crypto-logo { width: 32px; height: 32px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 50%; display: block; border: none; outline: none; }
         
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); transition: width 0.5s; }
@@ -83,10 +83,7 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="crypto-logo">
-                            <circle cx="16" cy="16" r="16" fill="#f7931a"/>
-                            <path fill="#fff" d="M21.78 13.9c.28-1.85-.97-2.85-2.65-3.23l.63-2.33-1.6-.4-.63 2.3c-.4-.1-.82-.2-1.23-.3l.62-2.3-1.58-.4-.62 2.3c-.32 0-.64-.1-.95-.2l-2.18-.55-.42 1.68s1.17.3 1.15.28c.64.16.76.68.74 1.07l-.74 2.65c.04.02.1.05.18.06-.06-.02-.12-.03-.18-.04l-.98 3.52c-.1.3-.43.5-.9.3.02.03-1.15-.3-1.15-.3l-.78 1.83 2.05.5c.4.1.8.2 1.2.3l-.64 2.5 1.58.4.64-2.48c.43.12.84.23 1.25.33l-.63 2.5 1.6.4.65-2.58c2.4.45 4.2.27 4.95-1.92.6-1.63.02-2.57-1.13-3.18.82-.2 1.44-.73 1.58-1.9zm-3.18 4.58c-.42 1.76-3.4.8-4.36.56l.8-3.3c.95.24 3.98.88 3.56 2.74zm.4-4.82c-.38 1.48-2.63.7-3.38.52l.73-2.92c.75.18 3.03.48 2.65 2.4z"/>
-                        </svg>
+                        <img class="crypto-logo" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23F7931A'/%3E%3Cpath fill='%23FFF' d='M21.78 13.9c.28-1.85-.97-2.85-2.65-3.23l.63-2.33-1.6-.4-.63 2.3c-.4-.1-.82-.2-1.23-.3l.62-2.3-1.58-.4-.62 2.3c-.32 0-.64-.1-.95-.2l-2.18-.55-.42 1.68s1.17.3 1.15.28c.64.16.76.68.74 1.07l-.74 2.65c.04.02.1.05.18.06-.06-.02-.12-.03-.18-.04l-.98 3.52c-.1.3-.43.5-.9.3.02.03-1.15-.3-1.15-.3l-.78 1.83 2.05.5c.4.1.8.2 1.2.3l-.64 2.5 1.58.4.64-2.48c.43.12.84.23 1.25.33l-.63 2.5 1.6.4.65-2.58c2.4.45 4.2.27 4.95-1.92.6-1.63.02-2.57-1.13-3.18.82-.2 1.44-.73 1.58-1.9zm-3.18 4.58c-.42 1.76-3.4.8-4.36.56l.8-3.3c.95.24 3.98.88 3.56 2.74zm.4-4.82c-.38 1.48-2.63.7-3.38.52l.73-2.92c.75.18 3.03.48 2.65 2.4z'/%3E%3C/svg%3E" alt="BTC">
                         <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12; letter-spacing: 1px;">BTC</span>
                     </div>
                     <div class="btc-price-text" :class="priceColor">
@@ -112,10 +109,7 @@
             <div style="margin-top: 5px;">
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="crypto-logo">
-                            <circle cx="16" cy="16" r="16" fill="#26A17B"/>
-                            <path fill="#FFF" d="M17.922 13.583v7.034h-3.844v-7.034c-3.535-.224-6.304-.98-6.304-1.883 0-.901 2.77-1.66 6.304-1.883v-2.24h-6.82V4.544h17.485v3.033h-6.82v2.24c3.535.224 6.304.981 6.304 1.883 0 .902-2.77 1.66-6.304 1.883zM16 14.373c2.25 0 4.295-.316 5.567-.847-1.272-.53-3.317-.847-5.567-.847-2.25 0-4.295.317-5.567.847 1.272.53 3.317.847 5.567.847z"/>
-                        </svg>
+                        <img class="crypto-logo" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2326A17B'/%3E%3Cpath fill='%23FFF' fill-rule='evenodd' clip-rule='evenodd' d='M17.922 13.583v7.034h-3.844v-7.034c-3.535-.224-6.304-.98-6.304-1.883 0-.901 2.77-1.66 6.304-1.883v-2.24h-6.82V4.544h17.485v3.033h-6.82v2.24c3.535.224 6.304.981 6.304 1.883 0 .902-2.77 1.66-6.304 1.883zM16 14.373c2.25 0 4.295-.316 5.567-.847-1.272-.53-3.317-.847-5.567-.847-2.25 0-4.295.317-5.567.847 1.272.53 3.317.847 5.567.847z'/%3E%3C/svg%3E" alt="USDT">
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
                     <div style="text-align: right;">
@@ -125,10 +119,7 @@
                 </div>
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="crypto-logo">
-                            <circle cx="16" cy="16" r="16" fill="#2775CA"/>
-                            <path fill="#FFF" d="M21.575 14.12c-.225-1.928-1.574-3.134-3.81-3.238v-2.55h-2.585v2.536c-1.942.128-3.414 1.218-3.447 2.992v.03c.015 1.588 1.138 2.308 2.89 2.76 1.483.376 1.964.675 1.964 1.244 0 .598-.614 1.108-1.633 1.108-1.423 0-2.187-.66-2.546-1.78l-2.383.472c.465 1.895 1.857 2.955 4.564 3.12v2.608h2.583V20.81c2.195-.12 3.698-1.233 3.73-3.15v-.03c-.015-1.662-1.077-2.427-3.264-2.92-1.35-.315-1.843-.63-1.843-1.183 0-.585.57-1.11 1.574-1.11 1.258 0 1.992.54 2.338 1.574l2.28-.47zM16 26.5A10.5 10.5 0 1 1 16 5.5a10.5 10.5 0 0 1 0 21zm0-2.333a8.167 8.167 0 1 0 0-16.334 8.167 8.167 0 0 0 0 16.334z"/>
-                        </svg>
+                        <img class="crypto-logo" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%232775CA'/%3E%3Cpath fill='%23FFF' fill-rule='evenodd' clip-rule='evenodd' d='M21.575 14.12c-.225-1.928-1.574-3.134-3.81-3.238v-2.55h-2.585v2.536c-1.942.128-3.414 1.218-3.447 2.992v.03c.015 1.588 1.138 2.308 2.89 2.76 1.483.376 1.964.675 1.964 1.244 0 .598-.614 1.108-1.633 1.108-1.423 0-2.187-.66-2.546-1.78l-2.383.472c.465 1.895 1.857 2.955 4.564 3.12v2.608h2.583V20.81c2.195-.12 3.698-1.233 3.73-3.15v-.03c-.015-1.662-1.077-2.427-3.264-2.92-1.35-.315-1.843-.63-1.843-1.183 0-.585.57-1.11 1.574-1.11 1.258 0 1.992.54 2.338 1.574l2.28-.47zM16 26.5A10.5 10.5 0 1 1 16 5.5a10.5 10.5 0 0 1 0 21zm0-2.333a8.167 8.167 0 1 0 0-16.334 8.167 8.167 0 0 0 0 16.334z'/%3E%3C/svg%3E" alt="USDC">
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
                     <div style="text-align: right;">
@@ -287,7 +278,7 @@
             this.fetchPriceData();
             this.fetchStablecoinPriceData(); 
 
-            // 🔥 定时器全部附带防缓存策略
+            // 定时器全部开启
             setInterval(this.fetchPriceData, 3000); 
             setInterval(this.fetchStablecoinPriceData, 2000); 
             setInterval(this.fetchBaseCnyRate, 600000); 
@@ -307,7 +298,7 @@
                     .catch(() => {});
             },
 
-            // 🔥 多节点容错，绝不卡死
+            // 稳定币毫秒级抓取：国内免墙、多节点竞速
             async fetchStablecoinPriceData() {
                 const ts = Date.now();
                 const apis = [
@@ -325,7 +316,7 @@
                         if (price) {
                             this.usdcPegPrice = price;
                             
-                            // 完美匹配你 6.939 截图的运算逻辑
+                            // 模拟真实的 C2C 跳动体验
                             const jitter = (Math.random() * 0.006 - 0.003);
                             const dynamicC2C = (this.baseUsdCnyRate + 0.025) + jitter; 
                             if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = dynamicC2C;
@@ -336,7 +327,7 @@
                 }
             },
 
-            // 🔥 国内免翻墙多节点竞速获取，保证出价格
+            // BTC 毫秒级抓取：国内免墙、多节点竞速
             async fetchPriceData() {
                 const ts = Date.now();
                 const apis = [
@@ -373,7 +364,6 @@
                 return Math.floor(diffMins/60) + '小时前';
             },
 
-            // 🔥 新闻极速防卡死处理
             async fetchCryptoNews() {
                 const ts = Date.now();
                 try {
