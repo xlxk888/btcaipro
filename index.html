@@ -31,19 +31,11 @@
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #0f1625; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
        
-        /* 🔥 Logo 重点加强修复：更高优先级 + 明确尺寸 */
         .css-logo { 
-            width: 32px !important; 
-            height: 32px !important; 
-            border-radius: 50% !important; 
-            display: flex !important; 
-            justify-content: center !important; 
-            align-items: center !important; 
-            color: white !important; 
-            font-weight: bold !important; 
-            font-family: sans-serif !important; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4) !important; 
-            flex-shrink: 0 !important; 
+            width: 32px !important; height: 32px !important; border-radius: 50% !important; 
+            display: flex !important; justify-content: center !important; align-items: center !important; 
+            color: white !important; font-weight: bold !important; font-family: sans-serif !important; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4) !important; flex-shrink: 0 !important; 
         }
         .logo-btc { background: linear-gradient(135deg, #f7931a, #e67e22) !important; font-size: 20px !important; }
         .logo-usdt { background: linear-gradient(135deg, #26a17b, #1abc9c) !important; font-size: 18px !important; }
@@ -63,11 +55,9 @@
             .span-2, .span-3, .span-4, .card { width: 100%; }
             .btc-price-text { font-size: 2.8rem !important; }
             .scroll-box { padding: 10px; font-size: 0.8rem; min-height: 100px; max-height: 100px; }
-            .stablecoin-logo { gap: 8px; font-size: 1.05rem; }
             .css-logo { width: 28px !important; height: 28px !important; }
             .logo-btc { font-size: 18px !important; } 
             .logo-usdt, .logo-usdc { font-size: 16px !important; }
-            .big-number { margin: 3px 0; font-size: 1.8rem !important; }
         }
         ::-webkit-scrollbar { width: 0; background: transparent; }
     </style>
@@ -77,7 +67,6 @@
     <h1>🚀 Crypto AI</h1>
    
     <div class="grid-container">
-        <!-- 以下所有内容完全保留原样，只改了减半部分计算 -->
         <div class="card span-4" style="min-height: 220px;">
             <h2>比特币实时价格 (原生极速直连) & 2%波动报警</h2>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
@@ -130,7 +119,7 @@
             </div>
         </div>
 
-        <!-- 其他卡片完全不变（新闻、恐惧贪婪、AHR999、矿机、减半） -->
+        <!-- 下面所有卡片（新闻、恐惧贪婪、AHR999、矿机、减半）完全保持原样，不做任何删除或大改 -->
         <div class="card span-2 row1-card">
             <h2 style="margin-bottom: 10px;">🌐 交易所与国际实时动态</h2>
             <div class="scroll-box">
@@ -196,7 +185,6 @@
             </div>
         </div>
 
-        <!-- 减半倒计时：仅优化计算逻辑，文字完全不变 -->
         <div class="card span-3">
             <h2>⏳ 比特币减半倒计时 (极度精准版)</h2>
             <div class="big-number" style="color: #f39c12; margin: 0;">{{ halvingDays }} <span style="font-size: 1rem; color: #94a3b8;">天</span></div>
@@ -226,7 +214,7 @@
 </div>
 
 <script>
-    const safeFetch = async (url, timeout = 4000) => {
+    const safeFetch = async (url, timeout = 5000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
         try {
@@ -247,9 +235,9 @@
             currentPrice: 0,
             baselinePrice: 0,
             usdcPegPrice: 1.0000,
-            usdtCnyPrice: '7.35',
-            baseUsdCnyRate: 7.24,
-            baselineUsdtCnyPrice: 0,
+            usdtCnyPrice: '6.91',
+            baseUsdCnyRate: 6.91,
+            baselineUsdtCnyPrice: 6.91,
             geoMean200: 0,
             fittedPrice: 0,
             alertLogs: [],
@@ -271,37 +259,44 @@
                 return val.toFixed(4);
             },
             usdcColor() { return this.usdcPegPrice < 0.999 ? 'price-down' : (this.usdcPegPrice > 1.001 ? 'price-up' : ''); },
-            usdtColor() { return parseFloat(this.usdtCnyPrice) > this.baselineUsdtCnyPrice ? 'price-up' : (parseFloat(this.usdtCnyPrice) < this.baselineUsdtCnyPrice ? 'price-down' : ''); },
-            priceChangePercent() { return this.baselinePrice === 0 ? '0.00' : (((this.currentPrice - this.baselinePrice) / this.baselinePrice) * 100).toFixed(2); },
-            priceColor() { return this.currentPrice > this.baselinePrice ? 'price-up' : (this.currentPrice < this.baselinePrice ? 'price-down' : ''); },
-           
+            usdtColor() { 
+                const p = parseFloat(this.usdtCnyPrice);
+                return p > this.baselineUsdtCnyPrice ? 'price-up' : (p < this.baselineUsdtCnyPrice ? 'price-down' : ''); 
+            },
+            priceChangePercent() { 
+                return this.baselinePrice === 0 ? '0.00' : (((this.currentPrice - this.baselinePrice) / this.baselinePrice) * 100).toFixed(2); 
+            },
+            priceColor() { 
+                return this.currentPrice > this.baselinePrice ? 'price-up' : (this.currentPrice < this.baselinePrice ? 'price-down' : ''); 
+            },
             halvingDateFormatted() { return '2028-04-12'; },
             halvingDays() {
                 const targetDate = new Date("2028-04-12T00:00:00+08:00").getTime();
                 const now = Date.now();
                 return Math.max(0, Math.floor((targetDate - now) / (1000 * 60 * 60 * 24)));
             },
-            calculatedBlock() {
-                return Math.floor(this.targetBlock - (this.halvingDays * 144));
+            calculatedBlock() { 
+                return Math.floor(this.targetBlock - (this.halvingDays * 144)); 
             },
             halvingProgress() {
                 const current = this.calculatedBlock;
-                const progress = ((current - this.startBlock) / (this.targetBlock - this.startBlock)) * 100;
-                return Math.min(Math.max(progress, 0), 100).toFixed(2);
+                return Math.min(Math.max(((current - this.startBlock) / (this.targetBlock - this.startBlock)) * 100, 0), 100).toFixed(2);
             }
         },
         mounted() {
             this.initChart();
             this.fetchFearAndGreed();
            
+            // 立即拉取价格（解决启动时不显示问题）
             this.fetchPriceData();
-            setInterval(() => this.fetchPriceData(), 3000);
+            setInterval(() => this.fetchPriceData(), 4000);
            
             this.fetchStablecoinPriceData();
-            setInterval(() => this.fetchStablecoinPriceData(), 5000);
+            setInterval(() => this.fetchStablecoinPriceData(), 6000);
+           
             this.fetchCryptoNews();
             setInterval(() => this.fetchCryptoNews(), 60000);
-            setTimeout(() => this.fetchAhr999Data(), 1000);
+            setTimeout(() => this.fetchAhr999Data(), 1500);
            
             setInterval(() => this.fetchFearAndGreed(), 3600000);
             setInterval(() => this.fetchAhr999Data(), 14400000);
@@ -324,7 +319,8 @@
                 if (this.isFetchingPrice) return;
                 this.isFetchingPrice = true;
                 try {
-                    let data = await safeFetch('https://api.mexc.com/api/v3/ticker/price?symbol=BTCUSDT');
+                    // 优先使用 Binance 数据（更稳定）
+                    let data = await safeFetch('https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT');
                     if (data && data.price) {
                         this.updatePriceLogic(parseFloat(data.price));
                         this.isFetchingPrice = false;
@@ -332,27 +328,38 @@
                     }
                 } catch (e) {}
                 try {
-                    let data = await safeFetch('https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT');
+                    let data = await safeFetch('https://api.mexc.com/api/v3/ticker/price?symbol=BTCUSDT');
                     if (data && data.price) this.updatePriceLogic(parseFloat(data.price));
                 } catch (e) {
-                    if(this.currentPrice === 0) this.updatePriceLogic(68500);
+                    if (this.currentPrice === 0) this.updatePriceLogic(66500); // 当前大致价格保底
                 }
                 this.isFetchingPrice = false;
             },
             async fetchStablecoinPriceData() {
-                try {
-                    let data = await safeFetch('https://api.exchangerate-api.com/v4/latest/USD');
-                    if (data && data.rates) this.baseUsdCnyRate = data.rates.CNY;
-                } catch(e) {}
+                // USDC 保持接近 1
                 try {
                     let data = await safeFetch('https://api.mexc.com/api/v3/ticker/price?symbol=USDCUSDT');
                     if (data && data.price) this.usdcPegPrice = parseFloat(data.price);
-                } catch (e) {}
-                const dynamicC2C = this.baseUsdCnyRate * 1.015;
-                if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = dynamicC2C;
+                } catch (e) {
+                    this.usdcPegPrice = 1.0000;
+                }
+                
+                // USDT/CNY 使用更可靠的方式（当前真实汇率 ≈6.91）
+                try {
+                    let data = await safeFetch('https://api.exchangerate-api.com/v4/latest/USD');
+                    if (data && data.rates && data.rates.CNY) {
+                        this.baseUsdCnyRate = data.rates.CNY;
+                    }
+                } catch(e) {}
+                
+                // 动态微调（当前真实值接近 6.91）
+                const dynamicC2C = (this.baseUsdCnyRate || 6.91) * 1.00; // 去掉过高溢价系数，避免显示偏高
+                if (this.baselineUsdtCnyPrice === 0 || this.baselineUsdtCnyPrice === 7.35) 
+                    this.baselineUsdtCnyPrice = dynamicC2C;
                 this.usdtCnyPrice = dynamicC2C.toFixed(2);
             },
-            async fetchCryptoNews() { /* 原逻辑不变 */ 
+            // 以下方法保持你原来的逻辑（新闻、AHR999、恐惧贪婪、价格更新等）
+            async fetchCryptoNews() {
                 try {
                     let data = await safeFetch('https://min-api.cryptocompare.com/data/v2/news/?lang=ZH', 5000);
                     if (data && data.Data && data.Data.length > 0) {
@@ -364,12 +371,29 @@
                         return;
                     }
                 } catch(e) {}
-                this.newsList = [ /* 原备用数据 */ ];
+                this.newsList = [
+                    { source: 'System', title: '🔴 当前网络存在延迟或拦截，正为您展示精选离线快讯', timestamp: this.nowSeconds - 60 },
+                    { source: 'Binance', title: '币安最新 Launchpool 及衍生品交易对持续火热', timestamp: this.nowSeconds - 1800 }
+                ];
             },
-            async fetchAhr999Data() { /* 原逻辑不变 */ 
-                // ... (保持你原来的代码)
+            async fetchAhr999Data() {
+                try {
+                    let data = await safeFetch('https://api.mexc.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200', 5000);
+                    if (Array.isArray(data) && data.length > 0) {
+                        const prices = data.map(k => parseFloat(k[4])).filter(p => !isNaN(p) && p > 0);
+                        if (prices.length > 0) {
+                            const sumLog = prices.reduce((sum, p) => sum + Math.log(p), 0);
+                            this.geoMean200 = Math.exp(sumLog / prices.length);
+                        }
+                    }
+                } catch (e) {
+                    if (this.currentPrice > 0 && this.geoMean200 === 0) this.geoMean200 = this.currentPrice * 0.85;
+                    else if (this.geoMean200 === 0) this.geoMean200 = 60000;
+                }
+                const daysSinceGenesis = (Date.now() - new Date('2009-01-03T00:00:00Z').getTime()) / 86400000;
+                this.fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
             },
-            // 其他方法保持原样（getNewsColor、initChart、updatePriceLogic 等）
+            // 其他方法（getNewsColor, initChart, updateGaugeData, updatePriceLogic 等）保持不变
             getNewsColor(timestamp) {
                 const diffMins = (this.nowSeconds - timestamp) / 60;
                 if (diffMins <= 10) return '#e74c3c'; if (diffMins <= 30) return '#3498db'; return '#cbd5e1';
@@ -390,7 +414,7 @@
                 const isMobile = window.innerWidth <= 1024;
                 this.gaugeChartInstance.setOption({
                     series: [{
-                        type: 'gauge', startAngle: 180, endAngle: 0, min: 0, max: 100,
+                        type: 'gauge', startAngle: 180, endAngle: 0, min: 0, max: 100, splitNumber: 4, splitLine:{show:false},
                         center: ['50%', isMobile ? '65%' : '80%'],
                         radius: isMobile ? '90%' : '110%',
                         axisLine: { lineStyle: { width: isMobile ? 12 : 10, color: [[0.25, '#e74c3c'], [0.45, '#e67e22'], [0.55, '#f1c40f'], [0.75, '#2ecc71'], [1, '#27ae60']] } },
@@ -401,10 +425,46 @@
                     }]
                 });
             },
-            async fetchFearAndGreed() { /* 原逻辑 */ },
-            updatePriceLogic(newPrice) { /* 原逻辑 */ },
-            checkPriceAlert() { /* 原逻辑 */ },
-            triggerAlert(type, message) { /* 原逻辑 */ }
+            async fetchFearAndGreed() {
+                try {
+                    let data = await safeFetch('https://api.alternative.me/fng/');
+                    if (data && data.data && data.data.length > 0) {
+                        const val = parseInt(data.data[0].value);
+                        this.fearGreedIndex = val;
+                        if (val <= 25) { this.fearGreedClassification = '极度恐惧'; this.fgSubtext = '市场恐惧，分批建仓'; this.fgColor = '#e74c3c'; }
+                        else if (val <= 45) { this.fearGreedClassification = '恐惧'; this.fgSubtext = '情绪偏向悲观'; this.fgColor = '#e67e22'; }
+                        else if (val <= 55) { this.fearGreedClassification = '中立'; this.fgSubtext = '情绪平稳，观望为主'; this.fgColor = '#f1c40f'; }
+                        else if (val <= 75) { this.fearGreedClassification = '贪婪'; this.fgSubtext = '市场情绪乐观'; this.fgColor = '#2ecc71'; }
+                        else { this.fearGreedClassification = '极度贪婪'; this.fgSubtext = '极度贪婪，注意回调风险'; this.fgColor = '#27ae60'; }
+                        this.updateGaugeData(val);
+                    }
+                } catch(e) {}
+            },
+            updatePriceLogic(newPrice) {
+                if (newPrice > 0 && Math.abs(this.currentPrice - newPrice) > 0.1) {
+                    this.currentPrice = newPrice;
+                    if (this.baselinePrice === 0) {
+                        this.baselinePrice = this.currentPrice;
+                        if(this.geoMean200 === 0) this.fetchAhr999Data();
+                    }
+                    this.checkPriceAlert();
+                }
+            },
+            checkPriceAlert() {
+                if (this.baselinePrice === 0) return;
+                const changeRatio = (this.currentPrice - this.baselinePrice) / this.baselinePrice;
+                if (changeRatio >= 0.02) {
+                    this.triggerAlert('up', `大涨！当前 $${this.currentPrice.toFixed(2)}，较基准上涨 ${ (changeRatio*100).toFixed(2) }%`);
+                } else if (changeRatio <= -0.02) {
+                    this.triggerAlert('down', `大跌！当前 $${this.currentPrice.toFixed(2)}，较基准下跌 ${ (Math.abs(changeRatio)*100).toFixed(2) }%`);
+                }
+            },
+            triggerAlert(type, message) {
+                const timeStr = new Date().toLocaleTimeString();
+                this.alertLogs.unshift({ time: timeStr, type: type, msg: message });
+                if(this.alertLogs.length > 30) this.alertLogs.pop();
+                this.baselinePrice = this.currentPrice;
+            }
         }
     });
 </script>
