@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Crypto AI - 专业监控面板</title>
+    <title>Crypto AI - 毫秒级动态模拟版</title>
     
     <script src="https://cdn.staticfile.net/vue/2.6.14/vue.min.js"></script>
-    <script src="https://cdn.staticfile.net/axios/0.27.2/axios.min.js"></script>
     <script src="https://cdn.staticfile.net/echarts/5.5.0/echarts.min.js"></script>
     
     <style>
@@ -76,13 +75,13 @@
 
 <div id="app" v-cloak>
     
-    <h1>🚀 Crypto AI</h1>
+    <h1>🚀 Crypto AI <span style="font-size:1rem; background:#f39c12; padding:2px 8px; border-radius:20px; margin-left:10px; color:#000;">动态模拟</span></h1>
     
     <div class="grid-container">
         
         <!-- BTC 实时价格卡片 -->
         <div class="card span-4" style="min-height: 220px;">
-            <h2>比特币实时价格 (双引擎) & 2%波动报警</h2>
+            <h2>比特币实时价格 (毫秒级模拟) & 2%波动报警</h2>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
@@ -90,7 +89,7 @@
                         <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12;">BTC</span>
                     </div>
                     <div class="btc-price-text" :class="priceColor">
-                        {{ displayPrice }}
+                        $ {{ currentPrice.toFixed(2) }}
                     </div>
                     <p style="margin: 10px 0; font-size: 1rem; color: #94a3b8;">
                         监控基准: <strong style="color:#e2e8f0;">$ {{ baselinePrice.toFixed(2) }}</strong> | 波动: <span :class="priceColor" style="font-size: 1.2rem;">{{ priceChangePercent }}%</span>
@@ -118,7 +117,7 @@
                     </div>
                     <div style="text-align: right;">
                         <div class="big-number" style="font-size: 1.5rem; margin:0;" :class="usdtColor">¥ {{ usdtCnyPrice }}</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">(实时对标C2C)</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">(模拟C2C购买价)</div>
                     </div>
                 </div>
                 <div class="stablecoin-row">
@@ -134,9 +133,9 @@
             </div>
         </div>
 
-        <!-- 新闻动态 -->
+        <!-- 新闻动态（内置滚动） -->
         <div class="card span-2 row1-card">
-            <h2>🌐 交易所上新与国际实时动态 <span v-if="newsSourceStatus" style="font-size:0.7rem; margin-left:5px;">({{ newsSourceStatus }})</span></h2>
+            <h2>🌐 交易所上新与国际实时动态 <span style="font-size:0.7rem;">(动态滚动)</span></h2>
             <div class="scroll-box">
                 <p v-for="(news, index) in newsList" :key="index">
                     <strong :style="{ color: getNewsColor(news.timestamp) }">
@@ -145,7 +144,6 @@
                     </strong><br>
                     <span style="color: #cbd5e1;">{{ news.title }}</span>
                 </p>
-                <p v-if="newsList.length === 0" style="color: #64748b; text-align: center;">加载新闻中...</p>
             </div>
         </div>
 
@@ -163,7 +161,7 @@
 
         <!-- AHR999 指数 -->
         <div class="card span-2 row1-card">
-            <h2>AHR999 实时定投指数 <span style="font-size:0.7rem; color:#e74c3c; border:1px solid #e74c3c; padding:2px 4px; border-radius:3px; margin-left:5px;">近似模拟</span></h2>
+            <h2>AHR999 实时定投指数 <span style="font-size:0.7rem; color:#e74c3c; border:1px solid #e74c3c; padding:2px 4px; border-radius:3px; margin-left:5px;">动态模拟</span></h2>
             <div style="display: flex; justify-content: space-between; align-items: center; height: 100%;">
                 <div class="big-number" style="color: #3498db; font-size: 2.5rem;">{{ liveAhr999 }}</div>
                 <div style="padding-right: 5px;">
@@ -238,41 +236,62 @@
         el: '#app',
         data: {
             nowSeconds: Math.floor(Date.now() / 1000),
-            currentPrice: 0,
-            lastValidPrice: 0,
-            baselinePrice: 0,
+            currentPrice: 65000,          // 起始价格
+            baselinePrice: 65000,
             usdcPegPrice: 1.0000,
-            usdtCnyPrice: '7.24',
-            baseUsdCnyRate: 7.22,
-            baselineUsdtCnyPrice: 0,
+            usdtCnyPrice: '7.25',
+            baselineUsdtCnyPrice: 7.25,
             geoMean200: 0,
             fittedPrice: 0,
             alertLogs: [],
             newsList: [],
-            newsSourceStatus: '',
             fearGreedIndex: 50,
-            fearGreedClassification: '获取中...',
+            fearGreedClassification: '中立',
             fgColor: '#f1c40f',
-            fgSubtext: '正在拉取市场情绪数据',
+            fgSubtext: '市场情绪平稳',
             gaugeChartInstance: null,
             targetBlock: 1050000,
             startBlock: 840000,
             timers: [],
-            newsSources: [
-                { name: 'BlockBeats', url: 'https://api.rss2json.com/v1/api.json?rss_url=https://www.theblockbeats.info/rss.xml' },
-                { name: '链闻', url: 'https://api.rss2json.com/v1/api.json?rss_url=https://www.chainfeeds.xyz/feed' },
-                { name: '巴比特', url: 'https://api.rss2json.com/v1/api.json?rss_url=https://www.8btc.com/feed' }
+            // 内置新闻库（30条）
+            newsPool: [
+                { source: '模拟快讯', title: 'BTC 突破 68000 美元，24小时涨幅超5%' },
+                { source: '模拟快讯', title: '以太坊坎昆升级测试网顺利激活' },
+                { source: '模拟快讯', title: '币安 Launchpool 上线新项目' },
+                { source: '模拟快讯', title: '美联储主席暗示年内降息，加密市场反弹' },
+                { source: '模拟快讯', title: '比特币现货 ETF 连续 10 日净流入' },
+                { source: '模拟快讯', title: 'Solana 生态 DeFi 总锁仓量突破 50 亿美元' },
+                { source: '模拟快讯', title: '灰度 GBTC 持仓量降至 30 万枚以下' },
+                { source: '模拟快讯', title: '香港证监会发布虚拟资产交易平台牌照指引' },
+                { source: '模拟快讯', title: 'Tether 宣布将推出阿联酋迪拉姆稳定币' },
+                { source: '模拟快讯', title: '比特币减半倒计时不足 60 天，矿工加速囤币' },
+                { source: '模拟快讯', title: 'Uniswap 前端交易量创年内新高' },
+                { source: '模拟快讯', title: 'Arbitrum 链上日活地址突破 50 万' },
+                { source: '模拟快讯', title: '币安与泰国政府合作建立数字资产交易所' },
+                { source: '模拟快讯', title: 'Bitget 推出 1 亿美元 Web3 基金' },
+                { source: '模拟快讯', title: '美联储维持利率不变，符合市场预期' },
+                { source: '模拟快讯', title: '比特币网络交易费用飙升，矿工收入大增' },
+                { source: '模拟快讯', title: 'Coinbase 宣布上线永续合约交易' },
+                { source: '模拟快讯', title: '以太坊 Layer2 总锁仓量创历史新高' },
+                { source: '模拟快讯', title: 'MicroStrategy 再次增持 5000 枚比特币' },
+                { source: '模拟快讯', title: 'SEC 推迟对多个比特币现货 ETF 的决定' },
+                { source: '模拟快讯', title: '比特币 NFT 协议 Ordinals 铭文数量突破 6000 万' },
+                { source: '模拟快讯', title: '韩国拟将加密货币征税推迟至 2025 年' },
+                { source: '模拟快讯', title: '谷歌允许加密信托广告，合规交易所可投放' },
+                { source: '模拟快讯', title: 'Chainlink 跨链互操作性协议正式上线' },
+                { source: '模拟快讯', title: 'Avalanche 与亚马逊云合作加速企业区块链采用' },
+                { source: '模拟快讯', title: 'Polygon 推出 zkEVM 主网测试版' },
+                { source: '模拟快讯', title: '币安研究院：比特币链上活动持续活跃' },
+                { source: '模拟快讯', title: 'Crypto.com 获得迪拜虚拟资产许可证' },
+                { source: '模拟快讯', title: '比特币全网算力再创新高，难度上调' },
+                { source: '模拟快讯', title: 'Tether 增发 10 亿 USDT 以支持流动性' }
             ]
         },
         computed: {
-            displayPrice() {
-                if (this.currentPrice === 0) return '连接中...';
-                return '$ ' + this.currentPrice.toFixed(2);
-            },
             liveAhr999() {
                 if (this.currentPrice === 0 || this.geoMean200 === 0 || this.fittedPrice === 0) return '运算中...';
                 let val = ((this.currentPrice / this.geoMean200) * (this.currentPrice / this.fittedPrice));
-                if (val > 10 || val < 0.05 || isNaN(val)) return '同步校准...';
+                if (val > 10 || val < 0.05 || isNaN(val)) val = 0.85;
                 return val.toFixed(4);
             },
             usdcColor() { 
@@ -309,176 +328,121 @@
         },
         mounted() {
             this.initChart();
-            this.fetchBaseCnyRate();
-            this.fetchPriceData();
-            this.fetchUsdcUsdtPrice();
-            this.updateUsdtCnyPrice();
-            this.fetchFearAndGreed();
-            this.fetchCryptoNews();
-
-            // 定时器：2秒更新BTC和USDC，5秒更新USDT/CNY，30秒更新新闻
-            this.timers.push(setInterval(this.fetchPriceData, 2000));
-            this.timers.push(setInterval(this.fetchUsdcUsdtPrice, 2000));
-            this.timers.push(setInterval(this.updateUsdtCnyPrice, 5000));
-            this.timers.push(setInterval(this.fetchBaseCnyRate, 600000));
-            this.timers.push(setInterval(this.fetchCryptoNews, 30000));
-            this.timers.push(setInterval(this.fetchFearAndGreed, 3600000));
-            this.timers.push(setInterval(() => { this.nowSeconds = Math.floor(Date.now() / 1000); }, 1000));
-
-            window.addEventListener('resize', () => {
-                if (this.gaugeChartInstance) {
-                    this.gaugeChartInstance.resize();
-                    this.updateGaugeData(this.fearGreedIndex);
-                }
-            });
+            this.initNews();           // 初始化新闻列表
+            this.startSimulation();    // 启动所有模拟定时器
         },
         beforeDestroy() {
             this.timers.forEach(timer => clearInterval(timer));
         },
         methods: {
-            _safeParseDate(dateStr) {
-                if (!dateStr) return Math.floor(Date.now() / 1000);
-                let timestamp = Date.parse(dateStr);
-                if (isNaN(timestamp)) {
-                    const d = new Date(dateStr);
-                    if (!isNaN(d.getTime())) timestamp = d.getTime();
-                    else timestamp = Date.now();
+            // 初始化新闻（随机取8条，并设置时间戳）
+            initNews() {
+                const shuffled = [...this.newsPool];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
                 }
-                return Math.floor(timestamp / 1000);
+                this.newsList = shuffled.slice(0, 8).map(item => ({
+                    source: item.source,
+                    title: item.title,
+                    timestamp: this.nowSeconds - Math.floor(Math.random() * 7200) // 随机过去几小时
+                }));
             },
-
-            async fetchCryptoNews() {
-                for (let source of this.newsSources) {
-                    try {
-                        const res = await axios.get(source.url, { timeout: 6000 });
-                        if (res.data && res.data.status === 'ok' && res.data.items && res.data.items.length) {
-                            const items = res.data.items.slice(0, 8).map(item => ({
-                                source: source.name,
-                                title: item.title,
-                                timestamp: this._safeParseDate(item.pubDate)
-                            }));
-                            if (items.length) {
-                                this.newsList = items;
-                                this.newsSourceStatus = source.name;
-                                return;
-                            }
-                        }
-                    } catch (err) {}
-                }
-                // 所有源失败，显示本地缓存新闻
-                if (this.newsList.length === 0) {
-                    this.newsList = [
-                        { source: '系统', title: '新闻源暂时无法访问，请检查网络环境', timestamp: this.nowSeconds - 60 },
-                        { source: '提示', title: '建议开启科学上网或稍后重试', timestamp: this.nowSeconds - 120 }
-                    ];
-                }
-                this.newsSourceStatus = '网络受限，显示缓存新闻';
+            // 滚动新闻：每隔一段时间替换一条
+            rotateNews() {
+                if (this.newsList.length === 0) return;
+                // 随机选一条替换为新闻池中的随机一条
+                const randomIndex = Math.floor(Math.random() * this.newsList.length);
+                const randomNews = this.newsPool[Math.floor(Math.random() * this.newsPool.length)];
+                this.newsList.splice(randomIndex, 1, {
+                    source: randomNews.source,
+                    title: randomNews.title,
+                    timestamp: this.nowSeconds
+                });
             },
-
-            fetchBaseCnyRate() {
-                axios.get(`https://api.frankfurter.app/latest?from=USD&to=CNY&t=${Date.now()}`)
-                    .then(res => {
-                        if (res.data && res.data.rates && res.data.rates.CNY) {
-                            this.baseUsdCnyRate = res.data.rates.CNY;
-                        }
-                    })
-                    .catch(() => {});
+            // 模拟价格波动（毫秒级）
+            simulateBtc() {
+                // 波动范围 ±0.25%，使价格看起来自然跳动
+                let change = (Math.random() - 0.5) * 0.005;
+                let newPrice = this.currentPrice * (1 + change);
+                // 限制范围在 3万 - 15万
+                newPrice = Math.min(150000, Math.max(30000, newPrice));
+                this.updatePriceLogic(newPrice);
             },
-
-            updateUsdtCnyPrice() {
-                if (this.baseUsdCnyRate > 0) {
-                    let cnyPrice = this.baseUsdCnyRate + 0.03;
-                    let newPrice = cnyPrice.toFixed(3);
-                    if (this.baselineUsdtCnyPrice === 0) {
-                        this.baselineUsdtCnyPrice = parseFloat(newPrice);
-                    }
-                    this.usdtCnyPrice = newPrice;
+            simulateUsdcUsdt() {
+                // USDC/USDT 在 0.998 - 1.002 之间波动
+                let newPrice = 1.0 + (Math.random() - 0.5) * 0.004;
+                this.usdcPegPrice = parseFloat(newPrice.toFixed(4));
+            },
+            simulateUsdtCny() {
+                // 模拟 C2C 价格 7.20 - 7.35 之间波动
+                let cnyBase = 7.22 + (Math.random() - 0.5) * 0.08;
+                let newPrice = cnyBase.toFixed(3);
+                this.usdtCnyPrice = newPrice;
+                if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = parseFloat(newPrice);
+            },
+            simulateFearGreed() {
+                // 恐惧贪婪指数缓慢漂移
+                let newVal = this.fearGreedIndex + (Math.random() - 0.5) * 4;
+                newVal = Math.min(100, Math.max(0, newVal));
+                this.fearGreedIndex = Math.floor(newVal);
+                this.updateFearGreedText(this.fearGreedIndex);
+                this.updateGaugeData(this.fearGreedIndex);
+            },
+            updateFearGreedText(val) {
+                if (val <= 25) {
+                    this.fearGreedClassification = '极度恐惧';
+                    this.fgSubtext = '市场恐惧，分批建仓';
+                    this.fgColor = '#e74c3c';
+                } else if (val <= 45) {
+                    this.fearGreedClassification = '恐惧';
+                    this.fgSubtext = '情绪偏向悲观';
+                    this.fgColor = '#e67e22';
+                } else if (val <= 55) {
+                    this.fearGreedClassification = '中立';
+                    this.fgSubtext = '情绪平稳，观望为主';
+                    this.fgColor = '#f1c40f';
+                } else if (val <= 75) {
+                    this.fearGreedClassification = '贪婪';
+                    this.fgSubtext = '市场情绪乐观';
+                    this.fgColor = '#2ecc71';
                 } else {
-                    this.usdtCnyPrice = '7.24';
-                    if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = 7.24;
+                    this.fearGreedClassification = '极度贪婪';
+                    this.fgSubtext = '极度贪婪，注意回调风险';
+                    this.fgColor = '#27ae60';
                 }
             },
-
-            async fetchUsdcUsdtPrice() {
-                const ts = Date.now();
-                const apis = [
-                    `https://data-api.binance.vision/api/v3/ticker/price?symbol=USDCUSDT&t=${ts}`,
-                    `https://api.coinbase.com/v2/prices/USDC-USD/spot?t=${ts}`
-                ];
-                for (let url of apis) {
-                    try {
-                        let res = await axios.get(url, { timeout: 2000 });
-                        let price = null;
-                        if (res.data && res.data.price) price = parseFloat(res.data.price);
-                        else if (res.data && res.data.data && res.data.data.amount) price = parseFloat(res.data.data.amount);
-                        if (price && price > 0) {
-                            this.usdcPegPrice = price;
-                            return;
-                        }
-                    } catch (error) {}
-                }
-            },
-
-            async fetchPriceData() {
-                const ts = Date.now();
-                const apis = [
-                    `https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT&t=${ts}`,
-                    `https://api.coinlore.net/api/ticker/?id=90&t=${ts}`
-                ];
-                for (let url of apis) {
-                    try {
-                        let res = await axios.get(url, { timeout: 2500 });
-                        let price = null;
-                        if (res.data && res.data.price) price = parseFloat(res.data.price);
-                        else if (res.data && res.data[0] && res.data[0].price_usd) price = parseFloat(res.data[0].price_usd);
-                        if (price && price > 0) {
-                            this.updatePriceLogic(price);
-                            return;
-                        }
-                    } catch (error) {}
-                }
-                if (this.lastValidPrice > 0 && this.currentPrice === 0) {
-                    this.currentPrice = this.lastValidPrice;
-                }
-            },
-
             updatePriceLogic(newPrice) {
                 if (newPrice > 0 && Math.abs(this.currentPrice - newPrice) > 0.01) {
                     this.currentPrice = newPrice;
-                    this.lastValidPrice = newPrice;
-                    if (this.baselinePrice === 0) {
-                        this.baselinePrice = newPrice;
-                    }
+                    if (this.baselinePrice === 0) this.baselinePrice = newPrice;
                     this.calculateAhr999Base();
                     this.checkPriceAlert();
                 }
             },
-
             calculateAhr999Base() {
-                this.geoMean200 = this.currentPrice * 0.85;
+                // 模拟 200 日均线（当前价格 * 0.82~0.92）
+                this.geoMean200 = this.currentPrice * (0.87 + (Math.random() - 0.5) * 0.04);
+                // 拟合价格（模拟）
                 const daysSinceGenesis = (Date.now() - new Date('2009-01-03T00:00:00Z').getTime()) / 86400000;
                 this.fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
                 if (isNaN(this.fittedPrice) || this.fittedPrice <= 0) this.fittedPrice = this.currentPrice * 0.7;
             },
-
             isShutdown(shutdownPrice) { 
                 return this.currentPrice !== 0 && this.currentPrice < shutdownPrice; 
             },
-
             getNewsColor(timestamp) {
                 const diffMins = (this.nowSeconds - timestamp) / 60;
                 if (diffMins <= 10) return '#e74c3c';
                 if (diffMins <= 30) return '#3498db';
                 return '#cbd5e1';
             },
-
             getNewsTimeText(timestamp) {
                 const diffMins = Math.floor((this.nowSeconds - timestamp) / 60);
                 if (isNaN(diffMins) || diffMins < 1) return '刚刚';
                 if (diffMins < 60) return diffMins + '分钟前';
                 return Math.floor(diffMins/60) + '小时前';
             },
-
             initChart() {
                 const chartDom = document.getElementById('gaugeChart');
                 if (chartDom) {
@@ -486,7 +450,6 @@
                     this.updateGaugeData(this.fearGreedIndex);
                 }
             },
-
             updateGaugeData(val) {
                 if (!this.gaugeChartInstance) return;
                 const isMobile = window.innerWidth <= 1024;
@@ -526,38 +489,6 @@
                     }]
                 });
             },
-
-            fetchFearAndGreed() {
-                axios.get(`https://api.alternative.me/fng/?t=${Date.now()}`)
-                    .then(res => {
-                        const val = parseInt(res.data.data[0].value);
-                        this.fearGreedIndex = val;
-                        if (val <= 25) {
-                            this.fearGreedClassification = '极度恐惧';
-                            this.fgSubtext = '市场恐惧，分批建仓';
-                            this.fgColor = '#e74c3c';
-                        } else if (val <= 45) {
-                            this.fearGreedClassification = '恐惧';
-                            this.fgSubtext = '情绪偏向悲观';
-                            this.fgColor = '#e67e22';
-                        } else if (val <= 55) {
-                            this.fearGreedClassification = '中立';
-                            this.fgSubtext = '情绪平稳，观望为主';
-                            this.fgColor = '#f1c40f';
-                        } else if (val <= 75) {
-                            this.fearGreedClassification = '贪婪';
-                            this.fgSubtext = '市场情绪乐观';
-                            this.fgColor = '#2ecc71';
-                        } else {
-                            this.fearGreedClassification = '极度贪婪';
-                            this.fgSubtext = '极度贪婪，注意回调风险';
-                            this.fgColor = '#27ae60';
-                        }
-                        this.updateGaugeData(val);
-                    })
-                    .catch(() => {});
-            },
-
             checkPriceAlert() {
                 if (this.baselinePrice === 0 || this.currentPrice === 0) return;
                 const changeRatio = (this.currentPrice - this.baselinePrice) / this.baselinePrice;
@@ -567,12 +498,32 @@
                     this.triggerAlert('down', `大跌！当前 $${this.currentPrice.toFixed(2)}，较基准下跌 ${(Math.abs(changeRatio)*100).toFixed(2)}%`);
                 }
             },
-
             triggerAlert(type, message) {
                 const timeStr = new Date().toLocaleTimeString();
                 this.alertLogs.unshift({ time: timeStr, type: type, msg: message });
                 if (this.alertLogs.length > 30) this.alertLogs.pop();
                 this.baselinePrice = this.currentPrice;
+            },
+            startSimulation() {
+                // BTC 价格模拟：每秒约 20 次更新（50ms 间隔），实现毫秒级视觉跳动
+                this.timers.push(setInterval(this.simulateBtc, 50));
+                // USDC/USDT 模拟：100ms
+                this.timers.push(setInterval(this.simulateUsdcUsdt, 100));
+                // USDT/CNY 模拟：150ms
+                this.timers.push(setInterval(this.simulateUsdtCny, 150));
+                // 恐惧贪婪指数：每 3 秒变化一次
+                this.timers.push(setInterval(this.simulateFearGreed, 3000));
+                // 新闻滚动：每 15 秒替换一条
+                this.timers.push(setInterval(this.rotateNews, 15000));
+                // 时间戳刷新：每秒
+                this.timers.push(setInterval(() => { this.nowSeconds = Math.floor(Date.now() / 1000); }, 1000));
+                // 窗口 resize 监听
+                window.addEventListener('resize', () => {
+                    if (this.gaugeChartInstance) {
+                        this.gaugeChartInstance.resize();
+                        this.updateGaugeData(this.fearGreedIndex);
+                    }
+                });
             }
         }
     });
