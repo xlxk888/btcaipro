@@ -32,8 +32,8 @@
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #0f1625; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
         
-        /* 🔥 强制以图片形式渲染，免疫任何浏览器Bug */
-        .crypto-logo { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        /* 🔥 Logo 统一样式 */
+        .crypto-logo { width: 32px; height: 32px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 50%; }
         
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); transition: width 0.5s; }
@@ -82,7 +82,10 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                        <img class="crypto-logo" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23f7931a'/%3E%3Cpath fill='%23fff' d='M21.78 13.9c.28-1.85-.97-2.85-2.65-3.23l.63-2.33-1.6-.4-.63 2.3c-.4-.1-.82-.2-1.23-.3l.62-2.3-1.58-.4-.62 2.3c-.32 0-.64-.1-.95-.2l-2.18-.55-.42 1.68s1.17.3 1.15.28c.64.16.76.68.74 1.07l-.74 2.65c.04.02.1.05.18.06-.06-.02-.12-.03-.18-.04l-.98 3.52c-.1.3-.43.5-.9.3.02.03-1.15-.3-1.15-.3l-.78 1.83 2.05.5c.4.1.8.2 1.2.3l-.64 2.5 1.58.4.64-2.48c.43.12.84.23 1.25.33l-.63 2.5 1.6.4.65-2.58c2.4.45 4.2.27 4.95-1.92.6-1.63.02-2.57-1.13-3.18.82-.2 1.44-.73 1.58-1.9zm-3.18 4.58c-.42 1.76-3.4.8-4.36.56l.8-3.3c.95.24 3.98.88 3.56 2.74zm.4-4.82c-.38 1.48-2.63.7-3.38.52l.73-2.92c.75.18 3.03.48 2.65 2.4z'/%3E%3C/svg%3E" alt="BTC">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="crypto-logo">
+                            <circle cx="16" cy="16" r="16" fill="#f7931a"/>
+                            <path fill="#fff" d="M21.78 13.9c.28-1.85-.97-2.85-2.65-3.23l.63-2.33-1.6-.4-.63 2.3c-.4-.1-.82-.2-1.23-.3l.62-2.3-1.58-.4-.62 2.3c-.32 0-.64-.1-.95-.2l-2.18-.55-.42 1.68s1.17.3 1.15.28c.64.16.76.68.74 1.07l-.74 2.65c.04.02.1.05.18.06-.06-.02-.12-.03-.18-.04l-.98 3.52c-.1.3-.43.5-.9.3.02.03-1.15-.3-1.15-.3l-.78 1.83 2.05.5c.4.1.8.2 1.2.3l-.64 2.5 1.58.4.64-2.48c.43.12.84.23 1.25.33l-.63 2.5 1.6.4.65-2.58c2.4.45 4.2.27 4.95-1.92.6-1.63.02-2.57-1.13-3.18.82-.2 1.44-.73 1.58-1.9zm-3.18 4.58c-.42 1.76-3.4.8-4.36.56l.8-3.3c.95.24 3.98.88 3.56 2.74zm.4-4.82c-.38 1.48-2.63.7-3.38.52l.73-2.92c.75.18 3.03.48 2.65 2.4z"/>
+                        </svg>
                         <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12; letter-spacing: 1px;">BTC</span>
                     </div>
                     <div class="btc-price-text" :class="priceColor">
@@ -108,7 +111,10 @@
             <div style="margin-top: 5px;">
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <img class="crypto-logo" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2326a17b'/%3E%3Cpath fill='%23fff' d='M17.922 13.583v7.034h-3.844v-7.034c-3.535-.224-6.304-.98-6.304-1.883 0-.901 2.77-1.66 6.304-1.883v-2.24h-6.82V4.544h17.485v3.033h-6.82v2.24c3.535.224 6.304.981 6.304 1.883 0 .902-2.77 1.66-6.304 1.883zM16 14.373c2.25 0 4.295-.316 5.567-.847-1.272-.53-3.317-.847-5.567-.847-2.25 0-4.295.317-5.567.847 1.272.53 3.317.847 5.567.847z'/%3E%3C/svg%3E" alt="USDT">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="crypto-logo">
+                            <circle cx="16" cy="16" r="16" fill="#26a17b"/>
+                            <path fill="#fff" fill-rule="evenodd" clip-rule="evenodd" d="M17.922 13.583v7.034h-3.844v-7.034c-3.535-.224-6.304-.98-6.304-1.883 0-.901 2.77-1.66 6.304-1.883v-2.24h-6.82V4.544h17.485v3.033h-6.82v2.24c3.535.224 6.304.981 6.304 1.883 0 .902-2.77 1.66-6.304 1.883zM16 14.373c2.25 0 4.295-.316 5.567-.847-1.272-.53-3.317-.847-5.567-.847-2.25 0-4.295.317-5.567.847 1.272.53 3.317.847 5.567.847z"/>
+                        </svg>
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
                     <div style="text-align: right;">
@@ -118,12 +124,15 @@
                 </div>
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <img class="crypto-logo" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%232775ca'/%3E%3Cpath fill='%23fff' d='M21.575 14.12c-.225-1.928-1.574-3.134-3.81-3.238v-2.55h-2.585v2.536c-1.942.128-3.414 1.218-3.447 2.992v.03c.015 1.588 1.138 2.308 2.89 2.76 1.483.376 1.964.675 1.964 1.244 0 .598-.614 1.108-1.633 1.108-1.423 0-2.187-.66-2.546-1.78l-2.383.472c.465 1.895 1.857 2.955 4.564 3.12v2.608h2.583V20.81c2.195-.12 3.698-1.233 3.73-3.15v-.03c-.015-1.662-1.077-2.427-3.264-2.92-1.35-.315-1.843-.63-1.843-1.183 0-.585.57-1.11 1.574-1.11 1.258 0 1.992.54 2.338 1.574l2.28-.47zM16 26.5A10.5 10.5 0 1116 5.5a10.5 10.5 0 010 21zm0-2.333a8.167 8.167 0 100-16.334 8.167 8.167 0 000 16.334z'/%3E%3C/svg%3E" alt="USDC">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="crypto-logo">
+                            <circle cx="16" cy="16" r="16" fill="#2775ca"/>
+                            <path fill="#fff" d="M21.575 14.12c-.225-1.928-1.574-3.134-3.81-3.238v-2.55h-2.585v2.536c-1.942.128-3.414 1.218-3.447 2.992v.03c.015 1.588 1.138 2.308 2.89 2.76 1.483.376 1.964.675 1.964 1.244 0 .598-.614 1.108-1.633 1.108-1.423 0-2.187-.66-2.546-1.78l-2.383.472c.465 1.895 1.857 2.955 4.564 3.12v2.608h2.583V20.81c2.195-.12 3.698-1.233 3.73-3.15v-.03c-.015-1.662-1.077-2.427-3.264-2.92-1.35-.315-1.843-.63-1.843-1.183 0-.585.57-1.11 1.574-1.11 1.258 0 1.992.54 2.338 1.574l2.28-.47zM16 26.5A10.5 10.5 0 1116 5.5a10.5 10.5 0 010 21zm0-2.333a8.167 8.167 0 100-16.334 8.167 8.167 0 000 16.334z"/>
+                        </svg>
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
                     <div style="text-align: right;">
                         <div class="big-number" style="font-size: 1.5rem; margin:0;" :class="usdcColor">$ {{ usdcPegPrice.toFixed(4) }}</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">毫秒级实时变动价</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">双通道毫秒级锚定</div>
                     </div>
                 </div>
             </div>
@@ -230,7 +239,7 @@
             currentPrice: 0, 
             baselinePrice: 0, 
             usdcPegPrice: 1.0000, 
-            usdtCnyPrice: '6.94', // 🔥 绝对锁死为 6.94
+            usdtCnyPrice: '6.94', 
             geoMean200: 0, 
             fittedPrice: 0, 
             alertLogs: [], 
@@ -258,67 +267,4 @@
                 return '2028-04-12';
             },
             halvingDays() { 
-                const targetDate = new Date("2028-04-12T00:00:00+08:00").getTime();
-                const now = Date.now();
-                return Math.max(0, Math.floor((targetDate - now) / (1000 * 60 * 60 * 24))); 
-            },
-            calculatedBlock() {
-                return this.targetBlock - (this.halvingDays * 144);
-            },
-            halvingProgress() {
-                const current = this.calculatedBlock;
-                return Math.min(Math.max(((current - this.startBlock) / (this.targetBlock - this.startBlock)) * 100, 0), 100).toFixed(2);
-            }
-        },
-        mounted() {
-            this.initChart(); 
-            this.fetchFearAndGreed(); 
-            
-            this.fetchPriceData();
-            // 🔥 重启被我误删的稳定币获取引擎！
-            this.fetchStablecoinPriceData(); 
-
-            setInterval(this.fetchPriceData, 5000); 
-            // 🔥 每2.5秒更新 USDC，实现毫秒级跳动体验
-            setInterval(this.fetchStablecoinPriceData, 2500); 
-
-            this.fetchCryptoNews();
-            
-            setInterval(this.fetchFearAndGreed, 3600000); 
-            setInterval(this.fetchCryptoNews, 60000); 
-            setInterval(() => { this.nowSeconds = Math.floor(Date.now() / 1000); }, 1000);
-            
-            window.addEventListener('resize', () => { if(this.gaugeChartInstance) this.gaugeChartInstance.resize(); this.updateGaugeData(this.fearGreedIndex); });
-        },
-        methods: {
-            isShutdown(shutdownPrice) { 
-                return this.currentPrice !== 0 && this.currentPrice < shutdownPrice; 
-            },
-            getNewsColor(timestamp) {
-                const diffMins = (this.nowSeconds - timestamp) / 60;
-                if (diffMins <= 10) return '#e74c3c'; if (diffMins <= 30) return '#3498db'; return '#cbd5e1';                     
-            },
-            getNewsTimeText(timestamp) {
-                const diffMins = Math.floor((this.nowSeconds - timestamp) / 60);
-                if(diffMins < 1 || isNaN(diffMins)) return '刚刚';
-                if(diffMins < 60) return diffMins + '分钟前';
-                return Math.floor(diffMins/60) + '小时前';
-            },
-
-            async fetchCryptoNews() {
-                this.newsList = [{ source: 'System', title: '正在连接全球资讯节点...', timestamp: this.nowSeconds }];
-                
-                try {
-                    let res = await axios.get('https://api.allorigins.win/raw?url=https://www.theblockbeats.info/rss.xml', { timeout: 3000 });
-                    this.parseAndSetNews(res.data, 'BlockBeats');
-                } catch(e1) {
-                    try {
-                        let res2 = await axios.get('https://api.rss2json.com/v1/api.json?rss_url=https://www.theblockbeats.info/rss.xml', { timeout: 3000 });
-                        if(res2.data && res2.data.items) {
-                            this.newsList = res2.data.items.slice(0, 8).map(item => ({
-                                source: 'BlockBeats',
-                                title: item.title,
-                                timestamp: Math.floor(new Date(item.pubDate.replace(/-/g, '/')).getTime() / 1000) || this.nowSeconds
-                            }));
-                        } else { throw new Error(); }
-                    } catch
+                const targetDate = new Date("2028-04-12T00:00:00
