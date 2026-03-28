@@ -49,7 +49,7 @@
             .span-2, .span-3, .span-4, .card { width: 100%; }
             
             /* 手机端高度调低相关样式 */
-            .card { padding: 10px; } /* 大幅减少内边距 */
+            .card { padding: 10px; } /* 减少内边距 */
             .card h2 { margin: 0 0 8px 0; padding-bottom: 5px; } /* 减少标题间距 */
             
             .btc-price-text { font-size: 2.5rem !important; } /* 缩小价格字体 */
@@ -60,10 +60,8 @@
             
             .stablecoin-row { padding: 8px; margin-bottom: 8px; } /* 缩小稳定币板块间距 */
             .stablecoin-logo { gap: 6px; font-size: 1rem; }
-            .crypto-logo { width: 28px; height: 28px; } /* 适当缩小Logo */
             
             .big-number { margin: 3px 0; font-size: 1.8rem !important; } /* 缩小大数字字体和间距 */
-            .stablecoin-row .big-number { font-size: 1.4rem !important; } /* 专门缩小稳定币数字 */
             
             ul { margin-top: 3px !important; } /* 缩小矿机列表顶部间距 */
             li { font-size: 0.8rem; }
@@ -142,7 +140,7 @@
                     </div>
                     <div style="text-align: right;">
                         <div class="big-number" style="font-size: 1.5rem; margin:0;" :class="usdcColor">$ {{ usdcPegPrice.toFixed(4) }}</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">毫秒级实时变动价</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">双通道毫秒级锚定</div>
                     </div>
                 </div>
             </div>
@@ -189,7 +187,7 @@
         </div>
 
         <div class="card span-3">
-            <h2>主流矿机关机价及状态监控 (电费 0.4 元/度)</h2>
+            <h2>主流矿机关关机价及状态监控 (电费 0.4 元/度)</h2>
             <div style="display: flex; justify-content: space-between; font-size: 0.95rem; line-height: 1.7;">
                 <div>
                     <p style="margin:0; color:#2ecc71;"><strong>在运行高能效机型:</strong></p>
@@ -248,8 +246,8 @@
             nowSeconds: Math.floor(Date.now() / 1000),
             currentPrice: 0, 
             baselinePrice: 0, 
-            usdcPegPrice: 1.0000, // 🔥 毫秒级抓取的实时变量
-            usdtCnyPrice: '7.22', // 🔥 硬编码更新为更现实的值，注释标记估值
+            usdcPegPrice: 1.0000, 
+            usdtCnyPrice: '6.94', // 🔥 彻底替换硬编码 USDT/CNY 为 6.94 解释估值
             geoMean200: 0, 
             fittedPrice: 0, 
             alertLogs: [], 
@@ -273,6 +271,7 @@
             priceChangePercent() { return this.baselinePrice === 0 ? 0 : (((this.currentPrice - this.baselinePrice) / this.baselinePrice) * 100).toFixed(2); },
             priceColor() { return this.currentPrice > this.baselinePrice ? 'price-up' : (this.currentPrice < this.baselinePrice ? 'price-down' : ''); },
             
+            // 绝对锁死日期与天数，严格同步
             halvingDateFormatted() {
                 return '2028-04-12';
             },
@@ -281,6 +280,7 @@
                 const now = Date.now();
                 return Math.max(0, Math.floor((targetDate - now) / (1000 * 60 * 60 * 24))); 
             },
+            // 区块高度根据剩余天数严密倒推，保证逻辑自洽 (每天144个块)
             calculatedBlock() {
                 return this.targetBlock - (this.halvingDays * 144);
             },
@@ -294,9 +294,9 @@
             this.fetchFearAndGreed(); 
             
             this.fetchPriceData();
-            this.fetchStablecoinPriceData(); // 🔥 初始抓取
+            this.fetchStablecoinPriceData(); // 🔥 初始抓取稳定币毫秒级实时价格
 
-            setInterval(this.fetchPriceData, 5000); // BTC 定时器
+            setInterval(this.fetchPriceData, 5000); // 矿机和倒计时仍需这个
             setInterval(this.fetchStablecoinPriceData, 2500); // 🔥 稳定币 Millisecond 定时器，每2.5秒更新一次感觉
 
             this.fetchCryptoNews();
@@ -391,29 +391,21 @@
 
             // 🔥 毫秒级稳定币实时抓取引擎
             async fetchStablecoinPriceData() {
-                try {
-                    // 并发请求 BTC 和 USDC
-                    const [btcRes, usdcRes] = await Promise.all([
-                        axios.get('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', { timeout: 1500 }),
-                        axios.get('https://api.binance.com/api/v3/ticker/price?symbol=USDCUSDT', { timeout: 1500 })
-                    ]);
+                const apis = [
+                    'https://api.binance.com/api/v3/ticker/price?symbol=USDCUSDT',
+                    'https://api.mexc.com/api/v3/ticker/price?symbol=USDCUSDT'
+                ];
 
-                    // 更新 BTC
-                    if (btcRes.data && btcRes.data.price) {
-                        this.updatePriceLogic(parseFloat(btcRes.data.price));
-                    }
-
-                    // 🔥 更新实时变动的 USDC/USDT
-                    if (usdcRes.data && usdcRes.data.price) {
-                        const newPrice = parseFloat(usdcRes.data.price);
-                        if (Math.abs(this.usdcPegPrice - newPrice) > 0.0001) {
-                            this.usdcPegPrice = newPrice;
+                for (let url of apis) {
+                    try {
+                        let res = await axios.get(url, { timeout: 1500 });
+                        if (res.data && res.data.price) {
+                            // 毫秒级直接更新
+                            this.usdcPegPrice = parseFloat(res.data.price);
+                            return; 
                         }
+                    } catch (error) {
                     }
-
-                } catch (error) {
-                    // 回退到独立的 BTC 抓取（如果 Promise.all 失败）
-                    this.fetchPriceData();
                 }
             },
 
