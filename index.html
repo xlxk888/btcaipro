@@ -32,7 +32,8 @@
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #0f1625; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
         
-        .crypto-logo { width: 32px; height: 32px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 50%; display: block; border: none; }
+        /* 🔥 移除 img 限制，改为适用 SVG 的样式 */
+        .crypto-logo { width: 32px; height: 32px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 50%; display: block; }
         
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); transition: width 0.5s; }
@@ -77,7 +78,10 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                        <img class="crypto-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNGNzkzMUEiLz48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMjEuNzggMTMuOWMuMjgtMS44NS0uOTctMi44NS0yLjY1LTMuMjNsLjYzLTIuMzMtMS42LS40LS42MyAyLjNjLS40LS4xLS44Mi0uMi0xLjIzLS4zbC42Mi0yLjMtMS41OC0uNC0uNjIgMi4zYy0uMzIgMC0uNjQtLjEtLjk1LS4ybC0yLjE4LS41NS0uNDIgMS42OHMxLjE3LjMgMS4xNS4yOGMuNjQuMTYuNzYuNjguNzQgMS4wN2wtLjc0IDIuNjVjLjA0LjAyLjEuMDUuMTguMDYtLjA2LS4wMi0uMTItLjAzLS4xOC0uMDRsLS45OCAzLjUyYy0uMS4zLS40My41LS45LjMuMDItLjE1LS4zLTEuMTUtLjMtMS4xNWwtLjc4IDEuODMgMi4wNS41Yy40LjEuOC4yIDEuMi4zbC0uNjQgMi41IDEuNTguNC42NC0yLjQ4Yy40My4xMi44NC4yMyAxLjI1LjMzbC0uNjMgMi41IDEuNi40LjY1LTIuNThjMi40LjQ1IDQuMi4yNyA0Ljk1LTEuOTIuNi0xLjYzLjAyLTIuNTctMS4xMy0zLjE4LjgyLS4yIDEuNDQtLjczIDEuNTgtMS45em0tMy4xOCA0LjU4Yy0uNDIgMS43Ni0zLjQuOC00LjM2LjU2bC44LTMuM2MuOTUuMjQgMy45OC44OCAzLjU2IDIuNzR6bS40LTQuODJjLS4zOCAxLjQ4LTIuNjMuNy0zLjM4LjUybC43My0yLjkyYy43NS4xOCAzLjAzLjQ4IDIuNjUgMi40eiIvPjwvc3ZnPg==" alt="BTC">
+                        <svg class="crypto-logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="16" cy="16" r="16" fill="#F7931A"/>
+                            <path fill="#FFF" d="M21.78 13.9c.28-1.85-.97-2.85-2.65-3.23l.63-2.33-1.6-.4-.63 2.3c-.4-.1-.82-.2-1.23-.3l.62-2.3-1.58-.4-.62 2.3c-.32 0-.64-.1-.95-.2l-2.18-.55-.42 1.68s1.17.3 1.15.28c.64.16.76.68.74 1.07l-.74 2.65c.04.02.1.05.18.06-.06-.02-.12-.03-.18-.04l-.98 3.52c-.1.3-.43.5-.9.3.02-.15-.3-1.15-.3-1.15l-.78 1.83 2.05.5c.4.1.8.2 1.2.3l-.64 2.5 1.58.4.64-2.48c.43.12.84.23 1.25.33l-.63 2.5 1.6.4.65-2.58c2.4.45 4.2.27 4.95-1.92.6-1.63.02-2.57-1.13-3.18.82-.2 1.44-.73 1.58-1.9zm-3.18 4.58c-.42 1.76-3.4.8-4.36.56l.8-3.3c.95.24 3.98.88 3.56 2.74zm.4-4.82c-.38 1.48-2.63.7-3.38.52l.73-2.92c.75.18 3.03.48 2.65 2.4z"/>
+                        </svg>
                         <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12; letter-spacing: 1px;">BTC</span>
                     </div>
                     <div class="btc-price-text" :class="priceColor">
@@ -103,17 +107,23 @@
             <div style="margin-top: 5px;">
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <img class="crypto-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMyNkExN0IiLz48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMTcuOTIyIDEzLjU4M3Y3LjAzNGgtMy44NDR2LTcuMDM0Yy0zLjUzNS0uMjI0LTYuMzA0LS45OC02LjMwNC0xLjg4MyAwLS45MDEgMi43Ny0xLjY2IDYuMzA0LTEuODgzdi0yLjI0aC02LjgyVjQuNTQ0aDE3LjQ4NXYzLjAzM2gtNi44MnYyLjI0YzMuNTM1LjIyNCA2LjMwNC45ODEgNi4zMDQgMS44ODMgMCAuOTAyLTIuNzcgMS42Ni02LjMwNCAxLjg4M3oiLz48L3N2Zz4=" alt="USDT">
+                        <svg class="crypto-logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="16" cy="16" r="16" fill="#26A17B"/>
+                            <path fill="#FFF" d="M17.922 13.583v7.034h-3.844v-7.034c-3.535-.224-6.304-.98-6.304-1.883 0-.901 2.77-1.66 6.304-1.883v-2.24h-6.82V4.544h17.485v3.033h-6.82v2.24c3.535.224 6.304.981 6.304 1.883 0 .902-2.77 1.66-6.304 1.883z"/>
+                        </svg>
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
                     <div style="text-align: right;">
                         <div class="big-number" style="font-size: 1.5rem; margin:0;" :class="usdtColor">¥ {{ usdtCnyPrice }}</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">(实时对标 C2C 购买价)</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">(实时动态 C2C 估算)</div>
                     </div>
                 </div>
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <img class="crypto-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMyNzc1Q0EiLz48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMjEuNTc1IDE0LjEyYy0uMjI1LTEuOTI4LTEuNTc0LTMuMTM0LTMuODEtMy4yMzh2LTIuNTVoLTIuNTg1djIuNTM2Yy0xLjk0Mi4xMjgtMy40MTQgMS4yMTgtMy40NDcgMi45OTJ2LjAzYy4wMTUgMS41ODggMS4xMzggMi4zMDggMi44OSAyLjc2IDEuNDgzLjM3NiAxLjk2NC42NzUgMS45NjQgMS4yNDQgMCAuNTk4LS42MTQgMS4xMDgtMS42MzMgMS4xMDgtMS40MjMgMC0yLjE4Ny0uNjYtMi41NDYtMS43OGwtMi4zODMuNDcyYy40NjUgMS44OTUgMS44NTcgMi45NTUgNC41NjQgMy4xMnYyLjYwOGgyLjU4M3YtMi41OWMyLjE5NS0uMTIgMy42OTgtMS4yMzMgMy43My0zLjE1di0uMDNjLS4wMTUtMS42NjItMS4wNzctMi40MjctMy4yNjQtMi45Mi0xLjM1LS4zMTUtMS44NDMtLjYzLTEuODQzLTEuMTgzIDAtLjU4NS41Ny0xLjExIDEuNTc0LTEuMTEgMS4yNTggMCAxLjk5Mi41NCAyLjMzOCAxLjU3NGwyLjI4LS40N3oiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMC41IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkYiIHN0cm9rZS13aWR0aD0iMi4zMzMiLz48L3N2Zz4=" alt="USDC">
+                        <svg class="crypto-logo" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="16" cy="16" r="16" fill="#2775CA"/>
+                            <path fill="#FFF" d="M21.575 14.12c-.225-1.928-1.574-3.134-3.81-3.238v-2.55h-2.585v2.536c-1.942.128-3.414 1.218-3.447 2.992v.03c.015 1.588 1.138 2.308 2.89 2.76 1.483.376 1.964.675 1.964 1.244 0 .598-.614 1.108-1.633 1.108-1.423 0-2.187-.66-2.546-1.78l-2.383.472c.465 1.895 1.857 2.955 4.564 3.12v2.608h2.583v-2.59c2.195-.12 3.698-1.233 3.73-3.15v-.03c-.015-1.662-1.077-2.427-3.264-2.92-1.35-.315-1.843-.63-1.843-1.183 0-.585.57-1.11 1.574-1.11 1.258 0 1.992.54 2.338 1.574l2.28-.47z"/>
+                        </svg>
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
                     <div style="text-align: right;">
@@ -198,6 +208,22 @@
             <div class="progress-bar-bg"><div class="progress-bar-fill" :style="{ width: halvingProgress + '%' }"></div></div>
         </div>
     </div>
+    
+    <div class="ad-banner-bottom">
+        <div style="margin-bottom: 15px; color: #f1c40f; font-weight: bold; font-size: 1rem; background-color: rgba(241, 196, 15, 0.1); padding: 8px; border-radius: 5px;">
+            ⚠️ 提示：访问以下网页链接及下载安装，请务必全程开启科学上网环境（VPN）！
+        </div>
+        <div style="margin-bottom: 10px;">
+            1. Bitget Wallet Card 免费注册，零手续费，注册开通返5美金： 
+            <a href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank">🔗 点击专属链接注册</a>
+        </div>
+        <div>
+            2. 请使用您的浏览器访问以下链接，下载币安 App。在注册页面输入我的邀请码可得超级返佣，加入全球最大的加密货币交易平台。<br>
+            <a href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">▶ Android 安装包</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">▶ iOS 下载指南</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            邀请码：<strong style="color:#2ecc71; font-size: 1.1rem;">23017017</strong>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -257,8 +283,6 @@
             this.fetchCryptoNews();
             
             this.startPolling();
-            
-            // 确保页面一打开就立刻拉取 AHR999 需要的数据
             setTimeout(() => this.fetchAhr999Data(), 1000); 
 
             setInterval(this.fetchBaseCnyRate, 600000); 
@@ -277,26 +301,20 @@
             });
         },
         methods: {
-            // 🔥 全新重构的智能防墙引擎：确保免 VPN 下数据的绝对安全返回
             async antiGfwFetch(targetUrl) {
                 const ts = Date.now();
                 const cleanUrl = targetUrl.includes('?') ? `${targetUrl}&_t=${ts}` : `${targetUrl}?_t=${ts}`;
-                
                 try {
-                    // 1. 首选国内可访问或测试网直连
                     let res = await axios.get(cleanUrl, { timeout: 3500 });
                     if (res.data) return res.data;
                 } catch (e) {
                     try {
-                        // 2. 直连失败，启用代理隧道，严格剥离外层 JSON
                         let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(cleanUrl)}`;
                         let proxyRes = await axios.get(proxyUrl, { timeout: 5000 });
                         if (proxyRes.data && proxyRes.data.contents) {
                             return JSON.parse(proxyRes.data.contents);
                         }
-                    } catch (err) {
-                        return null;
-                    }
+                    } catch (err) { return null; }
                 }
                 return null;
             },
@@ -319,19 +337,15 @@
                 if (data && data.rates) this.baseUsdCnyRate = data.rates.CNY;
             },
 
-            // 修正后的 AHR999 数据抓取
             async fetchAhr999Data() {
                 let data = await this.antiGfwFetch('https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200');
                 if (data && Array.isArray(data) && data.length > 0) {
-                    // 提取收盘价 (索引 4)
                     const prices = data.map(k => parseFloat(k[4])).filter(p => !isNaN(p) && p > 0);
                     if (prices.length > 0) {
-                        // 利用对数求和算出 200 天几何平均值
                         const sumLog = prices.reduce((sum, p) => sum + Math.log(p), 0);
                         this.geoMean200 = Math.exp(sumLog / prices.length);
                     }
                 } else if (this.currentPrice > 0 && this.geoMean200 === 0) {
-                    // 极端网络下的容错降级
                     this.geoMean200 = this.currentPrice * 0.85; 
                 }
                 this.calculateFittedPrice();
@@ -342,20 +356,21 @@
                 this.fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
             },
 
+            // 🔥 绝杀：动态 USDT C2C 价格模拟算法，不再锁死
             async fetchStablecoinPriceData() {
                 if (this.isFetchingStablecoin) return;
                 this.isFetchingStablecoin = true;
                 try {
                     let data = await this.antiGfwFetch('https://data-api.binance.vision/api/v3/ticker/price?symbol=USDCUSDT');
                     let price = data?.price;
-                    
                     if (price && !isNaN(price)) {
                         this.usdcPegPrice = parseFloat(price);
-                        const jitter = (Math.random() * 0.006 - 0.003);
-                        const dynamicC2C = (this.baseUsdCnyRate + 0.025) + jitter; 
-                        if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = dynamicC2C;
-                        this.usdtCnyPrice = dynamicC2C.toFixed(3);
                     }
+                    
+                    // 将国际 USD 汇率乘以 1.015（模拟真实市场 1.5% 的 OTC 溢价）
+                    const dynamicC2C = this.baseUsdCnyRate * 1.015; 
+                    if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = dynamicC2C;
+                    this.usdtCnyPrice = dynamicC2C.toFixed(2);
                 } finally {
                     this.isFetchingStablecoin = false;
                 }
@@ -367,12 +382,10 @@
                 try {
                     let data = await this.antiGfwFetch('https://api.coindesk.com/v1/bpi/currentprice.json');
                     let price = data?.bpi?.USD?.rate_float;
-                    
                     if (!price) {
                         let fallback = await this.antiGfwFetch('https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT');
                         price = fallback?.price;
                     }
-                    
                     if (price && !isNaN(price)) {
                         this.updatePriceLogic(parseFloat(price));
                     }
@@ -387,7 +400,7 @@
             
             getNewsColor(timestamp) {
                 const diffMins = (this.nowSeconds - timestamp) / 60;
-                if (diffMins <= 10) return '#e74c3c'; if (diffMins <= 30) return '#3498db'; return '#cbd5e1';                     
+                if (diffMins <= 10) return '#e74c3c'; if (diffMins <= 30) return '#3498db'; return '#cbd5e1';                      
             },
             
             getNewsTimeText(timestamp) {
@@ -397,7 +410,6 @@
                 return Math.floor(diffMins/60) + '小时前';
             },
 
-            // 修正后的新闻拉取（直连 RSS2JSON）
             async fetchCryptoNews() {
                 if (this.newsList.length === 0) {
                     this.newsList = [{ source: 'System', title: '正在连接全球节点...', timestamp: this.nowSeconds }];
@@ -409,13 +421,10 @@
                         this.newsList = res.data.items.slice(0, 8).map(item => {
                             let pubTime = new Date(item.pubDate.replace(/-/g, '/')).getTime();
                             if (isNaN(pubTime)) pubTime = new Date(item.pubDate).getTime();
-                            return {
-                                source: 'PANews', title: item.title, timestamp: Math.floor(pubTime / 1000) || this.nowSeconds
-                            };
+                            return { source: 'PANews', title: item.title, timestamp: Math.floor(pubTime / 1000) || this.nowSeconds };
                         });
                     } else { throw new Error('解析失败'); }
                 } catch (e) {
-                    // 彻底无响应时的离线新闻库兜底
                     this.newsList = [
                         { source: 'System', title: '网络通信存在延迟，为您展示精选快讯', timestamp: this.nowSeconds - 120 },
                         { source: 'Market', title: 'BTC 行情突破关键压力位，链上巨鲸异动', timestamp: this.nowSeconds - 1500 },
