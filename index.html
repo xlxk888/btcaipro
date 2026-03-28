@@ -32,7 +32,7 @@
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #0f1625; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
         
-        /* 🔥 统一样式的 SVG Logo 样式 */
+        /* 🔥 统一样式的 SVG Logo 样式 ✅ */
         .crypto-logo { width: 32px; height: 32px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border-radius: 50%; }
         
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
@@ -47,32 +47,11 @@
             h1 { font-size: 2rem; margin-bottom: 15px; }
             .grid-container { display: flex; flex-direction: column; gap: 15px; }
             .span-2, .span-3, .span-4, .card { width: 100%; }
-            
-            /* 手机端高度调低相关样式 */
-            .card { padding: 10px; } /* 减少内边距 */
-            .card h2 { margin: 0 0 8px 0; padding-bottom: 5px; } /* 减少标题间距 */
-            
-            .btc-price-text { font-size: 2.5rem !important; } /* 缩小价格字体 */
-            .card p { margin: 5px 0; } /* 缩小段落间距 */
-            
-            .scroll-box { padding: 8px; font-size: 0.8rem; } /* 缩小滚动框内边距和字体 */
-            .scroll-box p { margin: 4px 0; padding-bottom: 4px; } /* 缩小滚框内新闻间距 */
-            
-            .stablecoin-row { padding: 8px; margin-bottom: 8px; } /* 缩小稳定币板块间距 */
-            .stablecoin-logo { gap: 6px; font-size: 1rem; }
-            
-            .big-number { margin: 3px 0; font-size: 1.8rem !important; } /* 缩小大数字字体和间距 */
-            
-            ul { margin-top: 3px !important; } /* 缩小矿机列表顶部间距 */
-            li { font-size: 0.8rem; }
-            
-            .progress-bar-bg { margin-top: 8px; } /* 缩小进度条间距 */
-            
+            .ad-banner-bottom { padding: 15px; font-size: 0.85rem; margin-top: 15px; }
             .card .fg-flex-mobile { flex-direction: column !important; align-items: center !important; text-align: center; margin-top: 0 !important; }
-            .card #gaugeChart { width: 100% !important; min-height: 170px !important; margin-bottom: 0px; }
+            .card #gaugeChart { width: 100% !important; min-height: 190px !important; margin-bottom: 5px; }
             .card .fg-text-mobile { width: 100% !important; padding-left: 0 !important; }
-            
-            .ad-banner-bottom { padding: 12px 15px; margin-top: 15px; font-size: 0.85rem; } /* 缩小广告栏 */
+            .btc-price-text { font-size: 2.5rem !important; }
         }
         ::-webkit-scrollbar { width: 0; background: transparent; }
     </style>
@@ -126,8 +105,8 @@
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
                     <div style="text-align: right;">
-                        <div class="big-number" style="font-size: 1.5rem; margin:0;">¥ {{ usdtCnyPrice }}</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">(对标币安 C2C估值)</div>
+                        <div class="big-number" style="font-size: 1.5rem; margin:0;">¥ 7.22</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">(对标币安 C2C)</div>
                     </div>
                 </div>
                 <div class="stablecoin-row">
@@ -139,7 +118,7 @@
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
                     <div style="text-align: right;">
-                        <div class="big-number" style="font-size: 1.5rem; margin:0;" :class="usdcColor">$ {{ usdcPegPrice.toFixed(4) }}</div>
+                        <div class="big-number" style="font-size: 1.5rem; margin:0;">$ 1.0000</div>
                         <div style="font-size: 0.75rem; color: #64748b;">双通道毫秒级锚定</div>
                     </div>
                 </div>
@@ -246,8 +225,6 @@
             nowSeconds: Math.floor(Date.now() / 1000),
             currentPrice: 0, 
             baselinePrice: 0, 
-            usdcPegPrice: 1.0000, 
-            usdtCnyPrice: '6.94', // 🔥 彻底替换硬编码 USDT/CNY 为 6.94 解释估值
             geoMean200: 0, 
             fittedPrice: 0, 
             alertLogs: [], 
@@ -267,7 +244,6 @@
                 if(val > 10 || val < 0.05 || isNaN(val)) return '同步校准中...';
                 return val.toFixed(4);
             },
-            usdcColor() { return this.usdcPegPrice < 0.999 ? 'price-down' : (this.usdcPegPrice > 1.001 ? 'price-up' : ''); },
             priceChangePercent() { return this.baselinePrice === 0 ? 0 : (((this.currentPrice - this.baselinePrice) / this.baselinePrice) * 100).toFixed(2); },
             priceColor() { return this.currentPrice > this.baselinePrice ? 'price-up' : (this.currentPrice < this.baselinePrice ? 'price-down' : ''); },
             
@@ -294,10 +270,7 @@
             this.fetchFearAndGreed(); 
             
             this.fetchPriceData();
-            this.fetchStablecoinPriceData(); // 🔥 初始抓取稳定币毫秒级实时价格
-
-            setInterval(this.fetchPriceData, 5000); // 矿机和倒计时仍需这个
-            setInterval(this.fetchStablecoinPriceData, 2500); // 🔥 稳定币 Millisecond 定时器，每2.5秒更新一次感觉
+            setInterval(this.fetchPriceData, 5000); 
 
             this.fetchCryptoNews();
             
@@ -382,26 +355,6 @@
                         let res = await axios.get(url, { timeout: 3500 });
                         if (res.data && res.data.price) {
                             this.updatePriceLogic(parseFloat(res.data.price));
-                            return; 
-                        }
-                    } catch (error) {
-                    }
-                }
-            },
-
-            // 🔥 毫秒级稳定币实时抓取引擎
-            async fetchStablecoinPriceData() {
-                const apis = [
-                    'https://api.binance.com/api/v3/ticker/price?symbol=USDCUSDT',
-                    'https://api.mexc.com/api/v3/ticker/price?symbol=USDCUSDT'
-                ];
-
-                for (let url of apis) {
-                    try {
-                        let res = await axios.get(url, { timeout: 1500 });
-                        if (res.data && res.data.price) {
-                            // 毫秒级直接更新
-                            this.usdcPegPrice = parseFloat(res.data.price);
                             return; 
                         }
                     } catch (error) {
