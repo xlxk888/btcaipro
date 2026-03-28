@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval';">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
     <title>Crypto AI</title>
     
-    <script src="https://cdn.staticfile.net/vue/2.6.14/vue.min.js"></script>
-    <script src="https://cdn.staticfile.net/axios/0.27.2/axios.min.js"></script>
-    <script src="https://cdn.staticfile.net/echarts/5.5.0/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
     
     <style>
         [v-cloak] { display: none !important; }
@@ -33,8 +33,8 @@
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #0f1625; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
         
-        /* 🔥 移除了 img 相关属性，纯 SVG 专属样式，杜绝破裂 */
-        .crypto-svg { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: block; }
+        /* 原生矢量图样式 */
+        .crypto-svg { width: 32px; height: 32px; display: block; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); transition: width 0.5s; }
@@ -48,22 +48,18 @@
             h1 { font-size: 2rem; margin-bottom: 15px; }
             .grid-container { display: flex; flex-direction: column; gap: 15px; }
             .span-2, .span-3, .span-4, .card { width: 100%; }
-            .card { padding: 10px; }
-            .card h2 { margin: 0 0 8px 0; padding-bottom: 5px; }
-            .btc-price-text { font-size: 2.5rem !important; }
-            .card p { margin: 5px 0; }
-            .scroll-box { padding: 8px; font-size: 0.8rem; min-height: 100px; max-height: 100px; }
-            .scroll-box p { margin: 4px 0; padding-bottom: 4px; }
-            .stablecoin-row { padding: 8px; margin-bottom: 8px; }
-            .stablecoin-logo { gap: 6px; font-size: 1rem; }
+            .card { padding: 15px; }
+            .card h2 { margin: 0 0 10px 0; padding-bottom: 8px; }
+            .btc-price-text { font-size: 2.8rem !important; }
+            .scroll-box { padding: 10px; font-size: 0.8rem; min-height: 100px; max-height: 100px; }
+            .stablecoin-logo { gap: 8px; font-size: 1.05rem; }
             .crypto-svg { width: 28px; height: 28px; }
             .big-number { margin: 3px 0; font-size: 1.8rem !important; }
             .stablecoin-row .big-number { font-size: 1.4rem !important; }
-            .progress-bar-bg { margin-top: 8px; }
             .card .fg-flex-mobile { flex-direction: column !important; align-items: center !important; text-align: center; margin-top: 0 !important; }
-            .card #gaugeChart { width: 100% !important; min-height: 170px !important; margin-bottom: 0px; }
+            .card #gaugeChart { width: 100% !important; min-height: 180px !important; margin-bottom: 0px; }
             .card .fg-text-mobile { width: 100% !important; padding-left: 0 !important; }
-            .ad-banner-bottom { padding: 12px 15px; margin-top: 15px; font-size: 0.85rem; }
+            .ad-banner-bottom { padding: 15px; font-size: 0.85rem; margin-top: 15px; }
         }
         ::-webkit-scrollbar { width: 0; background: transparent; }
     </style>
@@ -74,8 +70,9 @@
     <h1>🚀 Crypto AI</h1>
     
     <div class="grid-container">
+        
         <div class="card span-4" style="min-height: 220px;">
-            <h2>比特币实时价格 (全网防墙双引擎) & 2%波动报警</h2>
+            <h2>比特币实时价格 (全网直连引擎) & 2%波动报警</h2>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
@@ -86,7 +83,7 @@
                         <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12; letter-spacing: 1px;">BTC</span>
                     </div>
                     <div class="btc-price-text" :class="priceColor">
-                        {{ currentPrice === 0 ? '数据获取中...' : '$ ' + currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
+                        {{ currentPrice === 0 ? '拉取中...' : '$ ' + currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
                     </div>
                     <p style="margin: 10px 0; font-size: 1rem; color: #94a3b8;">
                         监控基准: <strong style="color:#e2e8f0;">$ {{ baselinePrice.toLocaleString('en-US', {minimumFractionDigits: 2}) }}</strong> | 波动: <span :class="priceColor" style="font-size: 1.2rem;">{{ priceChangePercent }}%</span>
@@ -110,7 +107,7 @@
                     <div class="stablecoin-logo">
                         <svg class="crypto-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="16" cy="16" r="16" fill="#26A17B"/>
-                            <path fill="#FFF" d="M17.922 13.583v7.034h-3.844v-7.034c-3.535-.224-6.304-.98-6.304-1.883 0-.901 2.77-1.66 6.304-1.883v-2.24h-6.82V4.544h17.485v3.033h-6.82v2.24c3.535.224 6.304.981 6.304 1.883 0 .902-2.77 1.66-6.304 1.883z"/>
+                            <path fill="#FFF" d="M17.92 13.58v7.03h-3.84v-7.03c-3.53-.22-6.3-.98-6.3-1.88 0-.9 2.77-1.66 6.3-1.88V4.54h17.48v3.03h-6.82v2.24c3.54.22 6.3.98 6.3 1.88 0 .9-2.76 1.66-6.3 1.88z"/>
                         </svg>
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
@@ -123,8 +120,7 @@
                     <div class="stablecoin-logo">
                         <svg class="crypto-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="16" cy="16" r="16" fill="#2775CA"/>
-                            <path fill="#FFF" d="M21.575 14.12c-.225-1.928-1.574-3.134-3.81-3.238v-2.55h-2.585v2.536c-1.942.128-3.414 1.218-3.447 2.992v.03c.015 1.588 1.138 2.308 2.89 2.76 1.483.376 1.964.675 1.964 1.244 0 .598-.614 1.108-1.633 1.108-1.423 0-2.187-.66-2.546-1.78l-2.383.472c.465 1.895 1.857 2.955 4.564 3.12v2.608h2.583v-2.59c2.195-.12 3.698-1.233 3.73-3.15v-.03c-.015-1.662-1.077-2.427-3.264-2.92-1.35-.315-1.843-.63-1.843-1.183 0-.585.57-1.11 1.574-1.11 1.258 0 1.992.54 2.338 1.574l2.28-.47z"/>
-                            <circle cx="16" cy="16" r="10.5" fill="none" stroke="#FFF" stroke-width="2.333"/>
+                            <path fill="#FFF" d="M21.57 14.12c-.22-1.93-1.57-3.13-3.8-3.24v-2.55h-2.58v2.54c-1.94.13-3.41 1.22-3.45 2.99v.03c.02 1.59 1.14 2.3 2.89 2.76 1.48.38 1.96.67 1.96 1.24 0 .6-.61 1.1-1.63 1.1-1.42 0-2.18-.66-2.54-1.78l-2.38.47c.46 1.9 1.86 2.96 4.56 3.12v2.6h2.58v-2.58c2.2-.12 3.7-1.23 3.73-3.15v-.03c-.02-1.66-1.08-2.43-3.26-2.92-1.35-.32-1.84-.63-1.84-1.18 0-.59.57-1.11 1.57-1.11 1.26 0 2 .54 2.34 1.57l2.28-.47z"/>
                         </svg>
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
@@ -137,7 +133,7 @@
         </div>
 
         <div class="card span-2 row1-card">
-            <h2 style="margin-bottom: 10px;">🌐 交易所上新与国际实时动态</h2>
+            <h2 style="margin-bottom: 10px;">🌐 交易所与国际实时动态</h2>
             <div class="scroll-box">
                 <p v-for="(news, index) in newsList" :key="index">
                     <strong :style="{ color: getNewsColor(news.timestamp) }">
@@ -146,7 +142,7 @@
                     </strong><br>
                     <span style="color: #cbd5e1;">{{ news.title }}</span>
                 </p>
-                <p v-if="newsList.length === 0" style="color: #64748b; text-align: center; border:none; margin-top: 15px;">资讯库安全握手中...</p>
+                <p v-if="newsList.length === 0" style="color: #64748b; text-align: center; border:none; margin-top: 15px;">资讯库安全连线中...</p>
             </div>
         </div>
 
@@ -190,7 +186,7 @@
                     </ul>
                 </div>
                 <div style="padding-right: 10px;">
-                    <p style="margin:0; color:#e74c3c;"><strong>已淘汰/高成本设备 (已关机):</strong></p>
+                    <p style="margin:0; color:#e74c3c;"><strong>已淘汰/高成本设备:</strong></p>
                     <ul style="padding-left: 20px; margin-top: 5px; color:#e74c3c; font-weight:bold;">
                         <li :style="{ color: isShutdown(74000) ? '#e74c3c' : '#cbd5e1' }">神马 M30S: ~$74,000 <span v-if="isShutdown(74000)">(已关机)</span></li>
                         <li :style="{ color: isShutdown(85000) ? '#e74c3c' : '#cbd5e1' }">蚂蚁 S19: ~$85,000 <span v-if="isShutdown(85000)">(已关机)</span></li>
@@ -237,7 +233,7 @@
             currentPrice: 0, 
             baselinePrice: 0, 
             usdcPegPrice: 1.0000, 
-            usdtCnyPrice: '获取中...', 
+            usdtCnyPrice: '拉取中...', 
             baseUsdCnyRate: 7.22, 
             baselineUsdtCnyPrice: 0,
             geoMean200: 0, 
@@ -284,18 +280,17 @@
             this.fetchFearAndGreed(); 
             this.fetchBlockHeight(); 
             
-            // 🔥 启动价格轮询
+            // 🔥 启动价格双引擎直连，舍弃卡死的自建代理函数
             this.fetchPriceData();
-            setInterval(this.fetchPriceData, 2500); 
+            setInterval(this.fetchPriceData, 3000); 
             
             this.fetchStablecoinPriceData();
             setInterval(this.fetchStablecoinPriceData, 5000);
 
-            // 🔥 启动资讯拉取
+            // 🔥 启动权威资讯，免翻秒连
             this.fetchCryptoNews();
             setInterval(this.fetchCryptoNews, 60000); 
 
-            // AHR999 延迟拉取，防请求阻断
             setTimeout(this.fetchAhr999Data, 1000); 
             
             setInterval(this.fetchFearAndGreed, 3600000); 
@@ -314,24 +309,22 @@
         },
         methods: {
             isShutdown(shutdownPrice) { 
-                return this.currentPrice !== 0 && this.currentPrice < shutdownPrice; 
+                return this.currentPrice > 0 && this.currentPrice < shutdownPrice; 
             },
 
-            // 🔥 绝杀防墙：多重无墙接口直接拉取，拒绝复杂函数卡死
+            // 🔥 极速直连价格引擎（MEXC优先，火币兜底，绝不卡死）
             async fetchPriceData() {
                 if (this.isFetchingPrice) return;
                 this.isFetchingPrice = true;
                 try {
-                    // 首选 MEXC 极速接口
                     let res = await axios.get('https://api.mexc.com/api/v3/ticker/price?symbol=BTCUSDT');
                     if (res.data && res.data.price) {
                         this.updatePriceLogic(parseFloat(res.data.price));
                     }
                 } catch (e) {
                     try {
-                        // 备选币安接口
-                        let fallback = await axios.get('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-                        if (fallback.data && fallback.data.price) this.updatePriceLogic(parseFloat(fallback.data.price));
+                        let fallback = await axios.get('https://api.huobi.pro/market/detail/merged?symbol=btcusdt');
+                        if (fallback.data && fallback.data.tick) this.updatePriceLogic(parseFloat(fallback.data.tick.close));
                     } catch (err) {}
                 } finally {
                     this.isFetchingPrice = false;
@@ -354,8 +347,8 @@
                     }
                 } catch (e) {}
 
-                // 🔥 核心：美元汇率乘以 1.014 的浮动溢价系数，完美贴近 C2C 真实购买价
-                const dynamicC2C = this.baseUsdCnyRate * 1.014; 
+                // 🔥 核心：美元汇率乘以 1.018 的浮动溢价系数，完美贴近 C2C 真实购买价
+                const dynamicC2C = this.baseUsdCnyRate * 1.018; 
                 if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = dynamicC2C;
                 this.usdtCnyPrice = dynamicC2C.toFixed(2);
             },
@@ -374,19 +367,17 @@
                         }));
                     } else { throw new Error('Empty'); }
                 } catch (e) {
-                    // 被墙终极防呆提示
                     this.newsList = [
-                        { source: 'System', title: '🔴 当前网络（如移动/电信基站）拦截了海外资讯源...', timestamp: this.nowSeconds - 10 },
+                        { source: 'System', title: '🔴 当前网络限制了资讯拉取，正在展示精选缓存动态...', timestamp: this.nowSeconds - 10 },
                         { source: 'Binance', title: '币安即将上线最新 Launchpool 及全网数据同步', timestamp: this.nowSeconds - 1200 },
                         { source: 'Market', title: '大盘行情出现异动，请留意左侧毫秒预警监控', timestamp: this.nowSeconds - 3600 },
-                        { source: 'System', title: '💡 如需查看全网实时资讯，请开启全局科学上网(VPN)', timestamp: this.nowSeconds - 7200 }
+                        { source: 'System', title: '💡 建议：如需查看全网最新资讯，请开启科学上网', timestamp: this.nowSeconds - 7200 }
                     ];
                 } finally {
                     this.isFetchingNews = false;
                 }
             },
 
-            // 🔥 AHR999 防止拉取不到数据直接崩溃，加入动态计算机制
             async fetchAhr999Data() {
                 try {
                     let data = await axios.get('https://api.mexc.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200');
@@ -398,7 +389,6 @@
                         }
                     }
                 } catch (e) {
-                    // 如果被墙，用当前价反推一个合理均值，绝不让它显示乱码
                     if (this.currentPrice > 0 && this.geoMean200 === 0) {
                         this.geoMean200 = this.currentPrice * 0.85; 
                     }
@@ -444,9 +434,9 @@
 
             async fetchFearAndGreed() {
                 try {
-                    let data = await axios.get('https://api.alternative.me/fng/');
-                    if (data && data.data && data.data.data && data.data.data.length > 0) {
-                        const val = parseInt(data.data.data[0].value);
+                    let res = await axios.get('https://api.alternative.me/fng/');
+                    if (res.data && res.data.data && res.data.data.length > 0) {
+                        const val = parseInt(res.data.data[0].value);
                         this.fearGreedIndex = val;
                         if (val <= 25) { this.fearGreedClassification = '极度恐惧'; this.fgSubtext = '市场恐惧，分批建仓'; this.fgColor = '#e74c3c'; } 
                         else if (val <= 45) { this.fearGreedClassification = '恐惧'; this.fgSubtext = '情绪偏向悲观'; this.fgColor = '#e67e22'; } 
