@@ -1,208 +1,144 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Crypto AI - 专业监控面板</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto AI - 修复版</title>
 
-    <!-- ✅ 修复：稳定 CDN -->
-    <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
-    <script src="https://unpkg.com/axios@0.27.2/dist/axios.min.js"></script>
-    <script src="https://unpkg.com/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.staticfile.net/vue/2.6.14/vue.min.js"></script>
+<script src="https://cdn.staticfile.net/axios/0.27.2/axios.min.js"></script>
+<script src="https://cdn.staticfile.net/echarts/5.5.0/echarts.min.js"></script>
 
-    <style>
-        [v-cloak] { display: none !important; }
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #10172a; color: #e2e8f0; margin: 0; padding: 20px; }
-        h1 { text-align: center; color: #f39c12; margin: 5px 0 25px 0; letter-spacing: 2px; font-size: 2.5rem; }
-
-        .grid-container { display: grid; gap: 20px; grid-template-columns: repeat(6, 1fr); max-width: 1400px; margin: 0 auto; }
-        .span-2 { grid-column: span 2; } .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; }
-
-        .card { background-color: #1a263c; padding: 20px; border-radius: 12px; border: 1px solid #2a3b59; display: flex; flex-direction: column; }
-        .card h2 { margin: 0 0 15px 0; font-size: 1.15rem; color: #94a3b8; }
-
-        .price-up { color: #2ecc71; font-weight: bold; }
-        .price-down { color: #e74c3c; font-weight: bold; }
-
-        .btc-price-text { font-size: 3.6rem; font-weight: bold; }
-
-        .scroll-box { overflow-y: auto; background: #0f1625; padding: 12px; border-radius: 8px; font-size: 0.85rem; min-height: 120px; max-height: 120px; }
-
-        .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; }
-        .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); }
-
-        @media (max-width: 1024px) {
-            .grid-container { display: flex; flex-direction: column; }
-        }
-    </style>
+<style>
+body{background:#0f172a;color:#fff;font-family:sans-serif}
+.card{background:#1e293b;padding:15px;margin:10px;border-radius:10px}
+.price-up{color:#2ecc71}
+.price-down{color:#e74c3c}
+</style>
 </head>
 
 <body>
 <div id="app" v-cloak>
 
-<h1>🚀 Crypto AI</h1>
-
-<div class="grid-container">
-
-<div class="card span-4">
 <h2>BTC 实时价格</h2>
-<div class="btc-price-text" :class="priceColor">{{ displayPrice }}</div>
-<p>基准: {{ baselinePrice.toFixed(2) }} | 波动: {{ priceChangePercent }}%</p>
+<div class="card">
+    <div :class="priceColor" style="font-size:30px">
+        {{ displayPrice }}
+    </div>
+    <div>波动：{{ priceChangePercent }}%</div>
 </div>
 
-<div class="card span-2">
-<h2>稳定币</h2>
-<p :class="usdtColor">USDT/CNY：¥ {{ usdtCnyPrice }}</p>
-<p>USDC：{{ usdcPegPrice.toFixed(4) }}</p>
+<h2>恐惧贪婪指数</h2>
+<div class="card">
+    <div id="gaugeChart" style="height:200px"></div>
+    <div>{{ fearGreedClassification }}</div>
 </div>
 
-<div class="card span-2">
 <h2>新闻</h2>
-<div class="scroll-box">
-<p v-for="n in newsList">{{ n.title }}</p>
-</div>
-</div>
-
-<div class="card span-2">
-<h2>恐惧贪婪</h2>
-<div id="gaugeChart" style="height:150px;"></div>
-<p>{{ fearGreedClassification }}</p>
+<div class="card">
+    <div v-for="n in newsList">{{ n.title }}</div>
 </div>
 
-<div class="card span-2">
-<h2>AHR999</h2>
-<div>{{ liveAhr999 }}</div>
-</div>
-
-<div class="card span-3">
-<h2>矿机状态</h2>
-<p>根据价格自动判断</p>
-</div>
-
-<div class="card span-3">
-<h2>减半倒计时</h2>
-<p>{{ halvingDays }} 天</p>
-<div class="progress-bar-bg">
-<div class="progress-bar-fill" :style="{width: halvingProgress+'%'}"></div>
-</div>
-</div>
-
-</div>
 </div>
 
 <script>
 new Vue({
 el:"#app",
 data:{
-currentPrice:0,
-lastValidPrice:0,
-baselinePrice:0,
-
-usdcPegPrice:1,
-usdtCnyPrice:"7.24",
-baselineUsdtCnyPrice:0,
-
-newsList:[],
-
-fearGreedIndex:50,
-fearGreedClassification:"加载中",
-gaugeChartInstance:null,
-
-targetBlock:1050000,
-startBlock:840000,
-
-timers:[]
+    currentPrice:0,
+    baselinePrice:0,
+    fearGreedIndex:50,
+    fearGreedClassification:"加载中...",
+    newsList:[],
+    chart:null
 },
 
 computed:{
 displayPrice(){
-if(!this.currentPrice)return"连接中...";
-return"$ "+this.currentPrice.toFixed(2);
+    return this.currentPrice? "$"+this.currentPrice.toFixed(2):"加载中..."
 },
 priceChangePercent(){
-if(!this.baselinePrice)return"0.00";
-return(((this.currentPrice-this.baselinePrice)/this.baselinePrice)*100).toFixed(2);
+    if(!this.baselinePrice||!this.currentPrice) return "0.00"
+    return ((this.currentPrice-this.baselinePrice)/this.baselinePrice*100).toFixed(2)
 },
 priceColor(){
-if(!this.baselinePrice)return"";
-return this.currentPrice>this.baselinePrice?"price-up":"price-down";
-},
-usdtColor(){
-if(!this.baselineUsdtCnyPrice)return"";
-let c=parseFloat(this.usdtCnyPrice);
-return c>this.baselineUsdtCnyPrice?"price-up":"price-down";
-},
-halvingDays(){
-const t=new Date("2028-04-12").getTime();
-return Math.floor((t-Date.now())/86400000);
-},
-halvingProgress(){
-let current=this.targetBlock-(this.halvingDays*144);
-return ((current-this.startBlock)/(this.targetBlock-this.startBlock)*100).toFixed(2);
-},
-liveAhr999(){
-return this.currentPrice? (this.currentPrice/50000).toFixed(2):"计算中";
+    if(!this.baselinePrice) return ""
+    return this.currentPrice>this.baselinePrice?"price-up":"price-down"
 }
 },
 
 mounted(){
-this.$nextTick(()=>{this.initChart();});
+    this.$nextTick(()=>{
+        this.initChart()
+    })
+    this.fetchPrice()
+    this.fetchNews()
+    this.fetchFG()
 
-this.fetchPrice();
-this.fetchNews();
-this.fetchFG();
-
-this.timers.push(setInterval(this.fetchPrice,2000));
-this.timers.push(setInterval(this.fetchNews,30000));
-this.timers.push(setInterval(this.fetchFG,60000));
+    setInterval(this.fetchPrice,3000)
+    setInterval(this.fetchNews,30000)
 },
 
 methods:{
+
 initChart(){
-let dom=document.getElementById("gaugeChart");
-this.gaugeChartInstance=echarts.init(dom);
-this.updateGauge();
+    let dom=document.getElementById("gaugeChart")
+    if(!dom) return
+    this.chart=echarts.init(dom)
+    this.updateChart(50)
 },
-updateGauge(){
-this.gaugeChartInstance.setOption({
-series:[{type:'gauge',data:[{value:this.fearGreedIndex}]}]
-});
+
+updateChart(val){
+    if(!this.chart) return
+    this.chart.setOption({
+        series:[{
+            type:"gauge",
+            min:0,
+            max:100,
+            data:[{value:val}]
+        }]
+    })
 },
 
 async fetchPrice(){
-try{
-let res=await axios.get("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
-let p=parseFloat(res.data.price);
-this.currentPrice=p;
-this.lastValidPrice=p;
-if(!this.baselinePrice)this.baselinePrice=p;
-}catch(e){
-if(this.lastValidPrice)this.currentPrice=this.lastValidPrice;
-}
+    try{
+        let res=await axios.get("https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCUSDT")
+        let p=parseFloat(res.data.price)
+        if(!this.baselinePrice) this.baselinePrice=p
+        this.currentPrice=p
+    }catch(e){
+        console.log("价格获取失败")
+    }
 },
 
 async fetchNews(){
-try{
-let res=await axios.get("https://api.rss2json.com/v1/api.json?rss_url=https://www.theblockbeats.info/rss.xml");
-this.newsList=res.data.items.slice(0,5);
-}catch(e){
-this.newsList=[{title:"新闻加载失败"}];
-}
+    try{
+        let res=await axios.get("https://api.rss2json.com/v1/api.json?rss_url=https://www.theblockbeats.info/rss.xml")
+        this.newsList=res.data.items.slice(0,5)
+    }catch(e){
+        this.newsList=[{title:"新闻加载失败"}]
+    }
 },
 
 async fetchFG(){
-try{
-let res=await axios.get("https://api.alternative.me/fng/");
-let v=parseInt(res.data.data[0].value);
-this.fearGreedIndex=v;
-this.fearGreedClassification=v<50?"恐惧":"贪婪";
-this.updateGauge();
-}catch(e){}
-}
-}
-});
-</script>
+    try{
+        let res=await axios.get("https://api.alternative.me/fng/")
+        let v=parseInt(res.data.data[0].value)
+        this.fearGreedIndex=v
 
+        if(v<25) this.fearGreedClassification="极度恐惧"
+        else if(v<50) this.fearGreedClassification="恐惧"
+        else if(v<75) this.fearGreedClassification="贪婪"
+        else this.fearGreedClassification="极度贪婪"
+
+        this.updateChart(v)
+    }catch(e){
+        console.log("FG失败")
+    }
+}
+
+}
+})
+</script>
 </body>
 </html>
