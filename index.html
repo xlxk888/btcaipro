@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Crypto AI 完整修正版</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
@@ -14,45 +14,37 @@
         html, body {
             margin: 0;
             padding: 0;
-            background: radial-gradient(circle at top, #17233d 0%, #0f172a 45%, #09101f 100%);
+            background:
+                radial-gradient(circle at top, #1a2641 0%, #0f172a 48%, #08101d 100%);
             color: #e2e8f0;
             font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-            width: 100%;
             min-height: 100%;
-            overflow: hidden;
         }
 
         body {
-            padding: 14px 16px 16px;
+            padding: 12px;
+            overflow-x: hidden;
         }
 
         #app {
-            width: 100%;
             max-width: 1600px;
             margin: 0 auto;
-            height: calc(100vh - 30px);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
         }
 
         h1 {
-            margin: 0;
+            margin: 0 0 12px 0;
             text-align: center;
             color: #f59e0b;
-            font-size: 3rem;
-            font-weight: 800;
+            font-size: 3.1rem;
+            font-weight: 900;
             letter-spacing: 1px;
-            text-shadow: 0 0 18px rgba(245, 158, 11, 0.25);
-            flex: 0 0 auto;
+            text-shadow: 0 0 18px rgba(245, 158, 11, 0.22);
         }
 
         .grid-container {
-            flex: 1;
-            min-height: 0;
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: 1.3fr 1.1fr 0.75fr;
+            grid-auto-rows: minmax(170px, auto);
             gap: 12px;
         }
 
@@ -61,63 +53,115 @@
         .span-4 { grid-column: span 4; }
 
         .card {
-            background: rgba(28, 41, 68, 0.92);
-            border: 1px solid rgba(71, 97, 145, 0.6);
+            background: rgba(27, 40, 66, 0.94);
+            border: 1px solid rgba(72, 99, 150, 0.55);
             border-radius: 18px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
-            padding: 18px;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.22);
+            padding: 16px 18px;
+            min-width: 0;
             overflow: hidden;
         }
 
         .card h2 {
             margin: 0 0 12px 0;
+            color: #9aa9c2;
+            font-size: 1.05rem;
             padding-bottom: 10px;
-            font-size: 1rem;
-            color: #94a3b8;
-            border-bottom: 1px solid rgba(71, 97, 145, 0.45);
-            flex: 0 0 auto;
+            border-bottom: 1px solid rgba(72, 99, 150, 0.4);
         }
 
-        .price-up { color: #22c55e; font-weight: 700; }
-        .price-down { color: #ef4444; font-weight: 700; }
+        .price-up { color: #22c55e; font-weight: 800; }
+        .price-down { color: #ef4444; font-weight: 800; }
+
+        .top-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 0.85fr;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .top-left,
+        .top-right {
+            min-width: 0;
+        }
+
+        .asset-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .asset-code {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .token-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex: 0 0 auto;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 4px 10px rgba(0,0,0,0.25);
+        }
+
+        .token-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
 
         .btc-price-text {
-            font-size: 4.2rem;
-            line-height: 1;
-            margin: 8px 0 10px;
+            font-size: 4.25rem;
             font-weight: 900;
+            line-height: 1;
             letter-spacing: -1px;
+            margin: 8px 0 10px;
+            word-break: break-word;
+        }
+
+        .meta-line {
+            color: #9fb0c8;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .realtime-line {
+            color: #93c5fd;
+            font-size: 0.88rem;
+            margin: 2px 0 4px;
+            min-height: 20px;
         }
 
         .big-number {
-            font-size: 2.1rem;
-            font-weight: 800;
-            line-height: 1.1;
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1.05;
         }
 
         .small-muted {
-            color: #94a3b8;
-            font-size: 0.85rem;
+            color: #8fa0ba;
+            font-size: 0.83rem;
+            line-height: 1.4;
         }
 
         .scroll-box {
-            flex: 1;
-            min-height: 0;
-            overflow: hidden;
-            background: #101827;
+            background: #111a2a;
             border: 1px solid #1f2d45;
             border-radius: 12px;
             padding: 12px;
+            min-height: 138px;
+            max-height: 138px;
+            overflow-y: auto;
         }
 
         .scroll-box p {
             margin: 0 0 8px 0;
             padding-bottom: 8px;
-            border-bottom: 1px dashed rgba(71, 97, 145, 0.45);
             line-height: 1.45;
+            border-bottom: 1px dashed rgba(72, 99, 150, 0.38);
         }
 
         .scroll-box p:last-child {
@@ -131,48 +175,118 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            background: #101827;
+            background: #111a2a;
             border: 1px solid #1f2d45;
             border-radius: 14px;
             padding: 14px;
-            margin-bottom: 10px;
+            min-width: 0;
+        }
+
+        .stablecoin-row + .stablecoin-row {
+            margin-top: 10px;
         }
 
         .stablecoin-logo {
             display: flex;
             align-items: center;
             gap: 10px;
+            min-width: 0;
+            font-size: 1.08rem;
             font-weight: 800;
-            font-size: 1.05rem;
         }
 
-        .token-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            flex: 0 0 auto;
+        .stablecoin-label {
+            white-space: nowrap;
+        }
+
+        .stablecoin-right {
+            text-align: right;
+            min-width: 0;
+        }
+
+        .fg-layout {
+            display: grid;
+            grid-template-columns: 46% 54%;
+            align-items: center;
+            min-height: 170px;
+            gap: 8px;
+        }
+
+        .fg-chart {
+            width: 100%;
+            height: 170px;
+        }
+
+        .fg-number {
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 5px 0 8px;
+        }
+
+        .news-card .scroll-box {
+            min-height: 180px;
+            max-height: 180px;
+        }
+
+        .ahr-layout,
+        .miner-layout {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .ahr-left {
             display: flex;
             align-items: center;
+            min-height: 122px;
+        }
+
+        .ahr-value {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: #38bdf8;
+            line-height: 1;
+            word-break: break-word;
+        }
+
+        .inline-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 6px;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        .mini-list {
+            list-style: disc;
+            padding-left: 18px;
+            margin: 6px 0 0;
+            color: #d0d8e6;
+            line-height: 1.55;
+            font-size: 0.95rem;
+        }
+
+        .mini-list li { margin: 3px 0; }
+
+        .halving-main {
+            min-height: 115px;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.25);
         }
-
-        .token-icon svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        .btc-icon { background: linear-gradient(135deg, #ffb347, #f7931a); }
-        .usdt-icon { background: linear-gradient(135deg, #3fcf8e, #26a17b); }
-        .usdc-icon { background: linear-gradient(135deg, #5aa8ff, #2775ca); }
 
         .progress-bar-bg {
             width: 100%;
             height: 10px;
-            background: #172336;
             border-radius: 999px;
             overflow: hidden;
+            background: #172538;
             margin-top: 12px;
         }
 
@@ -180,274 +294,218 @@
             height: 100%;
             border-radius: 999px;
             background: linear-gradient(90deg, #f59e0b 0%, #22c55e 100%);
-            transition: width 0.4s ease;
-        }
-
-        .top-card-content {
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            gap: 16px;
-            align-items: stretch;
-            justify-content: space-between;
-        }
-
-        .btc-left {
-            flex: 1.1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .btc-right {
-            flex: 0.95;
-            min-width: 320px;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-
-        .live-line {
-            font-size: 0.86rem;
-            color: #93c5fd;
-            margin-top: 4px;
-            min-height: 20px;
-        }
-
-        .fg-wrap {
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .fg-chart {
-            width: 48%;
-            height: 100%;
-            min-height: 160px;
-        }
-
-        .fg-text {
-            width: 52%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-width: 0;
-        }
-
-        .fg-number {
-            font-size: 2.8rem;
-            font-weight: 900;
-            line-height: 1;
-            margin: 6px 0 10px;
+            transition: width 0.35s ease;
         }
 
         .ad-banner-bottom {
-            background: rgba(28, 41, 68, 0.92);
-            border: 1px solid rgba(71, 97, 145, 0.6);
-            border-radius: 16px;
-            padding: 12px 16px;
+            margin-top: 12px;
+            background: rgba(27, 40, 66, 0.94);
+            border: 1px solid rgba(72, 99, 150, 0.55);
+            border-radius: 18px;
+            padding: 14px 16px;
             color: #fca5a5;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            flex: 0 0 auto;
+            font-size: 0.94rem;
+            line-height: 1.68;
         }
 
         .ad-banner-bottom a {
             color: #22c55e;
             text-decoration: none;
-            font-weight: 700;
+            font-weight: 800;
+            word-break: break-all;
         }
 
         .ad-banner-bottom a:hover {
             text-decoration: underline;
         }
 
-        .label-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .ad-title {
+            color: #facc15;
+            font-weight: 900;
             margin-bottom: 8px;
         }
 
-        .inline-badge {
-            display: inline-block;
-            border: 1px solid #ef4444;
-            color: #ef4444;
-            border-radius: 6px;
-            padding: 2px 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
-        }
-
-        .mini-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            color: #cbd5e1;
-            font-size: 0.92rem;
-            line-height: 1.55;
-        }
-
-        .mini-list li { margin: 4px 0; }
-
-        .news-box {
-            font-size: 0.95rem;
-        }
-
-        .ahr-layout,
-        .miner-layout {
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .halving-card {
-            justify-content: center;
-        }
-
-        .bottom-card-text {
-            font-size: 0.95rem;
-            color: #94a3b8;
-            line-height: 1.55;
-        }
-
-        .desktop-only {
-            display: block;
+        .mono-id {
+            color: #22c55e;
+            font-weight: 900;
+            font-size: 1.02rem;
         }
 
         @media (max-width: 1024px) {
-            html, body {
-                overflow: hidden;
-            }
-
             body {
-                padding: 6px;
-            }
-
-            #app {
-                height: calc(100vh - 12px);
-                gap: 6px;
+                padding: 8px;
             }
 
             h1 {
-                font-size: 1.5rem;
-                line-height: 1.1;
+                font-size: 1.7rem;
+                margin-bottom: 8px;
             }
 
             .grid-container {
                 grid-template-columns: 1fr 1fr;
-                grid-template-rows: repeat(4, 1fr);
-                gap: 6px;
-                height: 100%;
-            }
-
-            .card {
-                padding: 8px 9px;
-                border-radius: 12px;
-            }
-
-            .card h2 {
-                margin: 0 0 6px 0;
-                padding-bottom: 5px;
-                font-size: 0.74rem;
-            }
-
-            .card:nth-child(1) { grid-column: span 2; }
-            .card:nth-child(2) { grid-column: span 1; }
-            .card:nth-child(3) { grid-column: span 1; }
-            .card:nth-child(4) { grid-column: span 1; }
-            .card:nth-child(5) { grid-column: span 1; }
-            .card:nth-child(6) { grid-column: span 2; }
-            .card:nth-child(7) { grid-column: span 2; }
-
-            .top-card-content {
                 gap: 8px;
             }
 
-            .btc-left {
-                flex: 1;
+            .card {
+                padding: 10px;
+                border-radius: 14px;
             }
 
-            .btc-right {
-                flex: 1;
-                min-width: 0;
+            .card h2 {
+                font-size: 0.75rem;
+                margin: 0 0 7px 0;
+                padding-bottom: 6px;
             }
 
-            .btc-price-text {
-                font-size: 2rem;
-                margin: 4px 0 5px;
+            .span-4,
+            .span-3,
+            .span-2 {
+                grid-column: span 1;
             }
 
-            .big-number {
+            .top-card {
+                grid-column: span 2;
+            }
+
+            .miner-card,
+            .halving-card,
+            .ad-card-mobile {
+                grid-column: span 2;
+            }
+
+            .top-layout {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .asset-head {
+                gap: 7px;
+                margin-bottom: 6px;
+            }
+
+            .asset-code {
                 font-size: 1.15rem;
             }
 
-            .small-muted,
-            .bottom-card-text,
-            .mini-list,
-            p,
-            li {
-                font-size: 0.66rem !important;
-                line-height: 1.25 !important;
-            }
-
             .token-icon {
-                width: 26px;
-                height: 26px;
+                width: 24px;
+                height: 24px;
             }
 
-            .stablecoin-logo {
-                gap: 6px;
-                font-size: 0.78rem;
+            .btc-price-text {
+                font-size: 1.08rem;
+                margin: 4px 0;
+                line-height: 1.05;
             }
 
-            .stablecoin-row {
-                padding: 8px;
-                margin-bottom: 6px;
-                border-radius: 10px;
+            .meta-line {
+                font-size: 0.62rem;
+                line-height: 1.3;
+            }
+
+            .realtime-line {
+                font-size: 0.56rem;
+                min-height: 14px;
             }
 
             .scroll-box {
-                padding: 7px;
-                border-radius: 9px;
+                min-height: 76px;
+                max-height: 76px;
+                padding: 8px;
+                border-radius: 10px;
             }
 
             .scroll-box p {
                 margin: 0 0 5px 0;
                 padding-bottom: 5px;
+                font-size: 0.58rem;
+                line-height: 1.25;
             }
 
-            .fg-wrap {
+            .stablecoin-row {
+                padding: 8px;
+                border-radius: 10px;
+            }
+
+            .stablecoin-logo {
+                gap: 7px;
+                font-size: 0.72rem;
+            }
+
+            .stablecoin-label {
+                white-space: normal;
+                line-height: 1.05;
+            }
+
+            .stablecoin-right .big-number {
+                font-size: 1rem;
+            }
+
+            .stablecoin-right .small-muted {
+                font-size: 0.55rem;
+                line-height: 1.15;
+            }
+
+            .fg-layout {
+                grid-template-columns: 43% 57%;
+                min-height: 100px;
                 gap: 4px;
             }
 
             .fg-chart {
-                width: 44%;
-                min-height: 90px;
-            }
-
-            .fg-text {
-                width: 56%;
+                height: 92px;
             }
 
             .fg-number {
-                font-size: 1.45rem;
-                margin: 3px 0 4px;
+                font-size: 1.6rem;
+                margin: 2px 0 4px;
             }
 
-            .label-row {
-                margin-bottom: 4px;
+            .big-number {
+                font-size: 1.16rem;
+            }
+
+            .small-muted,
+            .mini-list,
+            .mini-list li,
+            .ahr-guide,
+            .halving-meta,
+            .halving-main,
+            .news-card .scroll-box {
+                font-size: 0.6rem !important;
+                line-height: 1.25 !important;
+            }
+
+            .news-card .scroll-box {
+                min-height: 94px;
+                max-height: 94px;
+            }
+
+            .ahr-layout {
+                gap: 8px;
+            }
+
+            .ahr-value {
+                font-size: 1.16rem;
             }
 
             .inline-badge {
-                font-size: 0.55rem;
+                margin-left: 4px;
+                font-size: 0.5rem;
                 padding: 1px 4px;
+            }
+
+            .miner-layout {
+                gap: 8px;
+            }
+
+            .mini-list {
+                padding-left: 14px;
+                margin-top: 4px;
+            }
+
+            .halving-main {
+                min-height: 70px;
             }
 
             .progress-bar-bg {
@@ -455,16 +513,15 @@
                 height: 7px;
             }
 
-            .live-line {
-                font-size: 0.6rem;
-                min-height: 14px;
+            .ad-banner-bottom {
+                padding: 10px;
+                border-radius: 14px;
+                font-size: 0.62rem;
+                line-height: 1.35;
             }
 
-            .ad-banner-bottom {
-                padding: 7px 9px;
-                border-radius: 12px;
-                font-size: 0.62rem;
-                line-height: 1.25;
+            .mono-id {
+                font-size: 0.82rem;
             }
         }
     </style>
@@ -474,46 +531,44 @@
     <h1>🚀 Crypto AI</h1>
 
     <div class="grid-container">
-        <div class="card span-4">
+        <div class="card span-4 top-card">
             <h2>比特币实时价格 (币安 WebSocket) & 2% 波动报警</h2>
-            <div class="top-card-content">
-                <div class="btc-left">
-                    <div class="label-row">
-                        <div class="token-icon btc-icon">
-                            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <circle cx="32" cy="32" r="32" fill="transparent"/>
+            <div class="top-layout">
+                <div class="top-left">
+                    <div class="asset-head">
+                        <div class="token-icon">
+                            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="32" cy="32" r="32" fill="#F7931A"/>
                                 <path d="M40.88 27.7c1.35-9.05-12.1-10.52-12.1-10.52l1.04-4.14-2.53-.63-1.02 4.08c-.66-.17-1.34-.32-2.02-.47l1.03-4.12-2.53-.63-1.04 4.16c-.54-.12-1.07-.25-1.59-.38l-3.49-.87-.67 2.71s1.88.43 1.84.45c1.03.26 1.22.95 1.19 1.47l-1.2 4.82c.08.02.18.06.31.1l-.32-.08-1.66 6.75c-.12.28-.46.7-1.18.53.03.03-1.85-.46-1.85-.46l-1.27 2.94 3.31.82c.61.15 1.24.32 1.87.47l-1.04 4.24 2.53.63 1.03-4.15c.68.18 1.36.35 2.02.52l-1.03 4.14 2.53.63 1.04-4.22c4.3.81 7.55.49 8.92-3.43 1.11-3.13-.03-4.94-2.31-6.1 1.65-.38 2.9-1.35 3.23-3.44zm-3.45 4.89c-.47 1.89-3.62.91-4.64.66l.82-3.29c1.02.26 4.34.62 3.82 2.63zm.45-4.73c-.43 1.71-3.07.88-3.92.66l.74-2.97c.85.21 3.64.47 3.18 2.31z" fill="#fff"/>
-                                <rect x="27.5" y="10" width="3" height="44" rx="1.5" fill="#fff" opacity="0.95"/>
-                                <rect x="34.5" y="10" width="3" height="44" rx="1.5" fill="#fff" opacity="0.95"/>
+                                <rect x="27.6" y="11" width="3" height="42" rx="1.5" fill="#fff"/>
+                                <rect x="34.4" y="11" width="3" height="42" rx="1.5" fill="#fff"/>
                             </svg>
                         </div>
-                        <span style="font-size: 1.9rem; font-weight: 900; color: #f59e0b;">BTC</span>
+                        <div class="asset-code" style="color:#f59e0b;">BTC</div>
                     </div>
 
                     <div class="btc-price-text" :class="priceColor">
                         {{ currentPrice === 0 ? '连接中...' : '$ ' + currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                     </div>
 
-                    <div class="live-line">
-                        {{ btcRealtimeStatus }}
-                    </div>
+                    <div class="realtime-line">{{ btcRealtimeStatus }}</div>
 
-                    <p style="margin: 8px 0 0; font-size: 1.02rem; color: #94a3b8;">
+                    <div class="meta-line">
                         监控基准:
-                        <strong style="color: #e2e8f0;">$ {{ baselinePrice.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</strong>
+                        <strong style="color:#e2e8f0;">$ {{ baselinePrice.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</strong>
                         |
                         波动:
-                        <span :class="priceColor" style="font-size: 1.1rem;">{{ priceChangePercent }}%</span>
-                    </p>
+                        <span :class="priceColor">{{ priceChangePercent }}%</span>
+                    </div>
                 </div>
 
-                <div class="btc-right">
-                    <h3 style="font-size: 0.95rem; margin: 0 0 8px; color: #94a3b8;">报警系统日志</h3>
+                <div class="top-right">
+                    <h3 style="margin:0 0 8px 0; font-size:0.95rem; color:#94a3b8;">报警系统日志</h3>
                     <div class="scroll-box">
                         <p v-for="(log, index) in alertLogs" :key="index" :class="log.type === 'up' ? 'price-up' : 'price-down'">
                             [{{ log.time }}] {{ log.msg }}
                         </p>
-                        <p v-if="alertLogs.length === 0" style="color: #64748b; text-align: center; border: none; margin-top: 14px;">
+                        <p v-if="alertLogs.length === 0" style="color:#64748b; text-align:center; border:none; margin-top:12px;">
                             🟢 暂无波动达到 2% 的记录...
                         </p>
                     </div>
@@ -522,119 +577,110 @@
         </div>
 
         <div class="card span-2">
-            <h2>💵 稳定币实时汇率监控</h2>
-            <div style="margin-top: 2px;">
-                <div class="stablecoin-row">
-                    <div class="stablecoin-logo">
-                        <div class="token-icon usdt-icon">
-                            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <circle cx="32" cy="32" r="32" fill="transparent"/>
-                                <path d="M19 18h26v6h-10v5.1c7.82.37 13 1.98 13 3.86 0 2.27-7.16 4.12-16 4.12s-16-1.85-16-4.12c0-1.88 5.18-3.49 13-3.86V24H19zm13 14.8c8.08 0 13.1-.93 13.1-1.74S40.08 29.3 32 29.3s-13.1.93-13.1 1.76S23.92 32.8 32 32.8zm-3 1.56v11.64h6V34.36c-.99.03-1.99.05-3 .05s-2.01-.02-3-.05z" fill="#fff"/>
-                            </svg>
-                        </div>
-                        <span style="color: #34d399;">USDT / CNY</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="big-number" style="font-size: 1.9rem; margin: 0;" :class="usdtColor">
-                            {{ usdtCnyPrice === '0.00' ? '连接中...' : '¥ ' + usdtCnyPrice }}
-                        </div>
-                        <div style="font-size: 0.78rem; color: #64748b;">
-                            币安 C2C 实时广告中位价
-                        </div>
-                    </div>
-                </div>
+            <h2>💴 稳定币实时汇率监控</h2>
 
-                <div class="stablecoin-row">
-                    <div class="stablecoin-logo">
-                        <div class="token-icon usdc-icon">
-                            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <circle cx="32" cy="32" r="32" fill="transparent"/>
-                                <path d="M34.8 17.8a10.3 10.3 0 0 1 8.62 4.63l-3.11 2.2a6.46 6.46 0 0 0-5.51-2.97c-3.59 0-6.5 2.89-6.5 6.46s2.91 6.46 6.5 6.46a6.48 6.48 0 0 0 5.5-2.95l3.12 2.18a10.33 10.33 0 0 1-8.62 4.64c-5.8 0-10.5-4.68-10.5-10.33S29 17.8 34.8 17.8z" fill="#fff"/>
-                                <path d="M29.2 26.1c0-1.1.92-1.99 2.05-1.99h4.62v-3.6h-2.1V17h-3.54v3.5h-1.26c-3.05 0-5.52 2.4-5.52 5.35 0 2.97 2.47 5.37 5.52 5.37h3.53c1.13 0 2.05.89 2.05 1.99 0 1.1-.92 2-2.05 2h-6.42v3.6h4.13V47h3.54v-8.2h.86c3.05 0 5.52-2.4 5.52-5.36 0-2.96-2.47-5.35-5.52-5.35h-3.53c-1.13 0-2.05-.9-2.05-2z" fill="#fff"/>
-                                <path d="M20.6 22.4a15.2 15.2 0 0 0 0 19.2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                                <path d="M43.4 22.4a15.2 15.2 0 0 1 0 19.2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                        <span style="color: #60a5fa;">USDC / USDT</span>
+            <div class="stablecoin-row">
+                <div class="stablecoin-logo">
+                    <div class="token-icon">
+                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="32" cy="32" r="32" fill="#26A17B"/>
+                            <path d="M19 18h26v6h-10v5.1c7.82.37 13 1.98 13 3.86 0 2.27-7.16 4.12-16 4.12s-16-1.85-16-4.12c0-1.88 5.18-3.49 13-3.86V24H19zm13 14.8c8.08 0 13.1-.93 13.1-1.74S40.08 29.3 32 29.3s-13.1.93-13.1 1.76S23.92 32.8 32 32.8zm-3 1.56v11.64h6V34.36c-.99.03-1.99.05-3 .05s-2.01-.02-3-.05z" fill="#fff"/>
+                        </svg>
                     </div>
-                    <div style="text-align: right;">
-                        <div class="big-number" style="font-size: 1.9rem; margin: 0;" :class="usdcColor">
-                            $ {{ usdcPegPrice.toFixed(4) }}
-                        </div>
-                        <div style="font-size: 0.78rem; color: #64748b;">
-                            现货锚定实时价
-                        </div>
+                    <div class="stablecoin-label" style="color:#34d399;">USDT / CNY</div>
+                </div>
+                <div class="stablecoin-right">
+                    <div class="big-number" style="font-size:1.75rem; margin:0;" :class="usdtColor">
+                        {{ usdtCnyPrice === '0.00' ? '连接中...' : '¥ ' + usdtCnyPrice }}
                     </div>
+                    <div class="small-muted">币安 C2C 实时广告中位价</div>
+                </div>
+            </div>
+
+            <div class="stablecoin-row">
+                <div class="stablecoin-logo">
+                    <div class="token-icon">
+                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="32" cy="32" r="32" fill="#2775CA"/>
+                            <path d="M34.8 17.8a10.3 10.3 0 0 1 8.62 4.63l-3.11 2.2a6.46 6.46 0 0 0-5.51-2.97c-3.59 0-6.5 2.89-6.5 6.46s2.91 6.46 6.5 6.46a6.48 6.48 0 0 0 5.5-2.95l3.12 2.18a10.33 10.33 0 0 1-8.62 4.64c-5.8 0-10.5-4.68-10.5-10.33S29 17.8 34.8 17.8z" fill="#fff"/>
+                            <path d="M29.2 26.1c0-1.1.92-1.99 2.05-1.99h4.62v-3.6h-2.1V17h-3.54v3.5h-1.26c-3.05 0-5.52 2.4-5.52 5.35 0 2.97 2.47 5.37 5.52 5.37h3.53c1.13 0 2.05.89 2.05 1.99 0 1.1-.92 2-2.05 2h-6.42v3.6h4.13V47h3.54v-8.2h.86c3.05 0 5.52-2.4 5.52-5.36 0-2.96-2.47-5.35-5.52-5.35h-3.53c-1.13 0-2.05-.9-2.05-2z" fill="#fff"/>
+                            <path d="M20.6 22.4a15.2 15.2 0 0 0 0 19.2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M43.4 22.4a15.2 15.2 0 0 1 0 19.2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="stablecoin-label" style="color:#60a5fa;">USDC / USDT</div>
+                </div>
+                <div class="stablecoin-right">
+                    <div class="big-number" style="font-size:1.75rem; margin:0;" :class="usdcColor">
+                        $ {{ usdcPegPrice.toFixed(4) }}
+                    </div>
+                    <div class="small-muted">现货锚定实时价</div>
                 </div>
             </div>
         </div>
 
-        <div class="card span-2">
+        <div class="card span-2 news-card">
             <h2>🌐 交易所与国际实时动态</h2>
-            <div class="scroll-box news-box">
+            <div class="scroll-box">
                 <p v-for="(news, index) in newsList" :key="index">
                     <strong :style="{ color: getNewsColor(news.timestamp) }">
                         [{{ news.source }}]
-                        <span style="font-size: 0.75rem;">({{ getNewsTimeText(news.timestamp) }})</span>
-                    </strong><br>
-                    <span style="color: #cbd5e1;">{{ news.title }}</span>
+                        <span style="font-size:0.75rem;">({{ getNewsTimeText(news.timestamp) }})</span>
+                    </strong><br />
+                    <span style="color:#cbd5e1;">{{ news.title }}</span>
                 </p>
-                <p v-if="newsList.length === 0" style="color: #64748b; text-align: center; border: none; margin-top: 14px;">
+                <p v-if="newsList.length === 0" style="color:#64748b; text-align:center; border:none; margin-top:12px;">
                     拉取全球资讯网络中...
                 </p>
             </div>
         </div>
 
         <div class="card span-2">
-            <div class="fg-wrap">
+            <div class="fg-layout">
                 <div id="gaugeChart" class="fg-chart"></div>
-                <div class="fg-text">
-                    <div class="small-muted" style="font-size: 0.95rem;">恐惧 & 贪婪指数</div>
+                <div>
+                    <div class="small-muted" style="font-size:0.95rem;">恐惧 & 贪婪指数</div>
                     <div class="fg-number" :style="{ color: fgColor }">{{ fearGreedIndex }}</div>
-                    <div class="big-number" :style="{ color: fgColor }" style="font-size: 1.9rem;">{{ fearGreedClassification }}</div>
-                    <p style="font-size: 0.88rem; color: #94a3b8; margin: 8px 0 0; line-height: 1.4;">
-                        {{ fgSubtext }}
-                    </p>
+                    <div class="big-number" :style="{ color: fgColor }" style="font-size:2rem;">{{ fearGreedClassification }}</div>
+                    <div class="small-muted" style="margin-top:8px;">{{ fgSubtext }}</div>
                 </div>
             </div>
         </div>
 
         <div class="card span-2">
-            <h2>
-                AHR999 实时定投指数
-                <span class="inline-badge">Live 运算</span>
-            </h2>
+            <h2>AHR999 实时定投指数 <span class="inline-badge">Live 运算</span></h2>
             <div class="ahr-layout">
-                <div class="big-number" style="color: #38bdf8; font-size: 3.1rem; margin-left: 8px;">
-                    {{ liveAhr999 }}
+                <div class="ahr-left">
+                    <div class="ahr-value">{{ liveAhr999 }}</div>
                 </div>
-                <div>
-                    <p style="margin: 0 0 6px; font-size: 0.85rem;"><strong>指数区间指南:</strong></p>
-                    <ul class="mini-list">
-                        <li><span style="color: #22c55e;">■ &lt; 0.45</span> 抄底 (买入)</li>
-                        <li><span style="color: #facc15;">■ 0.45 - 1.2</span> 定投 (买入)</li>
-                        <li><span style="color: #fb923c;">■ 1.2 - 5.0</span> 等待 (持有)</li>
-                        <li><span style="color: #ef4444;">■ &gt; 5.0</span> 逃顶 (卖出)</li>
-                    </ul>
+                <div class="ahr-guide">
+                    <div style="margin-bottom:5px; font-size:0.88rem;"><strong>指数区间指南:</strong></div>
+                    <div class="small-muted" style="line-height:1.55;">
+                        <div><span style="color:#22c55e;">■ &lt; 0.45</span> 抄底 (买入)</div>
+                        <div><span style="color:#facc15;">■ 0.45 - 1.2</span> 定投 (买入)</div>
+                        <div><span style="color:#fb923c;">■ 1.2 - 5.0</span> 等待 (持有)</div>
+                        <div><span style="color:#ef4444;">■ &gt; 5.0</span> 逃顶 (卖出)</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card span-3">
+        <div class="card span-3 miner-card">
             <h2>主流矿机关机价及状态监控 (电费 0.4 元/度)</h2>
             <div class="miner-layout">
-                <div>
-                    <p style="margin: 0; color: #22c55e;"><strong>在运行高能效机型:</strong></p>
-                    <ul class="mini-list" style="padding-left: 18px; list-style: disc;">
-                        <li :style="{ color: isShutdown(32500) ? '#ef4444' : '#cbd5e1' }">蚂蚁 S21: ~$32,500 <span v-if="isShutdown(32500)"><strong>(已关机)</strong></span></li>
-                        <li :style="{ color: isShutdown(42100) ? '#ef4444' : '#cbd5e1' }">蚂蚁 S19 XP: ~$42,100 <span v-if="isShutdown(42100)"><strong>(已关机)</strong></span></li>
-                        <li :style="{ color: isShutdown(51000) ? '#ef4444' : '#cbd5e1' }">神马 M50S: ~$51,000 <span v-if="isShutdown(51000)"><strong>(已关机)</strong></span></li>
-                        <li :style="{ color: isShutdown(58500) ? '#ef4444' : '#cbd5e1' }">蚂蚁 S19 Pro: ~$58,500 <span v-if="isShutdown(58500)"><strong>(已关机)</strong></span></li>
+                <div style="flex:1; min-width:0;">
+                    <div style="margin-bottom:4px; color:#22c55e; font-weight:800;">在运行高能效机型:</div>
+                    <ul class="mini-list">
+                        <li :style="{ color: isShutdown(32500) ? '#ef4444' : '#d0d8e6' }">蚂蚁 S21: ~$32,500 <span v-if="isShutdown(32500)"><strong>(已关机)</strong></span></li>
+                        <li :style="{ color: isShutdown(42100) ? '#ef4444' : '#d0d8e6' }">蚂蚁 S19 XP: ~$42,100 <span v-if="isShutdown(42100)"><strong>(已关机)</strong></span></li>
+                        <li :style="{ color: isShutdown(51000) ? '#ef4444' : '#d0d8e6' }">神马 M50S: ~$51,000 <span v-if="isShutdown(51000)"><strong>(已关机)</strong></span></li>
+                        <li :style="{ color: isShutdown(58500) ? '#ef4444' : '#d0d8e6' }">蚂蚁 S19 Pro: ~$58,500 <span v-if="isShutdown(58500)"><strong>(已关机)</strong></span></li>
                     </ul>
                 </div>
-                <div>
-                    <p style="margin: 0; color: #ef4444;"><strong>已淘汰/高成本设备:</strong></p>
-                    <ul class="mini-list" style="padding-left: 18px; list-style: disc; color: #ef4444; font-weight: 700;">
+
+                <div style="flex:1; min-width:0;">
+                    <div style="margin-bottom:4px; color:#ef4444; font-weight:800;">已淘汰/高成本设备:</div>
+                    <ul class="mini-list" style="color:#ef4444; font-weight:700;">
                         <li>神马 M30S: ~$74,000 (已关机)</li>
                         <li>蚂蚁 S19: ~$85,000 (已关机)</li>
                     </ul>
@@ -644,34 +690,41 @@
 
         <div class="card span-3 halving-card">
             <h2>⏳ 比特币减半倒计时 (推算)</h2>
-            <div class="big-number" style="color: #f59e0b; margin: 0;">
-                {{ halvingDays }} <span style="font-size: 1rem; color: #94a3b8;">天</span>
-            </div>
-            <div class="bottom-card-text" style="margin-top: 10px;">
-                推算区块 <strong style="color: #e2e8f0;">{{ calculatedBlock.toLocaleString() }}</strong>
-                / 目标 <strong style="color: #e2e8f0;">1,050,000</strong><br>
-                预计日期 <strong style="color: #e2e8f0;">{{ halvingDateFormatted }}</strong>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" :style="{ width: halvingProgress + '%' }"></div>
+            <div class="halving-main">
+                <div class="big-number" style="color:#f59e0b; margin:0 0 8px 0;">
+                    {{ halvingDays }}
+                    <span style="font-size:1rem; color:#94a3b8;">天</span>
+                </div>
+
+                <div class="small-muted halving-meta" style="font-size:0.96rem; line-height:1.6;">
+                    推算区块 <strong style="color:#e2e8f0;">{{ calculatedBlock.toLocaleString() }}</strong>
+                    / 目标 <strong style="color:#e2e8f0;">1,050,000</strong><br />
+                    预计日期 <strong style="color:#e2e8f0;">{{ halvingDateFormatted }}</strong>
+                </div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" :style="{ width: halvingProgress + '%' }"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="ad-banner-bottom">
-        <div style="margin-bottom: 8px; color: #facc15; font-weight: 700;">
-            ⚠️ 提示：访问以下网页链接及下载安装，请务必全程开启科学上网环境。
+    <div class="ad-banner-bottom ad-card-mobile">
+        <div class="ad-title">⚠️ 提示：访问以下网页链接及下载安装，请务必全程开启科学上网环境。</div>
+
+        <div style="margin-bottom:8px;">
+            1. Bitget Wallet Card 免费注册，零手续费，开卡成功返 5 美金。<br />
+            注册链接：
+            <a href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank">https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy</a>
         </div>
+
         <div>
-            1. Bitget Wallet Card 免费注册，零手续费：
-            <a href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank">点击专属链接注册</a>
-        </div>
-        <div>
-            2. 币安 App 下载：
-            <a href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">Android 安装包</a>
-            |
-            <a href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">iOS 下载指南</a>
-            ，邀请码：<strong style="color: #22c55e;">23017017</strong>
+            2. 请使用您的浏览器访问以下链接，下载币安 App。在注册页面输入我的邀请码，超级返佣，加入全球最大的加密货币交易平台。<br />
+            Android<br />
+            <a href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">https://download.bmwweb.cc/pack/BNApp_00000058.apk</a><br />
+            iOS<br />
+            <a href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">https://www.bsmkweb.com/download-guide?hl=zh-CN</a><br />
+            邀请码：<span class="mono-id">23017017</span>
         </div>
     </div>
 </div>
@@ -713,7 +766,6 @@
             startBlock: 840000,
             isFetchingPrice: false,
             btcWs: null,
-            lastTickTime: 0,
             btcRealtimeStatus: '币安实时流连接中...'
         },
         computed: {
@@ -803,15 +855,13 @@
 
             connectBtcWebSocket() {
                 try {
-                    if (this.btcWs) {
-                        this.btcWs.close();
-                    }
+                    if (this.btcWs) this.btcWs.close();
 
                     const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
                     this.btcWs = ws;
 
                     ws.onopen = () => {
-                        this.btcRealtimeStatus = '币安 WebSocket 已连接，逐笔推送中...';
+                        this.btcRealtimeStatus = '币安 WebSocket 已连接，逐笔实时推送中...';
                     };
 
                     ws.onmessage = (event) => {
@@ -822,15 +872,14 @@
                                 if (!isNaN(price)) {
                                     this.updatePriceLogic(price);
                                     const eventTime = data.E || Date.now();
-                                    this.lastTickTime = eventTime;
-                                    this.btcRealtimeStatus = `币安逐笔成交推送 | 更新时间 ${this.formatMsTime(eventTime)}`;
+                                    this.btcRealtimeStatus = `毫秒级更新时间 ${this.formatMsTime(eventTime)}`;
                                 }
                             }
                         } catch (e) {}
                     };
 
                     ws.onerror = () => {
-                        this.btcRealtimeStatus = 'WebSocket 异常，自动切回轮询补偿...';
+                        this.btcRealtimeStatus = '实时流异常，切回 REST 补偿...';
                     };
 
                     ws.onclose = () => {
@@ -852,9 +901,6 @@
                     if (res && res.price) {
                         this.updatePriceLogic(parseFloat(res.price));
                         priceFound = true;
-                        if (!this.lastTickTime) {
-                            this.btcRealtimeStatus = 'REST 补偿成功，等待 WebSocket 实时推送...';
-                        }
                     }
                 } catch (e) {}
 
@@ -863,15 +909,15 @@
                         const res = await safeFetch('https://api.mexc.com/api/v3/ticker/price?symbol=BTCUSDT', {}, 3000);
                         if (res && res.price) {
                             this.updatePriceLogic(parseFloat(res.price));
+                            this.btcRealtimeStatus = '币安接口异常，当前使用 MEXC 轮询补偿';
                             priceFound = true;
-                            this.btcRealtimeStatus = '币安接口不可用，已切到 MEXC 补偿轮询';
                         }
                     } catch (e) {}
                 }
 
                 if (!priceFound && this.currentPrice === 0) {
                     this.updatePriceLogic(68500.00);
-                    this.btcRealtimeStatus = '接口不可达，当前显示临时保底值';
+                    this.btcRealtimeStatus = '接口暂不可达，当前显示临时保底值';
                 }
 
                 this.isFetchingPrice = false;
@@ -923,7 +969,6 @@
                     .map(item => parseFloat(item.adv.price));
 
                 if (!prices.length) throw new Error('No valid C2C price');
-
                 return this.median(prices);
             },
 
@@ -1060,12 +1105,12 @@
                         endAngle: 0,
                         min: 0,
                         max: 100,
-                        center: ['50%', isMobile ? '72%' : '74%'],
-                        radius: isMobile ? '98%' : '105%',
+                        center: ['50%', isMobile ? '74%' : '76%'],
+                        radius: isMobile ? '96%' : '105%',
                         splitNumber: 4,
                         axisLine: {
                             lineStyle: {
-                                width: isMobile ? 10 : 14,
+                                width: isMobile ? 9 : 14,
                                 color: [
                                     [0.25, '#ef4444'],
                                     [0.45, '#fb923c'],
@@ -1079,16 +1124,15 @@
                         splitLine: { show: false },
                         axisLabel: { show: false },
                         pointer: {
-                            length: '58%',
+                            length: '56%',
                             width: isMobile ? 5 : 7,
                             itemStyle: { color: '#e2e8f0' }
                         },
                         anchor: {
                             show: true,
-                            size: isMobile ? 8 : 10,
+                            size: isMobile ? 7 : 9,
                             itemStyle: { color: '#e2e8f0' }
                         },
-                        progress: { show: false },
                         detail: { show: false },
                         title: { show: false },
                         data: [{ value: val }]
