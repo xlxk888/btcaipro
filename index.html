@@ -6,9 +6,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
+  
+  <meta name="referrer" content="no-referrer" />
+
+  <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' rx='24' fill='%231b2842'/%3E%3Ctext x='50%25' y='55%25' font-size='80' text-anchor='middle' alignment-baseline='middle'%3E🚀%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' rx='24' fill='%231b2842'/%3E%3Ctext x='50%25' y='55%25' font-size='80' text-anchor='middle' alignment-baseline='middle'%3E🚀%3C/text%3E%3C/svg%3E">
   <link rel="manifest" href='data:application/manifest+json;utf8,{"name":"Crypto AI","short_name":"Crypto AI","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a"}' />
   
-  <title>Crypto AI 稳定修正版</title>
+  <title>Crypto AI 旗舰版</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
@@ -41,16 +46,19 @@
     .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; min-width: 0; }
     .coin-head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
 
-    /* 修复后的 Base64 矢量 Logo */
+    /* 终极修复方案：原生 URL 编码 SVG，丢弃 Base64，100% 兼容 iOS */
     .logo { width: 28px; height: 28px; border-radius: 50%; display: inline-block; flex: 0 0 auto; background-size: cover; background-position: center; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-    .logo-btc { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNmNzkzMWEiLz48cGF0aCBkPSJNMjEuOCAxNC4xYy4zLTIuMy0xLjUtMy4yLTMuMi0zLjhsLjctMi42LTEuNi0uNC0uNiAyLjVjLS40LS4xLS45LS4yLTEuMy0uM2wuNy0yLjUtMS42LS40LS43IDIuNmMtLjMtLjEtLjctLjItMS0uMkwxMSA5bC0uMyAxLjNzLjguMi44LjJjLjQuMS41LjQuNS42bC0uOCAzLjRjLjEgMCAuMi4xLjMuMWwtLjMtLjEtMS4xIDQuNWMtLjEuMi0uMy4zLS42LjIgMCAwLS44LS4yLS44LS4ybC0uNSAxLjQgMi44LjdjLjQuMS44LjIgMS4yLjNsLS43IDIuOCAxLjYuNC43LTIuN2MuNC4xLjkuMiAxLjMuM2wtLjcgMi44IDEuNi40LjctMi44YzIuMy41IDQgLjMgNC44LTEuNy42LTEuNS0uMS0yLjQtMS4xLTIuOS44LS4yIDEuNC0uNyAxLjYtMS43em0tMi4zIDQuNmMtLjQgMS43LTMuMy44LTQuMi42bC44LTNjMSAuMiAzLjguNyAzLjQgMi40em0uNC00LjNjLS40IDEuNS0yLjYuNy0zLjQuNWwuNy0yLjhjLjguMiAzLjEuNyAyLjcgMi4zeiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg=='); }
-    .logo-eth { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2MjdlZWEiLz48cGF0aCBkPSJNMTYgNC4zbC03LjQgMTIuMyA3LjQgNC40IDcuNC00LjRMMTYgNC4zem0wIDE3LjhMMDguNiAxNy44IDE2IDI3LjdsNy40LTkuOS03LjQgNC4zeiIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iLjgiLz48cGF0aCBkPSJNMTYgNC4zdjE2LjdsNy40LTQuNEwxNiA0LjN6IiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuNCIvPjxwYXRoIGQ9Ik0xNiAyMi4xdjUuNmw3LjQtOS45LTcuNCA0LjN6IiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuNiIvPjwvc3ZnPg=='); }
-    .logo-usdt { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMyNmExN2IiLz48cGF0aCBkPSJNMTguNyAxMy41djEwLjFoLTUuNFYxMy41aC01LjZ2LTQuMWgxNi42djQuMWgtNS42em0tMi43IDIuMWMtNC4xIDAtNy42LTEtNy42LTIuMnMzLjUtMi4yIDcuNi0yLjIgNy42IDEgNy42IDIuMi0zLjUgMi4yLTcuNiAyLjJ6IiBmaWxsPSIjZmZmIi8+PC9zdmc+'); }
-    .logo-usdc { background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMyNzc1Y2EiLz48cGF0aCBkPSJNMTYgMjQuM2MtNC42IDAtOC4zLTMuNy04LjMtOC4zczMuNy04LjMgOC4zLTguMyA4LjMgMy43IDguMyA4LjMtMy43IDguMy04LjMgOC4zem0wLTEzLjhjLTMgMC01LjUgMi41LTUuNSA1LjVzMi41IDUuNSA1LjUgNS41IDUuNS0yLjUgNS41LTUuNS0yLjUtNS41LTUuNS01LjV6IiBmaWxsPSIjZmZmIi8+PHBhdGggZD0iTTE0LjUgMTJoM3Y4aC0zeiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik0xMSAxNS41aDEwdjJIMTF6IiBmaWxsPSIjZmZmIi8+PC9zdmc+'); }
+    .logo-btc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23f7931a'/%3E%3Cpath d='M21.8 14.1c.3-2.3-1.5-3.2-3.2-3.8l.7-2.6-1.6-.4-.6 2.5c-.4-.1-.9-.2-1.3-.3l.7-2.5-1.6-.4-.7 2.6c-.3-.1-.7-.2-1-.2L11 9l-.3 1.3s.8.2.8.2c.4.1.5.4.5.6l-.8 3.4c.1 0 .2.1.3.1l-.3-.1-1.1 4.5c-.1.2-.3.3-.6.2 0 0-.8-.2-.8-.2l-.5 1.4 2.8.7c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.8 1.6.4.7-2.8c2.3.5 4 .3 4.8-1.7.6-1.5-.1-2.4-1.1-2.9.8-.2 1.4-.7 1.6-1.7zm-2.3 4.6c-.4 1.7-3.3.8-4.2.6l.8-3c1 .2 3.8.7 3.4 2.4zm.4-4.3c-.4 1.5-2.6.7-3.4.5l.7-2.8c.8.2 3.1.7 2.7 2.3z' fill='%23fff'/%3E%3C/svg%3E"); }
+    .logo-eth { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23627eea'/%3E%3Cpath d='M16 4.3l-7.4 12.3 7.4 4.4 7.4-4.4L16 4.3zm0 17.8l-7.4-4.3L16 27.7l7.4-9.9-7.4 4.3z' fill='%23fff' opacity='.8'/%3E%3Cpath d='M16 4.3v16.7l7.4-4.4L16 4.3z' fill='%23fff' opacity='.4'/%3E%3Cpath d='M16 22.1v5.6l7.4-9.9-7.4 4.3z' fill='%23fff' opacity='.6'/%3E%3C/svg%3E"); }
+    .logo-usdt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2326a17b'/%3E%3Cpath d='M18.7 13.5v10.1h-5.4V13.5h-5.6v-4.1h16.6v4.1h-5.6zm-2.7 2.1c-4.1 0-7.6-1-7.6-2.2s3.5-2.2 7.6-2.2 7.6 1 7.6 2.2-3.5 2.2-7.6 2.2z' fill='%23fff'/%3E%3C/svg%3E"); }
+    .logo-usdc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%232775ca'/%3E%3Cpath d='M16 24.3c-4.6 0-8.3-3.7-8.3-8.3s3.7-8.3 8.3-8.3 8.3 3.7 8.3 8.3-3.7 8.3-8.3 8.3zm0-13.8c-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5 5.5-2.5 5.5-5.5-2.5-5.5-5.5-5.5z' fill='%23fff'/%3E%3Cpath d='M14.5 12h3v8h-3z' fill='%23fff'/%3E%3Cpath d='M11 15.5h10v2H11z' fill='%23fff'/%3E%3C/svg%3E"); }
 
     .logo-small { font-size: 1.2rem; vertical-align: middle; }
     .code { font-size: 1rem; font-weight: 900; }
-    .price { font-size: 1.65rem; font-weight: 900; line-height: 1; word-break: break-word; }
+    
+    /* 强制禁止换行，确保长数字在同一行 */
+    .price { font-size: 1.65rem; font-weight: 900; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
     .up { color: #22c55e; font-weight: 800; }
     .down { color: #ef4444; font-weight: 800; }
     .live { color: #93c5fd; font-size: .78rem; min-height: 16px; margin-top: 6px; }
@@ -62,8 +70,8 @@
     
     .global-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px dashed rgba(72,99,150,.38); }
     .global-item:last-child { margin: 0; padding: 0; border: 0; }
-    .global-name { font-size: .85rem; color: #d0d8e6; font-weight: bold; }
-    .global-price { font-size: .95rem; font-weight: 900; }
+    .global-name { font-size: .85rem; color: #d0d8e6; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+    .global-price { font-size: .95rem; font-weight: 900; white-space: nowrap; }
     .global-change { font-size: .8rem; text-align: right; min-width: 45px; }
 
     .scroll p { margin: 0 0 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(72,99,150,.38); font-size: .82rem; line-height: 1.3; }
@@ -72,7 +80,7 @@
     .stable-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; }
     .stable-row + .stable-row { margin-top: 8px; }
     .stable-left { display: flex; align-items: center; gap: 7px; font-size: .9rem; font-weight: 800; }
-    .stable-val { font-size: 1.5rem; font-weight: 900; line-height: 1; }
+    .stable-val { font-size: 1.5rem; font-weight: 900; line-height: 1; white-space: nowrap; }
     .muted { color: #8fa0ba; font-size: .75rem; }
 
     .fg-wrap { display: grid; grid-template-columns: 45% 55%; align-items: center; min-height: 140px; }
@@ -92,9 +100,9 @@
     .ad-red { color: #ef4444; }
     .dl { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1px solid #3b5f96; border-radius: 50%; color: #7dd3fc; text-decoration: none; font-size: 10px; font-weight: 800; margin-left: 2px; vertical-align: middle; }
 
-    /* 让音频播放器隐藏 */
     #alarmSound { display: none; }
 
+    /* 手机端专门优化 */
     @media (max-width: 1024px) {
       body { padding: 6px; }
       h1 { font-size: 1.5rem; margin-bottom: 6px; }
@@ -103,11 +111,15 @@
       .top-card, .miner-card, .half-card { grid-column: span 2; }
       .card { padding: 8px; }
       .card h2 { font-size: .7rem; margin-bottom: 6px; padding-bottom: 5px; }
+      
       .logo { width: 22px; height: 22px; }
-      .price { font-size: 1.2rem; }
+      
+      /* 缩小价格字号，避免文字过长折行 */
+      .price { font-size: 1.35rem; }
+      
       .global-name { font-size: .75rem; }
       .global-price { font-size: .85rem; }
-      .stable-val { font-size: 1.1rem; }
+      .stable-val { font-size: 1.15rem; }
       .fg-num { font-size: 1.25rem; }
       .ahr-val { font-size: 1.1rem; }
       .mini { font-size: .58rem; }
@@ -118,13 +130,16 @@
 </head>
 <body>
 <div id="app">
-  <h1>🚀 Crypto AI (PWA增强版)</h1>
+  <h1>🚀 Crypto AI (直连旗舰版)</h1>
   
   <audio id="alarmSound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NExBQAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
 
   <div class="grid">
     <div class="card span-4 top-card">
-      <h2>Crypto 实时价格 & 2% 波动报警 <button @click="testAudio" style="background:#1f2d45;color:#fff;border:none;border-radius:4px;font-size:12px;cursor:pointer;margin-left:10px;">🔔 测试声音(必点以授权)</button></h2>
+      <h2 style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Crypto 实时价格 & 2% 波动报警</span>
+        <button @click="testAudio" style="background:#1f2d45;color:#facc15;border:1px solid #3b5f96;border-radius:4px;font-size:12px;padding:3px 8px;cursor:pointer;">🔔 声音授权</button>
+      </h2>
       <div class="top-layout">
         <div>
           <div class="coin-grid">
@@ -133,8 +148,8 @@
                 <div class="logo logo-btc"></div>
                 <div class="code" style="color:#f59e0b;">BTC</div>
               </div>
-              <div class="price" :class="btcPriceColor">
-                {{ btcPrice ? ('$ ' + btcPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '数据加载中...' }}
+              <div class="price" :class="btcPriceColor" title="BTC Price">
+                {{ btcPrice ? ('$ ' + btcPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '加载中...' }}
               </div>
             </div>
 
@@ -143,14 +158,14 @@
                 <div class="logo logo-eth"></div>
                 <div class="code" style="color:#a5b4fc;">ETH</div>
               </div>
-              <div class="price">
-                {{ ethPrice ? ('$ ' + ethPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '数据加载中...' }}
+              <div class="price" title="ETH Price">
+                {{ ethPrice ? ('$ ' + ethPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '加载中...' }}
               </div>
             </div>
           </div>
           <div class="live">{{ cryptoRealtimeStatus }}</div>
           <div class="meta">
-            BTC 监控基准: <strong style="color:#e2e8f0;">{{ baselineBtcPrice ? ('$ ' + baselineBtcPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '--' }}</strong>
+            BTC 基准: <strong style="color:#e2e8f0;">{{ baselineBtcPrice ? ('$ ' + baselineBtcPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '--' }}</strong>
             | 波动: <span :class="btcPriceColor">{{ btcPriceChangePercent }}%</span>
           </div>
         </div>
@@ -184,16 +199,16 @@
     </div>
 
     <div class="card span-2">
-      <h2>🌍 环球板块 (雅虎真实数据)</h2>
+      <h2>🌍 环球板块 (新浪财经底层直连)</h2>
       <div class="scroll news" style="padding: 10px;">
         <div v-for="(item, i) in globalMarkets" :key="i" class="global-item">
           <div class="global-name"><span class="logo-small">{{ item.icon }}</span> {{ item.name }}</div>
           <div style="text-align:right;">
-            <div class="global-price" :class="item.change >= 0 ? 'up' : 'down'">
+            <div class="global-price" :class="item.change > 0 ? 'up' : (item.change < 0 ? 'down' : '')">
               {{ item.prefix || '' }}{{ item.price }}{{ item.suffix || '' }}
             </div>
-            <div class="global-change" :class="item.change >= 0 ? 'up' : 'down'">
-              {{ item.change >= 0 ? '+' : '' }}{{ item.change }}%
+            <div class="global-change" :class="item.change > 0 ? 'up' : (item.change < 0 ? 'down' : '')">
+              {{ item.change > 0 ? '+' : '' }}{{ item.change }}%
             </div>
           </div>
         </div>
@@ -337,17 +352,23 @@
       this.fetchFearAndGreed();
       this.fetchCryptoPrices();
       this.fetchStablecoinPriceData();
-      this.fetchRealGlobalMarkets();
+      
+      // 立即拉取一次新浪环球数据
+      this.fetchSinaGlobalMarkets();
       
       setInterval(() => this.nowSeconds = Math.floor(Date.now() / 1000), 1000);
       setInterval(() => this.fetchCryptoPrices(), 3000);
       setInterval(() => this.fetchStablecoinPriceData(), 15000);
-      setInterval(() => this.fetchRealGlobalMarkets(), 15000);
+      
+      // 每 10 秒从新浪高速接口刷新一次环球金融数据
+      setInterval(() => this.fetchSinaGlobalMarkets(), 10000);
     },
     methods: {
       testAudio() {
         const audio = document.getElementById('alarmSound');
-        audio.play().catch(e => alert("浏览器拦截了自动播放，需点击一次页面。"));
+        audio.play()
+          .then(() => alert("声音授权成功！2% 波动时会触发报警。"))
+          .catch(e => alert("您的浏览器拦截了声音，请检查静音设置。"));
       },
       async fetchSymbolPrice(symbol) {
         const apis = [
@@ -371,7 +392,7 @@
           this.checkBtcAlert();
         }
         if (eth > 0) this.ethPrice = eth;
-        this.cryptoRealtimeStatus = btc ? "接口连接正常" : "网络波动...";
+        this.cryptoRealtimeStatus = btc ? "接口连接正常" : "网络波动中...";
         this.refreshAhr();
       },
       checkBtcAlert() {
@@ -389,7 +410,7 @@
         this.baselineBtcPrice = this.btcPrice;
         
         const audio = document.getElementById('alarmSound');
-        if (audio) audio.play().catch(e => console.log("需用户交互后才能播放声音"));
+        if (audio) audio.play().catch(e => console.log("需授权播放声音"));
       },
       async fetchStablecoinPriceData() {
         try {
@@ -401,32 +422,58 @@
           }
         } catch (_) {}
       },
-      async fetchRealGlobalMarkets() {
-        try {
-          const symbols = this.globalMarkets.map(m => m.id).join(',');
-          const targetUrl = encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}`);
-          const res = await safeFetch(`https://api.allorigins.win/raw?url=${targetUrl}`, {}, 4000);
+      
+      // 🌟 核心杀手锏：采用新浪财经 JSONP 接口，国内 100% 直连无跨域报错！
+      fetchSinaGlobalMarkets() {
+        const script = document.createElement('script');
+        // 请求 新浪外盘黄金, 外盘原油, 道琼斯, 纳斯达克, 上证指数
+        script.src = 'https://hq.sinajs.cn/list=hf_GC,hf_CL,gb_dji,gb_ixic,s_sh000001';
+        
+        script.onload = () => {
+          try {
+            // 解析黄金 hf_GC
+            if(typeof hq_str_hf_GC !== 'undefined') {
+              let gc = hq_str_hf_GC.split(',');
+              let p = parseFloat(gc[0]), o = parseFloat(gc[7]);
+              this.updateGlobalItem('GC=F', p, ((p-o)/o*100));
+            }
+            // 解析原油 hf_CL
+            if(typeof hq_str_hf_CL !== 'undefined') {
+              let cl = hq_str_hf_CL.split(',');
+              let p = parseFloat(cl[0]), o = parseFloat(cl[7]);
+              this.updateGlobalItem('CL=F', p, ((p-o)/o*100));
+            }
+            // 解析道琼斯 gb_dji
+            if(typeof hq_str_gb_dji !== 'undefined') {
+              let dji = hq_str_gb_dji.split(',');
+              this.updateGlobalItem('^DJI', parseFloat(dji[1]), parseFloat(dji[2]));
+            }
+            // 解析纳斯达克 gb_ixic
+            if(typeof hq_str_gb_ixic !== 'undefined') {
+              let ixic = hq_str_gb_ixic.split(',');
+              this.updateGlobalItem('^IXIC', parseFloat(ixic[1]), parseFloat(ixic[2]));
+            }
+            // 解析上证指数 s_sh000001
+            if(typeof hq_str_s_sh000001 !== 'undefined') {
+              let sh = hq_str_s_sh000001.split(',');
+              this.updateGlobalItem('000001.SS', parseFloat(sh[1]), parseFloat(sh[3]));
+            }
+          } catch(e) { console.log("新浪数据解析失败"); }
           
-          if (res && res.quoteResponse && res.quoteResponse.result) {
-            const dataMap = {};
-            res.quoteResponse.result.forEach(item => {
-              dataMap[item.symbol] = {
-                price: item.regularMarketPrice.toFixed(2),
-                change: item.regularMarketChangePercent.toFixed(2)
-              };
-            });
-            
-            this.globalMarkets = this.globalMarkets.map(market => {
-              if (dataMap[market.id]) {
-                return { ...market, price: dataMap[market.id].price, change: dataMap[market.id].change };
-              }
-              return market;
-            });
-          }
-        } catch (e) {
-          console.log("环球数据拉取失败，等待下一次轮询");
+          // 执行完后清理 script 标签保持页面干净
+          document.head.removeChild(script);
+        };
+        document.head.appendChild(script);
+      },
+      
+      updateGlobalItem(id, price, change) {
+        let item = this.globalMarkets.find(m => m.id === id);
+        if(item && !isNaN(price)) {
+          item.price = price.toFixed(2);
+          item.change = isNaN(change) ? 0 : change.toFixed(2);
         }
       },
+
       isShutdown(v) { return this.btcPrice > 0 && this.btcPrice < v; },
       refreshAhr() {
         if (this.btcPrice > 0) this.btcHistory.push(this.btcPrice);
