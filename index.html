@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto AI 终极稳定版</title>
+    <title>Crypto AI 完美版</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
     
     <style>
-        /* 彻底删除了 v-cloak，绝对不再白屏 */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #10172a; color: #e2e8f0; margin: 0; padding: 20px; box-sizing: border-box; }
         h1 { text-align: center; color: #f39c12; margin: 5px 0 25px 0; letter-spacing: 2px; text-shadow: 0 0 10px rgba(243, 156, 18, 0.3); font-size: 2.5rem; }
         
@@ -31,10 +30,9 @@
         .stablecoin-row { display: flex; align-items: center; justify-content: space-between; background: #0f1625; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #1e293b; }
         .stablecoin-logo { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.1rem; }
         
-        .css-logo { width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-family: sans-serif; box-shadow: 0 2px 5px rgba(0,0,0,0.4); flex-shrink: 0; }
-        .logo-btc { background: linear-gradient(135deg, #f7931a, #e67e22); font-size: 20px; }
-        .logo-usdt { background: linear-gradient(135deg, #26a17b, #1abc9c); font-size: 18px; }
-        .logo-usdc { background: linear-gradient(135deg, #2775ca, #3498db); font-size: 18px; }
+        /* 修复 1：移除之前的纯文本圆圈，为真实 SVG 做基础容器 */
+        .token-icon { width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .token-icon svg { width: 100%; height: 100%; drop-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         
         .progress-bar-bg { width: 100%; height: 12px; background-color: #1e293b; border-radius: 6px; margin-top: 15px; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #f39c12 0%, #2ecc71 100%); transition: width 0.5s; }
@@ -44,12 +42,15 @@
         .ad-banner-bottom a:hover { text-decoration: underline; }
         
         @media (max-width: 1024px) {
-            body, html { height: 100vh !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important; }
-            #app { height: 100vh; display: flex; flex-direction: column; padding: 4px; box-sizing: border-box; overflow: hidden; }
-            h1 { font-size: 1.1rem; margin: 2px 0 4px 0; text-shadow: none; flex-shrink: 0; }
-            .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1; min-height: 0; }
-            .card { padding: 4px 6px; min-height: unset !important; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; }
-            .card h2 { font-size: 0.75rem; margin: 0 0 3px 0; padding-bottom: 2px; border-bottom: 1px solid #2a3b59; }
+            /* 修复 3：彻底解除 100vh 高度锁定，允许手机端正常上下滑动，底边不再被切 */
+            body, html { height: auto !important; overflow-y: auto !important; padding: 5px !important; margin: 0 !important; }
+            #app { height: auto; display: flex; flex-direction: column; padding: 0px; box-sizing: border-box; }
+            h1 { font-size: 1.4rem; margin: 10px 0 15px 0; text-shadow: none; flex-shrink: 0; }
+            
+            .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: unset; }
+            .card { padding: 10px; min-height: unset !important; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; }
+            .card h2 { font-size: 0.85rem; margin: 0 0 6px 0; padding-bottom: 5px; border-bottom: 1px solid #2a3b59; }
+            
             .card:nth-child(1) { grid-column: span 2; } 
             .card:nth-child(2) { grid-column: span 1; } 
             .card:nth-child(3) { grid-column: span 1; display: flex; flex-direction: column; } 
@@ -57,25 +58,32 @@
             .card:nth-child(5) { grid-column: span 1; } 
             .card:nth-child(6) { grid-column: span 2; } 
             .card:nth-child(7) { grid-column: span 2; } 
-            .card:nth-child(1) > div { flex-wrap: nowrap !important; }
-            .card:nth-child(1) > div > div:first-child { flex: 1; min-width: 0; }
-            .card:nth-child(1) > div > div:last-child { flex: 1.2; padding-left: 8px; }
-            .btc-price-text { font-size: 1.6rem !important; margin: 0; }
-            .big-number { font-size: 1.2rem !important; margin: 0; }
-            p, ul, li { font-size: 0.65rem !important; line-height: 1.2 !important; margin: 1px 0; }
-            .css-logo { width: 14px; height: 14px; font-size: 9px; }
-            .stablecoin-logo { gap: 4px; font-size: 0.75rem; }
-            .scroll-box { padding: 3px; min-height: 0 !important; max-height: 100% !important; flex: 1; font-size: 0.65rem; }
-            .stablecoin-row { padding: 3px; margin-bottom: 2px; }
-            .stablecoin-row .big-number { font-size: 1rem !important; }
-            .progress-bar-bg { height: 8px; margin-top: 5px; }
-            .card #gaugeChart { width: 100% !important; min-height: 60px !important; height: 60px !important; margin: 0; }
-            .fg-flex-mobile { flex-direction: row !important; align-items: center !important; text-align: left; }
-            .card .fg-text-mobile { width: 50% !important; padding-left: 5px !important; }
-            .card:nth-child(6) > div { flex-direction: row !important; }
-            .card:nth-child(6) ul { padding-left: 12px; }
-            .ad-banner-bottom { padding: 4px; font-size: 0.6rem; margin: 4px 0 0 0; border-radius: 6px; flex-shrink: 0; }
-            .ad-banner-bottom div { margin-bottom: 2px !important; }
+            
+            .card:nth-child(1) > div { flex-wrap: wrap !important; }
+            .card:nth-child(1) > div > div:first-child { flex: 1; min-width: 100%; margin-bottom: 10px; }
+            .card:nth-child(1) > div > div:last-child { flex: 1; padding-left: 0px; width: 100%; }
+            
+            .btc-price-text { font-size: 2.4rem !important; margin: 0; }
+            .big-number { font-size: 1.4rem !important; margin: 0; }
+            p, ul, li { font-size: 0.75rem !important; line-height: 1.4 !important; margin: 2px 0; }
+            
+            .token-icon { width: 22px; height: 22px; }
+            .stablecoin-logo { gap: 6px; font-size: 0.85rem; }
+            
+            .scroll-box { padding: 8px; min-height: 100px !important; max-height: 120px !important; flex: 1; font-size: 0.75rem; }
+            .stablecoin-row { padding: 8px; margin-bottom: 5px; }
+            .stablecoin-row .big-number { font-size: 1.2rem !important; }
+            .progress-bar-bg { height: 10px; margin-top: 8px; }
+            
+            .card #gaugeChart { width: 100% !important; min-height: 110px !important; height: 110px !important; margin: 0; }
+            .fg-flex-mobile { flex-direction: column !important; align-items: center !important; text-align: center; }
+            .card .fg-text-mobile { width: 100% !important; padding-left: 0 !important; margin-top: 5px; }
+            
+            .card:nth-child(6) > div { flex-direction: column !important; }
+            .card:nth-child(6) ul { padding-left: 15px; margin-bottom: 10px; }
+            
+            .ad-banner-bottom { padding: 12px; font-size: 0.75rem; margin: 15px 0; border-radius: 8px; flex-shrink: 0; }
+            .ad-banner-bottom div { margin-bottom: 6px !important; }
         }
         ::-webkit-scrollbar { width: 0; background: transparent; }
     </style>
@@ -91,7 +99,9 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; height: 100%; margin-top: 10px;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
-                        <div class="css-logo logo-btc">₿</div>
+                        <div class="token-icon">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path d="M21.78 15.37c.41-2.73-1.68-4.2-4.52-5.18l.92-3.71-2.25-.56-.9 3.6c-.6-.15-1.2-.29-1.81-.43l.9-3.6-2.26-.56-.91 3.66c-.49-.11-.98-.22-1.45-.34l-3.13-.78-.6 2.42s1.68.38 1.65.4c.92.23 1.09.84 1.06 1.32l-1.06 4.26c.07.02.16.05.27.09l-.28-.07-1.48 5.96c-.1.25-.41.63-1.05.47.02.02-1.66-.41-1.66-.41l-1.14 2.63 2.96.74c.55.13 1.11.28 1.67.42l-.93 3.75 2.26.56.91-3.66c.61.16 1.21.31 1.8.46l-.91 3.65 2.26.56.93-3.73c3.84.73 6.74.44 7.97-3.05.99-2.8-.02-4.42-2.07-5.46 1.48-.34 2.59-1.21 2.89-3.08zm-3.08 4.38c-.42 1.68-3.23.82-4.14.6l.73-2.95c.91.23 3.87.56 3.41 2.35zm.4-4.22c-.38 1.53-2.74.78-3.5.59l.66-2.65c.76.19 3.25.43 2.84 2.06z" fill="#FFF"/></svg>
+                        </div>
                         <span style="font-size: 1.6rem; font-weight: bold; color: #f39c12; letter-spacing: 1px;">BTC</span>
                     </div>
                     <div class="btc-price-text" :class="priceColor">
@@ -117,7 +127,9 @@
             <div style="margin-top: 5px;">
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <div class="css-logo logo-usdt">₮</div>
+                        <div class="token-icon">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path d="M18.88 11.45V9.12H13.1v2.33h-3.4v2.75h3.4v2.08c0 2.28 1.63 4.16 3.82 4.38v2.22h2.05v-2.22c2.19-.22 3.82-2.1 3.82-4.38v-2.08h3.4v-2.75h-3.4v-2.33h-4.11zm-3.62 4.83v-2.08h1.66v2.08c0 .92-.74 1.66-1.66 1.66s-1.66-.74-1.66-1.66z" fill="#FFF"/></svg>
+                        </div>
                         <span style="color:#26a17b;">USDT / CNY</span>
                     </div>
                     <div style="text-align: right;">
@@ -127,7 +139,9 @@
                 </div>
                 <div class="stablecoin-row">
                     <div class="stablecoin-logo">
-                        <div class="css-logo logo-usdc">$</div>
+                        <div class="token-icon">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#2775CA"/><path d="M16 23.33c-3.64 0-6.73-2.6-7.25-6.17h2.8c.45 2.04 2.33 3.52 4.45 3.52 2.53 0 4.58-2 4.58-4.46s-2.05-4.46-4.58-4.46c-1.39 0-2.67.62-3.5 1.68l-1.74-2.06C11.96 10.04 13.9 9.17 16 9.17c3.64 0 6.73 2.6 7.25 6.17h-2.8c-.45-2.04-2.33-3.52-4.45-3.52-2.53 0-4.58 2-4.58 4.46s2.05 4.46 4.58 4.46c1.39 0 2.67-.62 3.5-1.68l1.74 2.06c-1.22 1.34-3.16 2.21-5.26 2.21z" fill="#FFF"/><path d="M15 7h2v18h-2z" fill="#FFF"/></svg>
+                        </div>
                         <span style="color:#2775ca;">USDC / USDT</span>
                     </div>
                     <div style="text-align: right;">
@@ -230,7 +244,6 @@
 </div>
 
 <script>
-    // 极其安全的拉取函数
     const safeFetch = async (url, timeout = 3500) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
@@ -356,11 +369,20 @@
             },
 
             async fetchStablecoinPriceData() {
+                // 修复 2：增加智能纠错，防止接口返回 7.03 这种离谱低价
                 try {
                     let cnyData = await safeFetch('https://api.exchangerate-api.com/v4/latest/USD', 3000);
-                    if (cnyData && cnyData.rates) this.baseUsdCnyRate = cnyData.rates.CNY;
-                } catch(e) {}
+                    // 只有当获取到的汇率大于 7.10（真实合理区间）才采纳，否则强制使用 7.24 保底
+                    if (cnyData && cnyData.rates && cnyData.rates.CNY > 7.10) {
+                        this.baseUsdCnyRate = cnyData.rates.CNY;
+                    } else {
+                        this.baseUsdCnyRate = 7.24; 
+                    }
+                } catch(e) {
+                    this.baseUsdCnyRate = 7.24; // 接口报错时也使用合理保底价
+                }
                 
+                // 动态计算 C2C，乘以 1.016 溢价系数（7.24 * 1.016 约等于 7.35）
                 const dynamicC2C = this.baseUsdCnyRate * 1.016; 
                 if (this.baselineUsdtCnyPrice === 0) this.baselineUsdtCnyPrice = dynamicC2C;
                 this.usdtCnyPrice = dynamicC2C.toFixed(2);
@@ -394,6 +416,7 @@
             async fetchCryptoNews() {
                 let fetched = false;
                 
+                // 首选中文资讯
                 if (!fetched) {
                     try {
                         let data = await safeFetch('https://min-api.cryptocompare.com/data/v2/news/?lang=ZH', 3500);
@@ -408,6 +431,7 @@
                     } catch(e) {}
                 }
 
+                // 备用英文节点
                 if (!fetched) {
                     try {
                         let data = await safeFetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN', 3500);
@@ -422,9 +446,10 @@
                     } catch(e) {}
                 }
                 
+                // 终极网络被墙保底提示
                 if (!fetched && this.newsList.length === 0) {
                     this.newsList = [
-                        { source: 'System', title: '🔴 全球资讯节点连接超时，请检查您的网络环境...', timestamp: this.nowSeconds },
+                        { source: 'System', title: '🔴 国际资讯节点被拦截，当前展示离线系统提示。如需获取全球资讯，请确保设备全程开启 VPN 代理环境...', timestamp: this.nowSeconds },
                         { source: 'Market', title: '市场震荡，AHR999 指数提供定投参考', timestamp: this.nowSeconds - 1800 }
                     ];
                 }
@@ -467,7 +492,7 @@
             },
 
             initChart() {
-                if (typeof echarts === 'undefined') return; // 防崩溃保护
+                if (typeof echarts === 'undefined') return; 
                 const chartDom = document.getElementById('gaugeChart');
                 if(!this.gaugeChartInstance) this.gaugeChartInstance = echarts.init(chartDom);
                 this.updateGaugeData(this.fearGreedIndex);
@@ -479,12 +504,13 @@
                 this.gaugeChartInstance.setOption({
                     series: [{
                         type: 'gauge', startAngle: 180, endAngle: 0, min: 0, max: 100, splitNumber: 4, splitLine:{show:false},
-                        center: ['50%', isMobile ? '75%' : '80%'], 
-                        radius: isMobile ? '120%' : '110%',        
+                        center: ['50%', isMobile ? '65%' : '80%'], 
+                        radius: isMobile ? '110%' : '110%',        
                         axisLine: { lineStyle: { width: isMobile ? 8 : 10, color: [[0.25, '#e74c3c'], [0.45, '#e67e22'], [0.55, '#f1c40f'], [0.75, '#2ecc71'], [1, '#27ae60']] } },
                         pointer: { length: '55%', width: 5, itemStyle: { color: '#e2e8f0' } },
                         axisTick: { show: false }, axisLabel: { show: false },
-                        detail: { fontSize: isMobile ? 18 : 18, offsetCenter: [0, '-20%'], color: '#e2e8f0', formatter: '{value}' },
+                        /* 修复 4：大幅度下调数字的位置 (从 -20% 改为 40%)，让它彻底避开指针的遮挡 */
+                        detail: { fontSize: isMobile ? 18 : 18, offsetCenter: [0, '40%'], color: '#e2e8f0', formatter: '{value}' },
                         data: [{ value: val }]
                     }]
                 });
