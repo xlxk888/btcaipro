@@ -25,7 +25,7 @@
       margin: 0 0 10px;
       text-align: center;
       color: #f59e0b;
-      font-size: 2.4rem;
+      font-size: 2.3rem;
       font-weight: 900;
       text-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
     }
@@ -84,8 +84,8 @@
     }
 
     .token-icon {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       overflow: hidden;
       flex: 0 0 auto;
@@ -93,18 +93,18 @@
     }
 
     .token-icon svg { width: 100%; height: 100%; display: block; }
-    .coin-code { font-size: 1.2rem; font-weight: 900; line-height: 1; }
+    .coin-code { font-size: 1.1rem; font-weight: 900; line-height: 1; }
 
     .coin-price {
-      font-size: 2rem;
+      font-size: 1.9rem;
       font-weight: 900;
       line-height: 1;
       letter-spacing: -0.5px;
       word-break: break-word;
     }
 
-    .live-line { color: #93c5fd; font-size: .8rem; min-height: 17px; margin: 3px 0 4px; }
-    .meta-line { color: #9fb0c8; font-size: .92rem; line-height: 1.4; }
+    .live-line { color: #93c5fd; font-size: .79rem; min-height: 17px; margin: 3px 0 4px; }
+    .meta-line { color: #9fb0c8; font-size: .9rem; line-height: 1.4; }
 
     .scroll-box {
       background: #111a2a;
@@ -146,7 +146,7 @@
     }
 
     .stable-right { text-align: right; min-width: 0; }
-    .stable-val { font-size: 1.85rem; font-weight: 900; line-height: 1; }
+    .stable-val { font-size: 1.8rem; font-weight: 900; line-height: 1; }
     .small-muted { color: #8fa0ba; font-size: .76rem; line-height: 1.25; }
 
     .fg-layout {
@@ -157,7 +157,7 @@
       gap: 6px;
     }
     #gaugeChart { width: 100%; height: 146px; }
-    .fg-number { font-size: 2.4rem; font-weight: 900; line-height: 1; margin: 4px 0 6px; }
+    .fg-number { font-size: 2.3rem; font-weight: 900; line-height: 1; margin: 4px 0 6px; }
 
     .ahr-wrap, .miner-wrap {
       display: flex;
@@ -167,7 +167,7 @@
     }
 
     .ahr-value {
-      font-size: 2.7rem;
+      font-size: 2.65rem;
       color: #38bdf8;
       font-weight: 900;
       line-height: 1;
@@ -212,6 +212,7 @@
       font-weight: 800;
       margin-bottom: 4px;
     }
+    .ad-line-red { color: #ef4444; }
 
     .dl {
       display: inline-flex;
@@ -223,7 +224,7 @@
       border: 1px solid #3b5f96;
       color: #7dd3fc;
       text-decoration: none;
-      margin-left: 4px;
+      margin-left: 2px;
       font-weight: 800;
       font-size: 10px;
       vertical-align: middle;
@@ -247,7 +248,7 @@
 
       .token-icon { width: 22px; height: 22px; }
       .coin-code { font-size: .95rem; }
-      .coin-price { font-size: 1.05rem; }
+      .coin-price { font-size: 1.03rem; }
       .live-line { font-size: .54rem; min-height: 12px; }
       .meta-line { font-size: .58rem; line-height: 1.2; }
 
@@ -291,7 +292,6 @@
         width: 14px;
         height: 14px;
         font-size: 9px;
-        margin-left: 3px;
       }
     }
   </style>
@@ -311,9 +311,7 @@
                 <div class="token-icon">
                   <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="32" cy="32" r="32" fill="#F7931A"/>
-                    <path d="M40.88 27.7c1.35-9.05-12.1-10.52-12.1-10.52l1.04-4.14-2.53-.63-1.02 4.08c-.66-.17-1.34-.32-2.02-.47l1.03-4.12-2.53-.63-1.04 4.16c-.54-.12-1.07-.25-1.59-.38l-3.49-.87-.67 2.71s1.88.43 1.84.45c1.03.26 1.22.95 1.19 1.47l-1.2 4.82c.08.02.18.06.31.1l-.32-.08-1.66 6.75c-.12.28-.46.7-1.18.53.03.03-1.85-.46-1.85-.46l-1.27 2.94 3.31.82c.61.15 1.24.32 1.87.47l-1.04 4.24 2.53.63 1.03-4.15c.68.18 1.36.35 2.02.52l-1.03 4.14 2.53.63 1.04-4.22c4.3.81 7.55.49 8.92-3.43 1.11-3.13-.03-4.94-2.31-6.1 1.65-.38 2.9-1.35 3.23-3.44zm-3.45 4.89c-.47 1.89-3.62.91-4.64.66l.82-3.29c1.02.26 4.34.62 3.82 2.63zm.45-4.73c-.43 1.71-3.07.88-3.92.66l.74-2.97c.85.21 3.64.47 3.18 2.31z" fill="#fff"/>
-                    <rect x="27.6" y="11" width="3" height="42" rx="1.5" fill="#fff"/>
-                    <rect x="34.4" y="11" width="3" height="42" rx="1.5" fill="#fff"/>
+                    <text x="32" y="40" text-anchor="middle" font-size="30" font-weight="700" fill="#fff">₿</text>
                   </svg>
                 </div>
                 <div class="coin-code" style="color:#f59e0b;">BTC</div>
@@ -328,8 +326,8 @@
                 <div class="token-icon">
                   <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="32" cy="32" r="32" fill="#627EEA"/>
-                    <polygon points="32,8 18,32 32,25 46,32" fill="#fff"/>
-                    <polygon points="32,56 18,35 32,42 46,35" fill="#dfe6ff"/>
+                    <polygon points="32,10 20,32 32,26 44,32" fill="#fff"/>
+                    <polygon points="32,54 20,35 32,41 44,35" fill="#dfe6ff"/>
                   </svg>
                 </div>
                 <div class="coin-code" style="color:#a5b4fc;">ETH</div>
@@ -370,7 +368,7 @@
           <div class="token-icon">
             <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
               <circle cx="32" cy="32" r="32" fill="#26A17B"/>
-              <path d="M19 18h26v6h-10v5.1c7.82.37 13 1.98 13 3.86 0 2.27-7.16 4.12-16 4.12s-16-1.85-16-4.12c0-1.88 5.18-3.49 13-3.86V24H19zm13 14.8c8.08 0 13.1-.93 13.1-1.74S40.08 29.3 32 29.3s-13.1.93-13.1 1.76S23.92 32.8 32 32.8zm-3 1.56v11.64h6V34.36c-.99.03-1.99.05-3 .05s-2.01-.02-3-.05z" fill="#fff"/>
+              <text x="32" y="39" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">T</text>
             </svg>
           </div>
           USDT / CNY
@@ -388,10 +386,8 @@
           <div class="token-icon">
             <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
               <circle cx="32" cy="32" r="32" fill="#2775CA"/>
-              <path d="M34.8 17.8a10.3 10.3 0 0 1 8.62 4.63l-3.11 2.2a6.46 6.46 0 0 0-5.51-2.97c-3.59 0-6.5 2.89-6.5 6.46s2.91 6.46 6.5 6.46a6.48 6.48 0 0 0 5.5-2.95l3.12 2.18a10.33 10.33 0 0 1-8.62 4.64c-5.8 0-10.5-4.68-10.5-10.33S29 17.8 34.8 17.8z" fill="#fff"/>
-              <path d="M29.2 26.1c0-1.1.92-1.99 2.05-1.99h4.62v-3.6h-2.1V17h-3.54v3.5h-1.26c-3.05 0-5.52 2.4-5.52 5.35 0 2.97 2.47 5.37 5.52 5.37h3.53c1.13 0 2.05.89 2.05 1.99 0 1.1-.92 2-2.05 2h-6.42v3.6h4.13V47h3.54v-8.2h.86c3.05 0 5.52-2.4 5.52-5.36 0-2.96-2.47-5.35-5.52-5.35h-3.53c-1.13 0-2.05-.9-2.05-2z" fill="#fff"/>
-              <path d="M20.6 22.4a15.2 15.2 0 0 0 0 19.2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-              <path d="M43.4 22.4a15.2 15.2 0 0 1 0 19.2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="32" cy="32" r="19" fill="none" stroke="#fff" stroke-width="4"/>
+              <text x="32" y="39" text-anchor="middle" font-size="19" font-weight="700" fill="#fff">$</text>
             </svg>
           </div>
           USDC / USDT
@@ -478,24 +474,19 @@
 
   <div class="ad">
     <div class="ad-title">⚠️ 提示：访问以下网页链接及下载安装，请务必全程开启科学上网环境。</div>
-    <div>
-      1. Bitget Wallet Card 免费注册，零手续费，开卡成功返 5 美金
-      <a class="dl" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">🔗</a>
+    <div class="ad-line-red">
+      1. Bitget Wallet Card 免费注册，零手续费，开卡成功返 5 美金。
       点击下载
+      <a class="dl" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="Bitget Wallet 下载/注册">🔗</a>
     </div>
-    <div style="margin-top:3px;">
-      Android 下载：
-      <a href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">https://download.bmwweb.cc/pack/BNApp_00000058.apk</a>
-      <a class="dl" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" title="点击下载">🔗</a>
-      点击下载
+    <div class="ad-line-red" style="margin-top:3px;">
+      2. 请使用您的浏览器访问以下链接，下载币安 App。在注册页面输入我的邀请码，超级返佣，加入全球最大的加密货币交易平台。
+      Android 点击下载
+      <a class="dl" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" title="Android 下载">🔗</a>
+      iOS 点击下载
+      <a class="dl" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank" title="iOS 下载">🔗</a>
+      邀请码：<span class="inv">23017017</span>
     </div>
-    <div style="margin-top:2px;">
-      iOS 下载：
-      <a href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">https://www.bsmkweb.com/download-guide?hl=zh-CN</a>
-      <a class="dl" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank" title="点击下载">🔗</a>
-      点击下载
-    </div>
-    <div style="margin-top:2px;">邀请码：<span class="inv">23017017</span></div>
   </div>
 </div>
 
@@ -521,21 +512,27 @@
       btcPrice: 0,
       ethPrice: 0,
       baselineBtcPrice: 0,
+
       usdtCnyPrice: 0,
       baselineUsdtCnyPrice: 0,
       usdtSourceText: "连接中...",
       usdcPegPrice: 1.0000,
+
       geoMean200: 0,
       fittedPrice: 0,
+
       alertLogs: [],
       newsList: [{ source: "System", title: "资讯加载中...", timestamp: Math.floor(Date.now() / 1000) }],
+
       fearGreedIndex: 50,
       fearGreedClassification: "中立",
       fgColor: "#facc15",
       fgSubtext: "正在连线...",
       gaugeChartInstance: null,
+
       targetBlock: 1050000,
       startBlock: 840000,
+
       cryptoRealtimeStatus: "实时价格连接中..."
     },
     computed: {
@@ -543,9 +540,7 @@
         if (!this.btcPrice || !this.baselineBtcPrice) return "";
         return this.btcPrice > this.baselineBtcPrice ? "price-up" : (this.btcPrice < this.baselineBtcPrice ? "price-down" : "");
       },
-      ethPriceColor() {
-        return "";
-      },
+      ethPriceColor() { return ""; },
       btcPriceChangePercent() {
         if (!this.baselineBtcPrice) return "0.00";
         return (((this.btcPrice - this.baselineBtcPrice) / this.baselineBtcPrice) * 100).toFixed(2);
@@ -569,9 +564,7 @@
         const diff = targetDate - Date.now();
         return Math.max(0, Math.ceil(diff / 86400000));
       },
-      calculatedBlock() {
-        return this.targetBlock - this.halvingDays * 144;
-      },
+      calculatedBlock() { return this.targetBlock - this.halvingDays * 144; },
       halvingProgress() {
         const v = ((this.calculatedBlock - this.startBlock) / (this.targetBlock - this.startBlock)) * 100;
         return Math.min(Math.max(v, 0), 100).toFixed(2);
@@ -621,12 +614,13 @@
           { name: "Gate", url: `https://api.gateio.ws/api/v4/spot/tickers?currency_pair=${symbol}_USDT`, map: d => parseFloat(Array.isArray(d) ? d[0]?.last : NaN) },
           { name: "Bybit", url: `https://api.bybit.com/v5/market/tickers?category=spot&symbol=${symbol}USDT`, map: d => parseFloat(d?.result?.list?.[0]?.lastPrice) },
           { name: "MEXC", url: `https://api.mexc.com/api/v3/ticker/price?symbol=${symbol}USDT`, map: d => parseFloat(d?.price) },
-          { name: "Binance", url: `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`, map: d => parseFloat(d?.price) }
+          { name: "CoinCap", url: `https://api.coincap.io/v2/assets/${symbol === "BTC" ? "bitcoin" : "ethereum"}`, map: d => parseFloat(d?.data?.priceUsd) },
+          { name: "Coinbase", url: `https://api.coinbase.com/v2/prices/${symbol}-USD/spot`, map: d => parseFloat(d?.data?.amount) }
         ];
 
         for (const api of apis) {
           try {
-            const data = await safeFetch(api.url, {}, 2500);
+            const data = await safeFetch(api.url, {}, 2600);
             const p = api.map(data);
             if (p > 0) return { price: p, source: api.name };
           } catch (_) {}
@@ -634,34 +628,41 @@
         return { price: 0, source: "" };
       },
 
+      setCachedPrice(symbol, v) {
+        try { localStorage.setItem(`cached_${symbol}_usd`, String(v)); } catch (_) {}
+      },
+      getCachedPrice(symbol) {
+        try {
+          const v = parseFloat(localStorage.getItem(`cached_${symbol}_usd`) || "0");
+          return v > 0 ? v : 0;
+        } catch (_) { return 0; }
+      },
+
       async fetchCryptoPrices() {
         const [btc, eth] = await Promise.all([this.fetchSymbolPrice("BTC"), this.fetchSymbolPrice("ETH")]);
 
         let btcPrice = btc.price;
         let ethPrice = eth.price;
-        let source = btc.source || eth.source || "REST";
+        let src = btc.source || eth.source || "REST";
 
-        if (!btcPrice || !ethPrice) {
-          try {
-            const cg = await safeFetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd", {}, 3500);
-            if (!btcPrice && cg?.bitcoin?.usd) btcPrice = parseFloat(cg.bitcoin.usd);
-            if (!ethPrice && cg?.ethereum?.usd) ethPrice = parseFloat(cg.ethereum.usd);
-            if (cg?.bitcoin?.usd || cg?.ethereum?.usd) source = "CoinGecko";
-          } catch (_) {}
-        }
+        if (!btcPrice) btcPrice = this.getCachedPrice("BTC");
+        if (!ethPrice) ethPrice = this.getCachedPrice("ETH");
 
-        const now = Date.now();
         if (btcPrice > 0) {
           this.btcPrice = btcPrice;
+          this.setCachedPrice("BTC", btcPrice);
           if (!this.baselineBtcPrice) this.baselineBtcPrice = btcPrice;
           this.checkBtcAlert();
         }
-        if (ethPrice > 0) this.ethPrice = ethPrice;
+        if (ethPrice > 0) {
+          this.ethPrice = ethPrice;
+          this.setCachedPrice("ETH", ethPrice);
+        }
 
         if (btcPrice > 0 || ethPrice > 0) {
-          this.cryptoRealtimeStatus = `${source} 毫秒级更新时间 ${this.formatMsTime(now)}`;
+          this.cryptoRealtimeStatus = `${src} 毫秒级更新时间 ${this.formatMsTime(Date.now())}`;
         } else {
-          this.cryptoRealtimeStatus = "实时接口不可达，请检查网络";
+          this.cryptoRealtimeStatus = "实时接口不可达，等待网络恢复";
         }
       },
 
@@ -726,7 +727,6 @@
             if (prices.length) return this.median(prices);
           } catch (_) {}
         }
-
         return 0;
       },
 
@@ -798,7 +798,6 @@
 
       async fetchCryptoNews() {
         let fetched = false;
-
         try {
           const data = await safeFetch("https://min-api.cryptocompare.com/data/v2/news/?lang=ZH", {}, 3500);
           if (data?.Data?.length) {
@@ -810,7 +809,6 @@
             fetched = true;
           }
         } catch (_) {}
-
         if (!fetched) {
           this.newsList = [
             { source: "System", title: "资讯接口不可达，当前显示系统提示。", timestamp: this.nowSeconds },
@@ -825,7 +823,6 @@
         if (mins <= 30) return "#38bdf8";
         return "#cbd5e1";
       },
-
       getNewsTimeText(ts) {
         const mins = Math.floor((this.nowSeconds - ts) / 60);
         if (mins < 1 || isNaN(mins)) return "刚刚";
@@ -837,6 +834,10 @@
         const daysSinceGenesis = (Date.now() - new Date("2009-01-03T00:00:00Z").getTime()) / 86400000;
         this.fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
 
+        if (this.btcPrice > 0 && this.geoMean200 === 0) {
+          this.geoMean200 = this.btcPrice * 0.85;
+        }
+
         try {
           const d = await safeFetch("https://api.huobi.pro/market/history/kline?period=1day&size=200&symbol=btcusdt", {}, 4000);
           const prices = (Array.isArray(d?.data) ? d.data : []).map(k => parseFloat(k?.close)).filter(p => p > 0);
@@ -847,8 +848,8 @@
           }
         } catch (_) {}
 
-        if (this.btcPrice > 0) this.geoMean200 = this.btcPrice * 0.85;
-        else if (!this.geoMean200) this.geoMean200 = 60000;
+        if (this.btcPrice > 0 && this.geoMean200 === 0) this.geoMean200 = this.btcPrice * 0.85;
+        if (!this.geoMean200) this.geoMean200 = 60000;
       },
 
       isShutdown(shutdownPrice) {
