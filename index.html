@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -9,11 +8,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="referrer" content="origin-when-cross-origin" />
   
-  <link rel="apple-touch-icon" href="https://bailian-bmp-pre.oss-cn-hangzhou.aliyuncs.com/public/system_agent/PlaceHolder.png">
-  <link rel="icon" href="https://bailian-bmp-pre.oss-cn-hangzhou.aliyuncs.com/public/system_agent/PlaceHolder.png">
-  
   <title>Crypto AI 旗舰版</title>
 
+  <!-- Vue & ECharts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
 
@@ -54,17 +51,22 @@
 
     .coin-box { background: #0c1525; border: 1px solid #1e2d48; border-radius: 12px; padding: 10px; min-width: 0; }
     .coin-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .logo { width: 26px; height: 26px; border-radius: 50%; background-size: contain; background-position: center; background-repeat: no-repeat; flex: 0 0 auto; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
     
-    /* 修复：使用官方配色与精确 SVG 路径 */
-    .logo-btc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23f7931a'/%3E%3Cpath d='M22.3 14.4c.4-2.4-1.5-3.7-4-4l.6-2.5-1.6-.4-.6 2.5c-.4-.1-.8-.2-1.3-.3l.6-2.5-1.6-.4-.6 2.6c-.4-.1-.7-.2-1-.2l-2.2-.6-.4 1.6s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.4c.1 0 .2 0 .2 0l-.2-.1-1.2 4.5c-.1.3-.4.4-.6.3 0 0-1.2-.3-1.2-.3l-.5 1.4 2.1.5c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.8 1.6.4.7-2.8c3.3.7 5.8.2 6.8-2.1.8-1.9 0-3-1.6-3.5 1.3-.3 2.2-1.1 2.5-2.7zm-3.7 5.1c-.5 2.1-3.9 1-5 .7l.9-3.5c1.1.3 4.5.8 4.1 2.8zm.6-5.1c-.5 1.8-3.3.9-4.2.6l.8-3.3c.9.2 3.7.8 3.4 2.7z' fill='%23fff'/%3E%3C/svg%3E"); }
-    .logo-eth { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23627eea'/%3E%3Cpath d='M16 3l7.8 13L16 20.7 8.2 16 16 3z' fill='%23fff'/%3E%3Cpath d='M16 3v17.7l7.8-4.7L16 3z' fill='%23fff' opacity='.5'/%3E%3Cpath d='M16 22.2l-7.8-4.7L16 29l7.8-11.5-7.8 4.7z' fill='%23fff'/%3E%3Cpath d='M16 22.2v6.8l7.8-11.5-7.8 4.7z' fill='%23fff' opacity='.5'/%3E%3C/svg%3E"); }
-    .logo-usdt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2326a17b'/%3E%3Cpath d='M18.5 13.5v9.5H13.5v-9.5H8V9h16v4.5h-5.5zm-2.5 2c-4.2 0-7.8-.9-7.8-2s3.6-2 7.8-2 7.8.9 7.8 2-3.6 2-7.8 2z' fill='%23fff'/%3E%3C/svg%3E"); }
-    .logo-usdc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%232775ca'/%3E%3Cpath d='M16 24.3c-4.6 0-8.3-3.7-8.3-8.3s3.7-8.3 8.3-8.3 8.3 3.7 8.3 8.3-3.7 8.3-8.3 8.3zm0-13.8c-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5 5.5-2.5 5.5-5.5-2.5-5.5-5.5-5.5z' fill='%23fff'/%3E%3Cpath d='M14.5 12h3v8h-3z' fill='%23fff'/%3E%3Cpath d='M11 15.5h10v2H11z' fill='%23fff'/%3E%3C/svg%3E"); }
-
+    /* Logo 样式优化：即使使用占位符也能保持美观的圆形 */
+    .logo { 
+      width: 32px; height: 32px; 
+      border-radius: 50%; 
+      background-size: contain; 
+      background-position: center; 
+      background-repeat: no-repeat; 
+      background-color: #1e2d48; /* 占位符背景色，防透明导致重叠 */
+      flex: 0 0 auto; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4); 
+    }
+    
     .code { font-size: .95rem; font-weight: 800; }
     
-    /* 修复：手机端价格完整显示，使用 clamp 动态缩放，禁止截断 */
+    /* 价格显示优化：手机端自适应换行 */
     .price { 
       font-size: clamp(1.1rem, 4.5vw, 1.7rem); 
       font-weight: 900; 
@@ -109,10 +111,28 @@
     .bar { margin-top: 10px; height: 8px; background: #172538; border-radius: 999px; overflow: hidden; }
     .bar > div { height: 100%; background: linear-gradient(90deg,#f59e0b,#22c55e); }
 
-    .ad { margin-top: 10px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 10px; font-size: .75rem; line-height: 1.3; }
-    .ad-title { color: #facc15; font-weight: 800; margin-bottom: 6px; }
-    .ad-red { color: #ef4444; margin-bottom: 4px; }
-    .dl { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 1px solid #3b5f96; border-radius: 50%; color: #7dd3fc; text-decoration: none; font-size: 10px; font-weight: 800; margin-left: 3px; vertical-align: middle; }
+    /* 广告栏目样式更新：字体调大，高亮重点 */
+    .ad { 
+      margin-top: 12px; 
+      background: var(--card-bg); 
+      border: 1px solid var(--card-border); 
+      border-radius: 12px; 
+      padding: 14px; 
+      font-size: .85rem; 
+      line-height: 1.4; 
+      color: #d0d8e6;
+    }
+    .ad-title { color: #facc15; font-weight: 800; margin-bottom: 8px; font-size: 0.95rem; }
+    .ad-item { margin-bottom: 6px; color: #ef4444; font-weight: 600; }
+    .ad-item strong { color: #f1f5f9; font-size: 0.9rem; }
+    .dl { 
+      display: inline-flex; align-items: center; justify-content: center; 
+      padding: 2px 10px; height: 22px;
+      background: #1e2d48; border: 1px solid #3b5f96; border-radius: 6px; 
+      color: #38bdf8; text-decoration: none; font-size: 0.8rem; font-weight: 800; 
+      margin: 0 4px; vertical-align: middle; cursor: pointer;
+    }
+    .dl:hover { background: #2d456b; color: #7dd3fc; }
 
     #alarmSound { display: none; }
 
@@ -125,18 +145,18 @@
       .card { padding: 10px; border-radius: 12px; }
       .card h2 { font-size: .75rem; margin-bottom: 8px; padding-bottom: 6px; }
       
-      .logo { width: 22px; height: 22px; }
+      .logo { width: 26px; height: 26px; }
       .global-name { font-size: .75rem; }
       .global-price { font-size: .82rem; }
       .stable-val { font-size: 1.2rem; }
       .fg-num { font-size: 1.3rem; }
       .ahr-val { font-size: 1.3rem; }
       .mini { font-size: .7rem; }
-      .ad { font-size: .65rem; padding: 8px; }
-      .dl { width: 14px; height: 14px; font-size: 9px; }
+      .ad { font-size: .8rem; padding: 10px; } /* 手机端广告字体保持清晰 */
+      .dl { padding: 2px 8px; height: 20px; font-size: 0.75rem; }
       
       .top-layout { grid-template-columns: 1fr; gap: 10px; }
-      .coin-grid { grid-template-columns: 1fr; } /* 手机单列防挤压 */
+      .coin-grid { grid-template-columns: 1fr; } 
     }
     @media (max-width: 480px) {
       .grid { grid-template-columns: 1fr; gap: 8px; }
@@ -162,14 +182,15 @@
           <div class="coin-grid">
             <div class="coin-box">
               <div class="coin-head">
-                <div class="logo logo-btc"></div>
+                <!-- 图片占位符，客户可按需替换 src -->
+                <div class="logo" style="background-image: url('https://bailian-bmp-pre.oss-cn-hangzhou.aliyuncs.com/public/system_agent/PlaceHolder.png');"></div>
                 <div class="code" style="color:#f59e0b;">BTC</div>
               </div>
               <div class="price" :class="btcPriceColor">{{ btcPrice ? formatUSD(btcPrice) : '加载中...' }}</div>
             </div>
             <div class="coin-box">
               <div class="coin-head">
-                <div class="logo logo-eth"></div>
+                <div class="logo" style="background-image: url('https://bailian-bmp-pre.oss-cn-hangzhou.aliyuncs.com/public/system_agent/PlaceHolder.png');"></div>
                 <div class="code" style="color:#a5b4fc;">ETH</div>
               </div>
               <div class="price" :class="ethPriceColor">{{ ethPrice ? formatUSD(ethPrice) : '加载中...' }}</div>
@@ -194,14 +215,14 @@
     <div class="card span-2">
       <h2>💴 稳定币实时汇率</h2>
       <div class="stable-row">
-        <div class="stable-left" style="color:#34d399;"><div class="logo logo-usdt"></div> USDT / CNY</div>
+        <div class="stable-left" style="color:#34d399;"><div class="logo" style="background-image: url('https://bailian-bmp-pre.oss-cn-hangzhou.aliyuncs.com/public/system_agent/PlaceHolder.png');"></div> USDT/CNY</div>
         <div style="width:100%;">
           <div class="stable-val" :class="usdtColor">{{ usdtCnyPrice ? ('¥ ' + usdtCnyPrice.toFixed(3)) : '计算中...' }}</div>
           <div class="muted">{{ usdtSourceText }}</div>
         </div>
       </div>
       <div class="stable-row">
-        <div class="stable-left" style="color:#60a5fa;"><div class="logo logo-usdc"></div> USDC / USDT</div>
+        <div class="stable-left" style="color:#60a5fa;"><div class="logo" style="background-image: url('https://bailian-bmp-pre.oss-cn-hangzhou.aliyuncs.com/public/system_agent/PlaceHolder.png');"></div> USDC/USDT</div>
         <div style="width:100%;">
           <div class="stable-val" :class="usdcColor">{{ usdcPegPrice ? ('$ ' + usdcPegPrice.toFixed(4)) : '--' }}</div>
           <div class="muted">现货实时锚定价</div>
@@ -210,7 +231,7 @@
     </div>
 
     <div class="card span-2">
-      <h2>🌍 环球板块 (新浪财经直连)</h2>
+      <h2>🌍 环球板块 (实时)</h2>
       <div class="scroll news">
         <div v-for="(item, i) in globalMarkets" :key="i" class="global-item">
           <div class="global-name"><span class="logo-small">{{ item.icon }}</span> {{ item.name }}</div>
@@ -223,7 +244,7 @@
             </div>
           </div>
         </div>
-        <div v-if="!sinaDataLoaded" style="text-align:center;color:#64748b;font-size:.75rem;padding:20px 0;">环球数据加载中...</div>
+        <div v-if="!globalLoaded" style="text-align:center;color:#64748b;font-size:.75rem;padding:20px 0;">环球数据加载中...</div>
       </div>
     </div>
 
@@ -286,19 +307,26 @@
   </div>
 
   <div class="ad">
-    <div class="ad-title">⚠️ 提示：部分数据接口在大陆网络可能受限，建议全程开启科学上网环境。</div>
-    <div class="ad-red">
-      1. Bitget Wallet Card 免年费开卡返 5U <a class="dl" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="注册">🔗</a>
+    <div class="ad-title">⚠️ 提示：请确保网络通畅，部分数据接口可能需要特定网络环境。</div>
+    
+    <div class="ad-item">
+      1. <strong>Bitget Wallet Card</strong> 免费开卡，激活成功返 <span style="color:#22c55e;font-weight:800;font-size:1.1rem;">5💲</span>
+      <div style="margin-top:4px; color:#d0d8e6; font-weight:normal; font-size:0.8rem;">
+        下载：<a class="dl" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank">点击前往注册</a>
+      </div>
     </div>
-    <div class="ad-red">
-      2. 币安 App 下载: <a class="dl" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" title="Android">📱</a> iOS指南 <a class="dl" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank" title="iOS">📲</a>
-      邀请码: <span style="color:#22c55e;font-weight:800;">23017017</span>
+    
+    <div class="ad-item" style="margin-top:10px; border-top:1px dashed #333; padding-top:10px;">
+      2. <strong>币安返佣下载地址</strong> (邀请码: <span style="color:#22c55e;">23017017</span>)
+      <div style="margin-top:6px; color:#d0d8e6; font-weight:normal; font-size:0.8rem; display:flex; gap:10px; flex-wrap:wrap;">
+        <span>安卓：<a class="dl" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank">点击下载 APK</a></span>
+        <span>iOS：<a class="dl" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">查看下载指南</a></span>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-  // 安全 Fetch 封装 (带超时)
   const safeFetch = async (url, options = {}, timeout = 3000) => {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
@@ -319,13 +347,13 @@
       usdtCnyPrice: 0, usdtSourceText: "汇率计算中...", usdcPegPrice: 0,
       btcHistory: [], geoMean200: 0, fittedPrice: 0, alertLogs: [],
       globalMarkets: [
-        { id: "GC=F", name: "黄金", icon: "🪙", price: "--", change: 0, prefix: "$" },
-        { id: "CL=F", name: "原油 (WTI)", icon: "🛢️", price: "--", change: 0, prefix: "$" },
+        { id: "gold", name: "黄金 (XAU)", icon: "🪙", price: "--", change: 0, prefix: "¥" },
+        { id: "us_oil", name: "原油 (WTI)", icon: "🛢️", price: "--", change: 0, prefix: "$" },
         { id: "^DJI", name: "道琼斯指数", icon: "🇺🇸", price: "--", change: 0 },
         { id: "^IXIC", name: "纳斯达克", icon: "📈", price: "--", change: 0 },
         { id: "000001.SS", name: "上证指数", icon: "🇨🇳", price: "--", change: 0 }
       ],
-      sinaDataLoaded: false,
+      globalLoaded: false,
       fearGreedIndex: 50, fearGreedClassification: "中立", fgColor: "#facc15", fgSubtext: "等待数据...", gaugeChartInstance: null,
       cryptoRealtimeStatus: "初始化中...",
       targetBlock: 1050000, startBlock: 840000
@@ -334,8 +362,8 @@
       btcPriceColor() { return this.getPriceColor(this.btcPrice, this.baselineBtcPrice); },
       ethPriceColor() { return this.ethPrice > 0 ? (this.btcPrice > 0 ? this.btcPriceColor : 'up') : ''; },
       btcPriceChangePercent() { return this.baselineBtcPrice ? (((this.btcPrice - this.baselineBtcPrice) / this.baselineBtcPrice) * 100).toFixed(2) : "0.00"; },
-      usdtColor() { return this.usdtCnyPrice > 7.2 ? 'up' : (this.usdtCnyPrice < 7.1 ? 'down' : ''); },
-      usdcColor() { return this.usdcPegPrice < 0.999 ? 'down' : (this.usdcPegPrice > 1.002 ? 'up' : ''); },
+      usdtColor() { return this.usdtCnyPrice > 7.25 ? 'up' : (this.usdtCnyPrice < 7.15 ? 'down' : ''); },
+      usdcColor() { return this.usdcPegPrice < 0.998 ? 'down' : (this.usdcPegPrice > 1.003 ? 'up' : ''); },
       liveAhr999() {
         if (!this.btcPrice || !this.geoMean200 || !this.fittedPrice) return "等待BTC价格...";
         const v = (this.btcPrice / this.geoMean200) * (this.btcPrice / this.fittedPrice);
@@ -355,26 +383,43 @@
         return curr > base ? "up" : (curr < base ? "down" : "");
       },
       
-      // 核心修复：多源价格拉取 (国内无VPN优先走 Binance -> Gate -> CryptoCompare)
+      // 核心修复：多源价格拉取 (国内无VPN优先走 CoinGecko -> Binance -> Gate)
       async fetchCryptoData() {
         this.cryptoRealtimeStatus = "连接交易所...";
-        const sources = [
-          { url: "https://api.binance.com/api/v3/ticker/price", map: d => ({ btc: d.find(x=>x.symbol==='BTCUSDT')?.price, eth: d.find(x=>x.symbol==='ETHUSDT')?.price }) },
-          { url: "https://api.gateio.ws/api/v4/spot/tickers", map: d => ({ btc: d.find(x=>x.currency_pair==='BTC_USDT')?.last, eth: d.find(x=>x.currency_pair==='ETH_USDT')?.last }) },
-          { url: "https://api.coinbase.com/v2/prices?currency=USD&crypto=BTC,ETH", map: d => ({ btc: d.data[0]?.amount, eth: d.data[1]?.amount }) }
-        ];
-        
         let success = false;
-        for (const s of sources) {
+        
+        // 1. 尝试 CoinGecko (国内通常可用，无跨域)
+        try {
+          const d = await safeFetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd", {}, 3500);
+          if (d?.bitcoin?.usd && d?.ethereum?.usd) {
+            this.btcPrice = d.bitcoin.usd;
+            this.ethPrice = d.ethereum.usd;
+            success = true;
+          }
+        } catch(_){}
+
+        // 2. 降级尝试 Binance API
+        if (!success) {
           try {
-            const data = await safeFetch(s.url, {}, 3500);
-            if (s.map) {
-              const res = s.map(data);
-              if (res.btc) this.btcPrice = parseFloat(res.btc);
-              if (res.eth) this.ethPrice = parseFloat(res.eth);
-              if (this.btcPrice > 10000 && this.ethPrice > 1000) { success = true; break; }
-            }
-          } catch(_) { continue; }
+            const d = await safeFetch("https://api.binance.com/api/v3/ticker/price", {}, 3500);
+            const btcItem = d.find(x => x.symbol === 'BTCUSDT');
+            const ethItem = d.find(x => x.symbol === 'ETHUSDT');
+            if (btcItem) this.btcPrice = parseFloat(btcItem.price);
+            if (ethItem) this.ethPrice = parseFloat(ethItem.price);
+            if (this.btcPrice > 10000 && this.ethPrice > 1000) success = true;
+          } catch(_){}
+        }
+
+        // 3. 降级尝试 Gate.io
+        if (!success) {
+          try {
+            const d = await safeFetch("https://api.gateio.ws/api/v4/spot/tickers", {}, 3500);
+            const btcItem = d.find(x => x.currency_pair === 'BTC_USDT');
+            const ethItem = d.find(x => x.currency_pair === 'ETH_USDT');
+            if (btcItem) this.btcPrice = parseFloat(btcItem.last);
+            if (ethItem) this.ethPrice = parseFloat(ethItem.last);
+            if (this.btcPrice > 10000 && this.ethPrice > 1000) success = true;
+          } catch(_){}
         }
 
         if (success) {
@@ -383,7 +428,7 @@
           this.checkBtcAlert();
           this.refreshAhr();
         } else {
-          this.cryptoRealtimeStatus = "⚠️ 网络受限，无法拉取实时价格";
+          this.cryptoRealtimeStatus = "⚠️ 网络受限，无法拉取实时价格 (请检查网络)";
         }
       },
 
@@ -407,14 +452,15 @@
 
       // 稳定币修复：USDC/USDT 直接取现货，USDT/CNY 使用标准外汇+场外溢价估算
       async fetchStableData() {
+        // 1. 获取 USDC/USDT (Gate.io 现货)
         try {
           const d = await safeFetch("https://api.gateio.ws/api/v4/spot/tickers?currency_pair=USDC_USDT", {}, 2500);
           if (d?.[0]?.last) this.usdcPegPrice = parseFloat(d[0].last);
           else this.usdcPegPrice = 1.0;
         } catch(_) { this.usdcPegPrice = 1.0; }
 
+        // 2. 获取 USDT/CNY (外汇基准 * 1.012 溢价模拟 C2C)
         try {
-          // 使用开放外汇接口获取基准 USD/CNY，叠加 ~1.2% 场外溢价模拟 C2C 价格
           const f = await safeFetch("https://open.er-api.com/v6/latest/USD", {}, 3000);
           if (f?.rates?.CNY) {
             this.usdtCnyPrice = f.rates.CNY * 1.012;
@@ -426,47 +472,74 @@
         }
       },
 
-      // 修复 Sina JSONP：精确解析各品种索引，处理 GBK 编码，防内存泄漏
-      fetchSinaGlobalMarkets() {
+      // 环球板块修复：黄金改用免费 API，美股继续尝试新浪 (若失败则显示 --)
+      fetchGlobalMarkets() {
+        this.fetchGlobalGold();
+        this.fetchGlobalViaSina();
+      },
+
+      async fetchGlobalGold() {
+        try {
+          const d = await safeFetch("https://data-asg.goldprice.org/dbXRates/CNY", {}, 2500);
+          if (d?.items) {
+            const gold = d.items.find(i => i.xauCode === 'CNY');
+            if (gold) {
+              const price = parseFloat(gold.xauPrice);
+              this.updateGlobalItem('gold', price, 0); 
+              // 注意：此接口不提供涨跌幅，仅更新价格
+            }
+          }
+        } catch(_) {}
+      },
+
+      fetchGlobalViaSina() {
         const existing = document.getElementById('sina-global-script');
         if (existing) return;
         const s = document.createElement('script');
         s.id = 'sina-global-script';
         s.charset = 'gb2312';
-        s.src = 'https://hq.sinajs.cn/list=hf_GC,hf_CL,gb_dji,gb_ixic,s_sh000001';
+        // 请求原油、道琼斯、纳指、上证
+        s.src = 'https://hq.sinajs.cn/list=hf_CL,gb_dji,gb_ixic,s_sh000001';
         document.head.appendChild(s);
 
         const parseAndClean = () => {
           const get = k => window[k] ? window[k].split(',') : [];
           const safeVal = (arr, idx) => idx < arr.length ? parseFloat(arr[idx]) : 0;
           const setPrice = (id, p, c) => {
-            const item = this.globalMarkets.find(m => m.id === id);
-            if (item && p > 0) { item.price = p.toFixed(2); item.change = c.toFixed(2); }
+            if (p > 0) this.updateGlobalItem(id, p, c);
           };
 
-          const gc = get('hq_str_hf_GC');
-          setPrice('GC=F', safeVal(gc, 4), safeVal(gc, 11)); // 黄金: 4现价 11涨幅%
-          
+          // 新浪接口解析
           const cl = get('hq_str_hf_CL');
-          setPrice('CL=F', safeVal(cl, 4), safeVal(cl, 11)); // 原油
+          setPrice('us_oil', safeVal(cl, 4), safeVal(cl, 11));
 
           const dji = get('hq_str_gb_dji');
-          setPrice('^DJI', safeVal(dji, 1), safeVal(dji, 3)); // 道指: 1现价 3涨幅%
+          setPrice('^DJI', safeVal(dji, 1), safeVal(dji, 3));
 
           const ixic = get('hq_str_gb_ixic');
           setPrice('^IXIC', safeVal(ixic, 1), safeVal(ixic, 3));
 
           const sh = get('hq_str_s_sh000001');
-          setPrice('000001.SS', safeVal(sh, 3), safeVal(sh, 15)); // 上证: 3现价 15涨幅%
+          setPrice('000001.SS', safeVal(sh, 3), safeVal(sh, 15));
           
-          this.sinaDataLoaded = true;
-          // 清理
+          this.globalLoaded = true;
           const node = document.getElementById('sina-global-script');
           if(node) node.parentNode.removeChild(node);
         };
 
         s.addEventListener('load', parseAndClean);
-        s.addEventListener('error', () => { this.sinaDataLoaded = true; parseAndClean(); });
+        s.addEventListener('error', () => { 
+          this.globalLoaded = true; 
+          parseAndClean(); 
+        });
+      },
+
+      updateGlobalItem(id, price, change) {
+        const item = this.globalMarkets.find(m => m.id === id);
+        if (item) {
+          item.price = price.toFixed(2);
+          if (change !== 0) item.change = change.toFixed(2);
+        }
       },
 
       isShutdown(v) { return this.btcPrice > 0 && this.btcPrice < v; },
@@ -516,7 +589,7 @@
       }
     },
     mounted() {
-      // ✅ 严格使用 addEventListener 绑定所有交互事件
+      // 严格使用 addEventListener 绑定所有交互事件
       document.getElementById('btnAudioTest').addEventListener('click', () => {
         const audio = document.getElementById('alarmSound');
         audio.play()
@@ -528,11 +601,11 @@
       this.fetchFearAndGreed();
       this.fetchCryptoData();
       this.fetchStableData();
-      this.fetchSinaGlobalMarkets();
+      this.fetchGlobalMarkets();
 
       setInterval(() => this.fetchCryptoData(), 4000);
       setInterval(() => this.fetchStableData(), 18000);
-      setInterval(() => this.fetchSinaGlobalMarkets(), 12000);
+      setInterval(() => this.fetchGlobalMarkets(), 12000);
     }
   });
 </script>
