@@ -7,11 +7,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="referrer" content="no-referrer" />
+  <meta name="referrer" content="origin-when-cross-origin" />
   
-  <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' rx='24' fill='%231b2842'/%3E%3Ctext x='50%25' y='55%25' font-size='80' text-anchor='middle' alignment-baseline='middle'%3E🚀%3C/text%3E%3C/svg%3E">
-  <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' rx='24' fill='%231b2842'/%3E%3Ctext x='50%25' y='55%25' font-size='80' text-anchor='middle' alignment-baseline='middle'%3E🚀%3C/text%3E%3C/svg%3E">
-  <link rel="manifest" href='data:application/manifest+json;utf8,{"name":"Crypto AI","short_name":"Crypto AI","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a"}' />
+  <link rel="apple-touch-icon" href="https://bailian-bmp-pre.oss-cn-hangzhou.aliyuncs.com/public/system_agent/PlaceHolder.png">
+  <link rel="icon" href="https://bailian-bmp-pre.oss-cn-hangzhou.aliyuncs.com/public/system_agent/PlaceHolder.png">
   
   <title>Crypto AI 旗舰版</title>
 
@@ -19,110 +18,136 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
 
   <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: rgba(27, 40, 66, .95);
+      --card-border: rgba(72, 99, 150, .55);
+      --text-main: #e2e8f0;
+      --text-muted: #9fb0c8;
+      --up: #22c55e;
+      --down: #ef4444;
+    }
     * { box-sizing: border-box; }
     html, body {
       margin: 0; padding: 0;
-      background: radial-gradient(circle at top, #1a2641 0%, #0f172a 48%, #08101d 100%);
-      color: #e2e8f0;
+      background: radial-gradient(circle at top, #1a2641 0%, var(--bg-dark) 48%, #08101d 100%);
+      color: var(--text-main);
       font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
-    body { padding: 10px; overflow-x: hidden; }
+    body { padding: 12px; overflow-x: hidden; }
 
     #app { max-width: 1480px; margin: 0 auto; }
 
-    h1 { margin: 0 0 10px; text-align: center; color: #f59e0b; font-size: 2.2rem; font-weight: 900; }
+    h1 { margin: 0 0 12px; text-align: center; color: #f59e0b; font-size: 2rem; font-weight: 900; letter-spacing: 1px; }
 
-    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
     .span-2 { grid-column: span 2; }
     .span-3 { grid-column: span 3; }
     .span-4 { grid-column: span 4; }
 
-    .card { background: rgba(27, 40, 66, .95); border: 1px solid rgba(72, 99, 150, .55); border-radius: 12px; padding: 12px; min-width: 0; overflow: hidden; }
-    .card h2 { margin: 0 0 8px; color: #9fb0c8; font-size: .95rem; border-bottom: 1px solid rgba(72,99,150,.35); padding-bottom: 6px; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px; min-width: 0; }
+    .card h2 { margin: 0 0 10px; color: var(--text-muted); font-size: .9rem; border-bottom: 1px solid rgba(72,99,150,.35); padding-bottom: 8px; }
 
-    .top-layout { display: grid; grid-template-columns: 1.25fr .75fr; gap: 10px; }
-    .coin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .top-layout { display: grid; grid-template-columns: 1.3fr .7fr; gap: 12px; }
+    .coin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
-    .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; min-width: 0; }
-    .coin-head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
-
-    .logo { width: 28px; height: 28px; border-radius: 50%; display: inline-block; flex: 0 0 auto; background-size: cover; background-position: center; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-    .logo-btc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23f7931a'/%3E%3Cpath d='M21.8 14.1c.3-2.3-1.5-3.2-3.2-3.8l.7-2.6-1.6-.4-.6 2.5c-.4-.1-.9-.2-1.3-.3l.7-2.5-1.6-.4-.7 2.6c-.3-.1-.7-.2-1-.2L11 9l-.3 1.3s.8.2.8.2c.4.1.5.4.5.6l-.8 3.4c.1 0 .2.1.3.1l-.3-.1-1.1 4.5c-.1.2-.3.3-.6.2 0 0-.8-.2-.8-.2l-.5 1.4 2.8.7c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.8 1.6.4.7-2.8c2.3.5 4 .3 4.8-1.7.6-1.5-.1-2.4-1.1-2.9.8-.2 1.4-.7 1.6-1.7zm-2.3 4.6c-.4 1.7-3.3.8-4.2.6l.8-3c1 .2 3.8.7 3.4 2.4zm.4-4.3c-.4 1.5-2.6.7-3.4.5l.7-2.8c.8.2 3.1.7 2.7 2.3z' fill='%23fff'/%3E%3C/svg%3E"); }
-    .logo-eth { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23627eea'/%3E%3Cpath d='M16 4.3l-7.4 12.3 7.4 4.4 7.4-4.4L16 4.3zm0 17.8l-7.4-4.3L16 27.7l7.4-9.9-7.4 4.3z' fill='%23fff' opacity='.8'/%3E%3Cpath d='M16 4.3v16.7l7.4-4.4L16 4.3z' fill='%23fff' opacity='.4'/%3E%3Cpath d='M16 22.1v5.6l7.4-9.9-7.4 4.3z' fill='%23fff' opacity='.6'/%3E%3C/svg%3E"); }
-    .logo-usdt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2326a17b'/%3E%3Cpath d='M18.7 13.5v10.1h-5.4V13.5h-5.6v-4.1h16.6v4.1h-5.6zm-2.7 2.1c-4.1 0-7.6-1-7.6-2.2s3.5-2.2 7.6-2.2 7.6 1 7.6 2.2-3.5 2.2-7.6 2.2z' fill='%23fff'/%3E%3C/svg%3E"); }
+    .coin-box { background: #0c1525; border: 1px solid #1e2d48; border-radius: 12px; padding: 10px; min-width: 0; }
+    .coin-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .logo { width: 26px; height: 26px; border-radius: 50%; background-size: contain; background-position: center; background-repeat: no-repeat; flex: 0 0 auto; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+    
+    /* 修复：使用官方配色与精确 SVG 路径 */
+    .logo-btc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23f7931a'/%3E%3Cpath d='M22.3 14.4c.4-2.4-1.5-3.7-4-4l.6-2.5-1.6-.4-.6 2.5c-.4-.1-.8-.2-1.3-.3l.6-2.5-1.6-.4-.6 2.6c-.4-.1-.7-.2-1-.2l-2.2-.6-.4 1.6s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.4c.1 0 .2 0 .2 0l-.2-.1-1.2 4.5c-.1.3-.4.4-.6.3 0 0-1.2-.3-1.2-.3l-.5 1.4 2.1.5c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.8 1.6.4.7-2.8c3.3.7 5.8.2 6.8-2.1.8-1.9 0-3-1.6-3.5 1.3-.3 2.2-1.1 2.5-2.7zm-3.7 5.1c-.5 2.1-3.9 1-5 .7l.9-3.5c1.1.3 4.5.8 4.1 2.8zm.6-5.1c-.5 1.8-3.3.9-4.2.6l.8-3.3c.9.2 3.7.8 3.4 2.7z' fill='%23fff'/%3E%3C/svg%3E"); }
+    .logo-eth { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23627eea'/%3E%3Cpath d='M16 3l7.8 13L16 20.7 8.2 16 16 3z' fill='%23fff'/%3E%3Cpath d='M16 3v17.7l7.8-4.7L16 3z' fill='%23fff' opacity='.5'/%3E%3Cpath d='M16 22.2l-7.8-4.7L16 29l7.8-11.5-7.8 4.7z' fill='%23fff'/%3E%3Cpath d='M16 22.2v6.8l7.8-11.5-7.8 4.7z' fill='%23fff' opacity='.5'/%3E%3C/svg%3E"); }
+    .logo-usdt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2326a17b'/%3E%3Cpath d='M18.5 13.5v9.5H13.5v-9.5H8V9h16v4.5h-5.5zm-2.5 2c-4.2 0-7.8-.9-7.8-2s3.6-2 7.8-2 7.8.9 7.8 2-3.6 2-7.8 2z' fill='%23fff'/%3E%3C/svg%3E"); }
     .logo-usdc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%232775ca'/%3E%3Cpath d='M16 24.3c-4.6 0-8.3-3.7-8.3-8.3s3.7-8.3 8.3-8.3 8.3 3.7 8.3 8.3-3.7 8.3-8.3 8.3zm0-13.8c-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5 5.5-2.5 5.5-5.5-2.5-5.5-5.5-5.5z' fill='%23fff'/%3E%3Cpath d='M14.5 12h3v8h-3z' fill='%23fff'/%3E%3Cpath d='M11 15.5h10v2H11z' fill='%23fff'/%3E%3C/svg%3E"); }
 
-    .logo-small { font-size: 1.2rem; vertical-align: middle; }
-    .code { font-size: 1rem; font-weight: 900; }
-    .price { font-size: 1.65rem; font-weight: 900; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .code { font-size: .95rem; font-weight: 800; }
     
-    .up { color: #22c55e; font-weight: 800; }
-    .down { color: #ef4444; font-weight: 800; }
-    .live { color: #93c5fd; font-size: .78rem; min-height: 16px; margin-top: 6px; }
-    .meta { color: #9fb0c8; font-size: .86rem; margin-top: 3px; }
-
-    .scroll { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; overflow-y: auto; }
-    .log { min-height: 108px; max-height: 108px; }
-    .news { min-height: 150px; max-height: 150px; }
+    /* 修复：手机端价格完整显示，使用 clamp 动态缩放，禁止截断 */
+    .price { 
+      font-size: clamp(1.1rem, 4.5vw, 1.7rem); 
+      font-weight: 900; 
+      line-height: 1.15; 
+      word-break: break-all; 
+      overflow-wrap: anywhere;
+    }
     
-    .global-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px dashed rgba(72,99,150,.38); }
-    .global-item:last-child { margin: 0; padding: 0; border: 0; }
-    .global-name { font-size: .85rem; color: #d0d8e6; font-weight: bold; display: flex; align-items: center; gap: 4px; }
-    .global-price { font-size: .95rem; font-weight: 900; white-space: nowrap; }
-    .global-change { font-size: .8rem; text-align: right; min-width: 45px; }
+    .up { color: var(--up); font-weight: 800; }
+    .down { color: var(--down); font-weight: 800; }
+    .live { color: #93c5fd; font-size: .75rem; min-height: 16px; margin-top: 6px; }
+    .meta { color: var(--text-muted); font-size: .8rem; margin-top: 4px; }
 
-    .scroll p { margin: 0 0 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(72,99,150,.38); font-size: .82rem; line-height: 1.3; }
+    .scroll { background: #0c1525; border: 1px solid #1e2d48; border-radius: 12px; padding: 10px; overflow-y: auto; }
+    .log { min-height: 110px; max-height: 110px; }
+    .news { min-height: 140px; max-height: 140px; }
+    
+    .global-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(72,99,150,.3); }
+    .global-item:last-child { border-bottom: 0; }
+    .global-name { font-size: .82rem; color: #d0d8e6; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .global-price { font-size: .9rem; font-weight: 800; }
+    .global-change { font-size: .75rem; text-align: right; min-width: 50px; }
+
+    .scroll p { margin: 0 0 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(72,99,150,.3); font-size: .8rem; line-height: 1.25; }
     .scroll p:last-child { margin: 0; padding: 0; border: 0; }
 
-    .stable-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; }
+    .stable-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #0c1525; border: 1px solid #1e2d48; border-radius: 12px; padding: 10px; }
     .stable-row + .stable-row { margin-top: 8px; }
-    .stable-left { display: flex; align-items: center; gap: 7px; font-size: .9rem; font-weight: 800; }
-    .stable-val { font-size: 1.5rem; font-weight: 900; line-height: 1; white-space: nowrap; }
-    .muted { color: #8fa0ba; font-size: .75rem; }
+    .stable-left { display: flex; align-items: center; gap: 8px; font-size: .85rem; font-weight: 800; }
+    .stable-val { font-size: clamp(1.1rem, 3.5vw, 1.5rem); font-weight: 900; line-height: 1.1; text-align: right; }
+    .muted { color: #8fa0ba; font-size: .7rem; text-align: right; margin-top: 2px; }
 
-    .fg-wrap { display: grid; grid-template-columns: 45% 55%; align-items: center; min-height: 140px; }
-    #gaugeChart { width: 100%; height: 136px; }
-    .fg-num { font-size: 2rem; font-weight: 900; line-height: 1; }
+    .fg-wrap { display: grid; grid-template-columns: 45% 55%; align-items: center; min-height: 135px; }
+    #gaugeChart { width: 100%; height: 130px; }
+    .fg-num { font-size: 1.8rem; font-weight: 900; line-height: 1; }
 
-    .ahr-wrap, .miner-wrap { display: flex; justify-content: space-between; gap: 10px; }
-    .ahr-val { font-size: 2.1rem; color: #38bdf8; font-weight: 900; line-height: 1; }
-    .mini { font-size: .83rem; color: #d0d8e6; line-height: 1.35; }
-    .mini ul { margin: 5px 0 0 16px; padding: 0; }
+    .ahr-wrap, .miner-wrap { display: flex; justify-content: space-between; gap: 12px; }
+    .ahr-val { font-size: clamp(1.4rem, 5vw, 2.1rem); color: #38bdf8; font-weight: 900; line-height: 1; }
+    .mini { font-size: .8rem; color: #d0d8e6; line-height: 1.4; }
+    .mini ul { margin: 4px 0 0 14px; padding: 0; }
 
-    .bar { margin-top: 8px; height: 8px; background: #172538; border-radius: 999px; overflow: hidden; }
+    .bar { margin-top: 10px; height: 8px; background: #172538; border-radius: 999px; overflow: hidden; }
     .bar > div { height: 100%; background: linear-gradient(90deg,#f59e0b,#22c55e); }
 
-    .ad { margin-top: 8px; background: rgba(27,40,66,.95); border: 1px solid rgba(72,99,150,.55); border-radius: 10px; padding: 7px 8px; font-size: .75rem; line-height: 1.2; }
-    .ad-title { color: #facc15; font-weight: 800; margin-bottom: 4px; }
-    .ad-red { color: #ef4444; }
-    .dl { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1px solid #3b5f96; border-radius: 50%; color: #7dd3fc; text-decoration: none; font-size: 10px; font-weight: 800; margin-left: 2px; vertical-align: middle; }
+    .ad { margin-top: 10px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 10px; font-size: .75rem; line-height: 1.3; }
+    .ad-title { color: #facc15; font-weight: 800; margin-bottom: 6px; }
+    .ad-red { color: #ef4444; margin-bottom: 4px; }
+    .dl { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 1px solid #3b5f96; border-radius: 50%; color: #7dd3fc; text-decoration: none; font-size: 10px; font-weight: 800; margin-left: 3px; vertical-align: middle; }
 
     #alarmSound { display: none; }
 
+    /* 手机端专项适配 */
     @media (max-width: 1024px) {
-      body { padding: 6px; }
-      h1 { font-size: 1.5rem; margin-bottom: 6px; }
-      .grid { grid-template-columns: 1fr 1fr; gap: 7px; }
-      .span-4, .span-3, .span-2 { grid-column: span 1; }
-      .top-card, .miner-card, .half-card { grid-column: span 2; }
-      .card { padding: 8px; }
-      .card h2 { font-size: .7rem; margin-bottom: 6px; padding-bottom: 5px; }
+      body { padding: 8px; }
+      h1 { font-size: 1.4rem; margin-bottom: 8px; }
+      .grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .span-4, .span-3, .span-2 { grid-column: span 2; }
+      .card { padding: 10px; border-radius: 12px; }
+      .card h2 { font-size: .75rem; margin-bottom: 8px; padding-bottom: 6px; }
+      
       .logo { width: 22px; height: 22px; }
-      .price { font-size: 1.35rem; }
       .global-name { font-size: .75rem; }
-      .global-price { font-size: .85rem; }
-      .stable-val { font-size: 1.15rem; }
-      .fg-num { font-size: 1.25rem; }
-      .ahr-val { font-size: 1.1rem; }
-      .mini { font-size: .58rem; }
-      .ad { font-size: .56rem; line-height: 1.16; padding: 6px 7px; }
-      .dl { width: 13px; height: 13px; font-size: 9px; }
+      .global-price { font-size: .82rem; }
+      .stable-val { font-size: 1.2rem; }
+      .fg-num { font-size: 1.3rem; }
+      .ahr-val { font-size: 1.3rem; }
+      .mini { font-size: .7rem; }
+      .ad { font-size: .65rem; padding: 8px; }
+      .dl { width: 14px; height: 14px; font-size: 9px; }
+      
+      .top-layout { grid-template-columns: 1fr; gap: 10px; }
+      .coin-grid { grid-template-columns: 1fr; } /* 手机单列防挤压 */
+    }
+    @media (max-width: 480px) {
+      .grid { grid-template-columns: 1fr; gap: 8px; }
+      .span-4, .span-3, .span-2, .top-card, .miner-card, .half-card { grid-column: span 1; }
+      .price { font-size: 1.35rem; }
     }
   </style>
 </head>
 <body>
 <div id="app">
-  <h1>🚀 Crypto AI (直连旗舰版)</h1>
+  <h1>🚀 Crypto AI 旗舰版</h1>
   
   <audio id="alarmSound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NExBQAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
 
@@ -130,8 +155,7 @@
     <div class="card span-4 top-card">
       <h2 style="display:flex; justify-content:space-between; align-items:center;">
         <span>Crypto 实时价格 & 2% 波动报警</span>
-        <!-- 修复：移除内联事件，改用 ID 绑定 -->
-        <button id="btnAudioTest" style="background:#1f2d45;color:#facc15;border:1px solid #3b5f96;border-radius:4px;font-size:12px;padding:3px 8px;cursor:pointer;">🔔 声音授权</button>
+        <button id="btnAudioTest" style="background:#1e2d48;color:#facc15;border:1px solid #3b5f96;border-radius:6px;font-size:12px;padding:4px 10px;cursor:pointer;">🔔 声音授权</button>
       </h2>
       <div class="top-layout">
         <div>
@@ -141,59 +165,53 @@
                 <div class="logo logo-btc"></div>
                 <div class="code" style="color:#f59e0b;">BTC</div>
               </div>
-              <div class="price" :class="btcPriceColor" title="BTC Price">
-                {{ btcPrice ? ('$ ' + btcPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '加载中...' }}
-              </div>
+              <div class="price" :class="btcPriceColor">{{ btcPrice ? formatUSD(btcPrice) : '加载中...' }}</div>
             </div>
-
             <div class="coin-box">
               <div class="coin-head">
                 <div class="logo logo-eth"></div>
                 <div class="code" style="color:#a5b4fc;">ETH</div>
               </div>
-              <div class="price" title="ETH Price">
-                {{ ethPrice ? ('$ ' + ethPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '加载中...' }}
-              </div>
+              <div class="price" :class="ethPriceColor">{{ ethPrice ? formatUSD(ethPrice) : '加载中...' }}</div>
             </div>
           </div>
           <div class="live">{{ cryptoRealtimeStatus }}</div>
           <div class="meta">
-            BTC 基准: <strong style="color:#e2e8f0;">{{ baselineBtcPrice ? ('$ ' + baselineBtcPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '--' }}</strong>
+            BTC 基准: <strong>{{ baselineBtcPrice ? formatUSD(baselineBtcPrice) : '--' }}</strong>
             | 波动: <span :class="btcPriceColor">{{ btcPriceChangePercent }}%</span>
           </div>
         </div>
-
         <div>
           <h3 style="margin:0 0 6px 0; font-size:.85rem; color:#94a3b8;">报警系统日志</h3>
           <div class="scroll log">
             <p v-for="(log, i) in alertLogs" :key="i" :class="log.type === 'up' ? 'up' : 'down'">[{{ log.time }}] {{ log.msg }}</p>
-            <p v-if="alertLogs.length===0" style="color:#64748b; text-align:center; border:0; margin-top:8px;">暂无达到 2% 波动记录</p>
+            <p v-if="alertLogs.length===0" style="color:#64748b; text-align:center; border:0; margin-top:12px;">暂无达到 2% 波动记录</p>
           </div>
         </div>
       </div>
     </div>
 
     <div class="card span-2">
-      <h2>💴 稳定币实时汇率监控</h2>
+      <h2>💴 稳定币实时汇率</h2>
       <div class="stable-row">
         <div class="stable-left" style="color:#34d399;"><div class="logo logo-usdt"></div> USDT / CNY</div>
-        <div style="text-align:right;">
-          <div class="stable-val" :class="usdtColor">{{ usdtCnyPrice ? ('¥ ' + usdtCnyPrice.toFixed(2)) : '计算中...' }}</div>
+        <div style="width:100%;">
+          <div class="stable-val" :class="usdtColor">{{ usdtCnyPrice ? ('¥ ' + usdtCnyPrice.toFixed(3)) : '计算中...' }}</div>
           <div class="muted">{{ usdtSourceText }}</div>
         </div>
       </div>
       <div class="stable-row">
         <div class="stable-left" style="color:#60a5fa;"><div class="logo logo-usdc"></div> USDC / USDT</div>
-        <div style="text-align:right;">
-          <div class="stable-val" :class="usdcColor">$ {{ usdcPegPrice.toFixed(4) }}</div>
-          <div class="muted">现货实时锚定</div>
+        <div style="width:100%;">
+          <div class="stable-val" :class="usdcColor">{{ usdcPegPrice ? ('$ ' + usdcPegPrice.toFixed(4)) : '--' }}</div>
+          <div class="muted">现货实时锚定价</div>
         </div>
       </div>
     </div>
 
     <div class="card span-2">
-      <h2>🌍 环球板块 (新浪财经底层直连)</h2>
-      <div class="scroll news" style="padding: 10px;">
+      <h2>🌍 环球板块 (新浪财经直连)</h2>
+      <div class="scroll news">
         <div v-for="(item, i) in globalMarkets" :key="i" class="global-item">
           <div class="global-name"><span class="logo-small">{{ item.icon }}</span> {{ item.name }}</div>
           <div style="text-align:right;">
@@ -205,6 +223,7 @@
             </div>
           </div>
         </div>
+        <div v-if="!sinaDataLoaded" style="text-align:center;color:#64748b;font-size:.75rem;padding:20px 0;">环球数据加载中...</div>
       </div>
     </div>
 
@@ -214,7 +233,7 @@
         <div>
           <div class="muted" style="font-size:.82rem;">恐惧 & 贪婪指数</div>
           <div class="fg-num" :style="{color:fgColor}">{{ fearGreedIndex }}</div>
-          <div style="font-size:1.55rem; font-weight:900; line-height:1;" :style="{color:fgColor}">{{ fearGreedClassification }}</div>
+          <div style="font-size:1.5rem; font-weight:900; line-height:1;" :style="{color:fgColor}">{{ fearGreedClassification }}</div>
           <div class="muted" style="margin-top:4px;">{{ fgSubtext }}</div>
         </div>
       </div>
@@ -235,55 +254,52 @@
     </div>
 
     <div class="card span-3 miner-card">
-      <h2>主流矿机关机价及状态监控 (电费 0.4 元/度)</h2>
+      <h2>主流矿机关机价监控 (电费 0.4 元/度)</h2>
       <div class="miner-wrap">
-        <div class="mini" style="flex:1; min-width:0;">
-          <div style="color:#22c55e; font-weight:800;">在运行高能效机型:</div>
+        <div class="mini" style="flex:1;">
+          <div style="color:#22c55e; font-weight:800;">高能效在运:</div>
           <ul>
-            <li :style="{color:isShutdown(32500)?'#ef4444':'#d0d8e6'}">蚂蚁 S21: ~$32,500 <b v-if="isShutdown(32500)">(已关机)</b></li>
-            <li :style="{color:isShutdown(42100)?'#ef4444':'#d0d8e6'}">蚂蚁 S19 XP: ~$42,100 <b v-if="isShutdown(42100)">(已关机)</b></li>
-            <li :style="{color:isShutdown(51000)?'#ef4444':'#d0d8e6'}">神马 M50S: ~$51,000 <b v-if="isShutdown(51000)">(已关机)</b></li>
-            <li :style="{color:isShutdown(58500)?'#ef4444':'#d0d8e6'}">蚂蚁 S19 Pro: ~$58,500 <b v-if="isShutdown(58500)">(已关机)</b></li>
+            <li :style="{color:isShutdown(32500)?'#ef4444':'#d0d8e6'}">S21: ~$32.5k <b v-if="isShutdown(32500)">(停)</b></li>
+            <li :style="{color:isShutdown(42100)?'#ef4444':'#d0d8e6'}">S19XP: ~$42.1k <b v-if="isShutdown(42100)">(停)</b></li>
+            <li :style="{color:isShutdown(51000)?'#ef4444':'#d0d8e6'}">M50S: ~$51.0k <b v-if="isShutdown(51000)">(停)</b></li>
           </ul>
         </div>
-        <div class="mini" style="flex:1; min-width:0;">
-          <div style="color:#ef4444; font-weight:800;">已淘汰/高成本设备:</div>
+        <div class="mini" style="flex:1;">
+          <div style="color:#ef4444; font-weight:800;">高成本已淘汰:</div>
           <ul style="color:#ef4444;">
-            <li>神马 M30S: ~$74,000 (已关机)</li>
-            <li>蚂蚁 S19: ~$85,000 (已关机)</li>
+            <li>M30S: ~$74.0k (停)</li>
+            <li>S19: ~$85.0k (停)</li>
           </ul>
         </div>
       </div>
     </div>
 
     <div class="card span-3 half-card">
-      <h2>⏳ 比特币减半倒计时 (推算)</h2>
-      <div style="font-size:2rem; font-weight:900; color:#f59e0b; line-height:1;">{{ halvingDays }} <span style="font-size:1rem; color:#94a3b8;">天</span></div>
-      <div class="muted" style="margin-top:6px; font-size:.86rem; line-height:1.35;">
-        推算区块 <strong style="color:#e2e8f0;">{{ calculatedBlock.toLocaleString() }}</strong> / 目标 <strong style="color:#e2e8f0;">1,050,000</strong><br />
-        预计日期 <strong style="color:#e2e8f0;">{{ halvingDateFormatted }}</strong>
+      <h2>⏳ 比特币减半倒计时</h2>
+      <div style="font-size:clamp(1.5rem, 5vw, 2.2rem); font-weight:900; color:#f59e0b; line-height:1;">{{ halvingDays }} <span style="font-size:.9rem; color:#94a3b8;">天</span></div>
+      <div class="muted" style="margin-top:6px; line-height:1.3;">
+        推算区块 <strong>{{ calculatedBlock.toLocaleString() }}</strong> / 目标 <strong>1,050,000</strong><br />
+        预计 <strong>{{ halvingDateFormatted }}</strong>
       </div>
       <div class="bar"><div :style="{width: halvingProgress + '%'}"></div></div>
     </div>
   </div>
 
   <div class="ad">
-    <div class="ad-title">⚠️ 提示：访问以下网页链接及下载安装，请务必全程开启科学上网环境。</div>
+    <div class="ad-title">⚠️ 提示：部分数据接口在大陆网络可能受限，建议全程开启科学上网环境。</div>
     <div class="ad-red">
-      1. Bitget Wallet Card 免费注册，零手续费，开卡成功返 5 美金。点击下载
-      <a class="dl" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">🔗</a>
+      1. Bitget Wallet Card 免年费开卡返 5U <a class="dl" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="注册">🔗</a>
     </div>
     <div class="ad-red">
-      2. 请使用您的浏览器访问以下链接下载币安 App。
-      Android 点击下载 <a class="dl" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" title="Android 点击下载">🔗</a>
-      iOS 点击下载 <a class="dl" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank" title="iOS 点击下载">🔗</a>
-      邀请码：<span style="color:#22c55e;font-weight:800;">23017017</span>
+      2. 币安 App 下载: <a class="dl" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" title="Android">📱</a> iOS指南 <a class="dl" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank" title="iOS">📲</a>
+      邀请码: <span style="color:#22c55e;font-weight:800;">23017017</span>
     </div>
   </div>
 </div>
 
 <script>
-  const safeFetch = async (url, options = {}, timeout = 4000) => {
+  // 安全 Fetch 封装 (带超时)
+  const safeFetch = async (url, options = {}, timeout = 3000) => {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
     try {
@@ -299,9 +315,8 @@
   new Vue({
     el: "#app",
     data: {
-      nowSeconds: Math.floor(Date.now() / 1000),
       btcPrice: 0, ethPrice: 0, baselineBtcPrice: 0,
-      usdtCnyPrice: 0, baselineUsdtCnyPrice: 0, usdtSourceText: "数据加载中...", usdcPegPrice: 1.0,
+      usdtCnyPrice: 0, usdtSourceText: "汇率计算中...", usdcPegPrice: 0,
       btcHistory: [], geoMean200: 0, fittedPrice: 0, alertLogs: [],
       globalMarkets: [
         { id: "GC=F", name: "黄金", icon: "🪙", price: "--", change: 0, prefix: "$" },
@@ -310,199 +325,214 @@
         { id: "^IXIC", name: "纳斯达克", icon: "📈", price: "--", change: 0 },
         { id: "000001.SS", name: "上证指数", icon: "🇨🇳", price: "--", change: 0 }
       ],
-      fearGreedIndex: 50, fearGreedClassification: "中立", fgColor: "#facc15", fgSubtext: "本地模式", gaugeChartInstance: null,
-      cryptoRealtimeStatus: "实时连接中...",
+      sinaDataLoaded: false,
+      fearGreedIndex: 50, fearGreedClassification: "中立", fgColor: "#facc15", fgSubtext: "等待数据...", gaugeChartInstance: null,
+      cryptoRealtimeStatus: "初始化中...",
       targetBlock: 1050000, startBlock: 840000
     },
     computed: {
-      btcPriceColor() {
-        if (!this.btcPrice || !this.baselineBtcPrice) return "";
-        return this.btcPrice > this.baselineBtcPrice ? "up" : (this.btcPrice < this.baselineBtcPrice ? "down" : "");
-      },
-      btcPriceChangePercent() {
-        if (!this.baselineBtcPrice) return "0.00";
-        return (((this.btcPrice - this.baselineBtcPrice) / this.baselineBtcPrice) * 100).toFixed(2);
-      },
-      usdtColor() { return this.usdtCnyPrice > this.baselineUsdtCnyPrice ? "up" : (this.usdtCnyPrice < this.baselineUsdtCnyPrice ? "down" : ""); },
-      usdcColor() { return this.usdcPegPrice < 0.999 ? "down" : (this.usdcPegPrice > 1.001 ? "up" : ""); },
+      btcPriceColor() { return this.getPriceColor(this.btcPrice, this.baselineBtcPrice); },
+      ethPriceColor() { return this.ethPrice > 0 ? (this.btcPrice > 0 ? this.btcPriceColor : 'up') : ''; },
+      btcPriceChangePercent() { return this.baselineBtcPrice ? (((this.btcPrice - this.baselineBtcPrice) / this.baselineBtcPrice) * 100).toFixed(2) : "0.00"; },
+      usdtColor() { return this.usdtCnyPrice > 7.2 ? 'up' : (this.usdtCnyPrice < 7.1 ? 'down' : ''); },
+      usdcColor() { return this.usdcPegPrice < 0.999 ? 'down' : (this.usdcPegPrice > 1.002 ? 'up' : ''); },
       liveAhr999() {
-        if (!this.btcPrice || !this.geoMean200 || !this.fittedPrice) return "计算中...";
+        if (!this.btcPrice || !this.geoMean200 || !this.fittedPrice) return "等待BTC价格...";
         const v = (this.btcPrice / this.geoMean200) * (this.btcPrice / this.fittedPrice);
-        return (isNaN(v) || v <= 0) ? "校准中..." : v.toFixed(4);
+        return (isNaN(v) || v <= 0) ? "计算中..." : v.toFixed(4);
       },
       halvingDateFormatted() { return "2028-04-12"; },
-      halvingDays() { 
-        const targetDate = new Date("2028-04-12T00:00:00Z");
-        const now = new Date();
-        const diff = Math.max(0, Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24)));
-        return diff;
-      },
+      halvingDays() { return Math.max(0, Math.ceil((new Date("2028-04-12") - new Date()) / 86400000)); },
       calculatedBlock() { return this.targetBlock - this.halvingDays * 144; },
       halvingProgress() {
-        const v = ((this.calculatedBlock - this.startBlock) / (this.targetBlock - this.startBlock)) * 100;
-        return Math.min(Math.max(v, 0), 100).toFixed(2);
+        return Math.min(Math.max(((this.calculatedBlock - this.startBlock) / (this.targetBlock - this.startBlock)) * 100, 0), 100).toFixed(1);
       }
     },
-    mounted() {
-      // 严格使用 addEventListener 绑定事件
-      document.getElementById('btnAudioTest').addEventListener('click', this.testAudio);
-      window.addEventListener('resize', this.handleResize);
-      
-      this.initChart();
-      this.fetchFearAndGreed();
-      this.fetchCryptoPrices();
-      this.fetchStablecoinPriceData();
-      this.fetchSinaGlobalMarkets();
-      
-      setInterval(() => this.nowSeconds = Math.floor(Date.now() / 1000), 1000);
-      setInterval(() => this.fetchCryptoPrices(), 3000);
-      setInterval(() => this.fetchStablecoinPriceData(), 15000);
-      setInterval(() => this.fetchSinaGlobalMarkets(), 10000);
-    },
     methods: {
-      handleResize() {
-        if (this.gaugeChartInstance) this.gaugeChartInstance.resize();
+      formatUSD(v) { return '$ ' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); },
+      getPriceColor(curr, base) {
+        if (!curr || !base) return "";
+        return curr > base ? "up" : (curr < base ? "down" : "");
       },
-      testAudio() {
-        const audio = document.getElementById('alarmSound');
-        audio.play()
-          .then(() => alert("声音授权成功！2% 波动时会触发报警。"))
-          .catch(e => alert("浏览器拦截自动播放，请手动点击页面或检查静音设置。"));
-      },
-      async fetchCryptoPrices() {
-        // 优先使用 CoinGecko 避免浏览器 CORS 拦截
-        try {
-          const d = await safeFetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd", {}, 3500);
-          if (d && d.bitcoin && d.ethereum) {
-            this.btcPrice = d.bitcoin.usd;
-            this.ethPrice = d.ethereum.usd;
-            if (!this.baselineBtcPrice) this.baselineBtcPrice = this.btcPrice;
-            this.checkBtcAlert();
-            this.refreshAhr();
-            this.cryptoRealtimeStatus = "CoinGecko 接口正常";
-            return;
-          }
-        } catch (_) {}
+      
+      // 核心修复：多源价格拉取 (国内无VPN优先走 Binance -> Gate -> CryptoCompare)
+      async fetchCryptoData() {
+        this.cryptoRealtimeStatus = "连接交易所...";
+        const sources = [
+          { url: "https://api.binance.com/api/v3/ticker/price", map: d => ({ btc: d.find(x=>x.symbol==='BTCUSDT')?.price, eth: d.find(x=>x.symbol==='ETHUSDT')?.price }) },
+          { url: "https://api.gateio.ws/api/v4/spot/tickers", map: d => ({ btc: d.find(x=>x.currency_pair==='BTC_USDT')?.last, eth: d.find(x=>x.currency_pair==='ETH_USDT')?.last }) },
+          { url: "https://api.coinbase.com/v2/prices?currency=USD&crypto=BTC,ETH", map: d => ({ btc: d.data[0]?.amount, eth: d.data[1]?.amount }) }
+        ];
         
-        // 降级请求
-        this.cryptoRealtimeStatus = "接口重试中...";
+        let success = false;
+        for (const s of sources) {
+          try {
+            const data = await safeFetch(s.url, {}, 3500);
+            if (s.map) {
+              const res = s.map(data);
+              if (res.btc) this.btcPrice = parseFloat(res.btc);
+              if (res.eth) this.ethPrice = parseFloat(res.eth);
+              if (this.btcPrice > 10000 && this.ethPrice > 1000) { success = true; break; }
+            }
+          } catch(_) { continue; }
+        }
+
+        if (success) {
+          this.cryptoRealtimeStatus = "✅ 价格数据已同步";
+          if (!this.baselineBtcPrice) this.baselineBtcPrice = this.btcPrice;
+          this.checkBtcAlert();
+          this.refreshAhr();
+        } else {
+          this.cryptoRealtimeStatus = "⚠️ 网络受限，无法拉取实时价格";
+        }
       },
+
       checkBtcAlert() {
         if (!this.baselineBtcPrice || !this.btcPrice) return;
         const ratio = (this.btcPrice - this.baselineBtcPrice) / this.baselineBtcPrice;
-        if (ratio >= 0.02) {
-            this.triggerAlert("up", `大涨！$${this.btcPrice.toFixed(2)} (+${(ratio * 100).toFixed(2)}%)`);
-        } else if (ratio <= -0.02) {
-            this.triggerAlert("down", `大跌！$${this.btcPrice.toFixed(2)} (-${(Math.abs(ratio) * 100).toFixed(2)}%)`);
+        if (Math.abs(ratio) >= 0.02) {
+          const type = ratio > 0 ? "up" : "down";
+          const msg = ratio > 0 
+            ? `📈 大涨预警! ${this.formatUSD(this.btcPrice)} (+${(ratio*100).toFixed(2)}%)`
+            : `📉 大跌预警! ${this.formatUSD(this.btcPrice)} (-${(Math.abs(ratio)*100).toFixed(2)}%)`;
+          this.triggerAlert(type, msg);
         }
       },
       triggerAlert(type, msg) {
-        this.alertLogs.unshift({ time: new Date().toLocaleTimeString(), type: type, msg: msg });
+        this.alertLogs.unshift({ time: new Date().toLocaleTimeString(), type, msg });
         if (this.alertLogs.length > 30) this.alertLogs.pop();
         this.baselineBtcPrice = this.btcPrice;
-        const audio = document.getElementById('alarmSound');
-        if (audio) audio.play().catch(() => {});
+        document.getElementById('alarmSound')?.play().catch(()=>{});
       },
-      async fetchStablecoinPriceData() {
+
+      // 稳定币修复：USDC/USDT 直接取现货，USDT/CNY 使用标准外汇+场外溢价估算
+      async fetchStableData() {
         try {
-          const d = await safeFetch("https://open.er-api.com/v6/latest/USD", {}, 3000);
-          if (d && d.rates && d.rates.CNY) {
-            this.usdtCnyPrice = d.rates.CNY * 1.015; 
-            if (!this.baselineUsdtCnyPrice) this.baselineUsdtCnyPrice = this.usdtCnyPrice;
-            this.usdtSourceText = "开放汇率引擎";
+          const d = await safeFetch("https://api.gateio.ws/api/v4/spot/tickers?currency_pair=USDC_USDT", {}, 2500);
+          if (d?.[0]?.last) this.usdcPegPrice = parseFloat(d[0].last);
+          else this.usdcPegPrice = 1.0;
+        } catch(_) { this.usdcPegPrice = 1.0; }
+
+        try {
+          // 使用开放外汇接口获取基准 USD/CNY，叠加 ~1.2% 场外溢价模拟 C2C 价格
+          const f = await safeFetch("https://open.er-api.com/v6/latest/USD", {}, 3000);
+          if (f?.rates?.CNY) {
+            this.usdtCnyPrice = f.rates.CNY * 1.012;
+            this.usdtSourceText = "外汇基准+1.2%场外溢价";
           }
-        } catch (_) {}
-      },
-      fetchSinaGlobalMarkets() {
-        if (document.getElementById('sina-script')) return; // 防重复注入
-        const script = document.createElement('script');
-        script.id = 'sina-script';
-        script.src = 'https://hq.sinajs.cn/list=hf_GC,hf_CL,gb_dji,gb_ixic,s_sh000001';
-        script.charset = 'gb2312';
-        
-        const onLoad = () => {
-          try {
-            this.parseSinaData();
-          } catch(e) { console.warn("新浪数据解析异常", e); }
-          this.cleanupSinaScript();
-        };
-        const onError = () => this.cleanupSinaScript();
-
-        script.addEventListener('load', onLoad);
-        script.addEventListener('error', onError);
-        document.head.appendChild(script);
-      },
-      parseSinaData() {
-        const getVal = (key) => window[key] ? window[key].split(',') : [];
-        
-        const update = (id, pStr, oStr, isPercent) => {
-          let item = this.globalMarkets.find(m => m.id === id);
-          if(!item) return;
-          const p = parseFloat(pStr);
-          if(isNaN(p)) return;
-          const o = parseFloat(oStr);
-          const change = isPercent ? parseFloat(oStr) : ((p - o) / o * 100);
-          this.$set(item, 'price', p.toFixed(2));
-          this.$set(item, 'change', isNaN(change) ? 0 : change.toFixed(2));
-        };
-
-        update('GC=F', getVal('hq_str_hf_GC')[0], getVal('hq_str_hf_GC')[7], false);
-        update('CL=F', getVal('hq_str_hf_CL')[0], getVal('hq_str_hf_CL')[7], false);
-        update('^DJI', getVal('hq_str_gb_dji')[1], getVal('hq_str_gb_dji')[2], true);
-        update('^IXIC', getVal('hq_str_gb_ixic')[1], getVal('hq_str_gb_ixic')[2], true);
-        update('000001.SS', getVal('hq_str_s_sh000001')[1], getVal('hq_str_s_sh000001')[3], true);
-      },
-      cleanupSinaScript() {
-        const s = document.getElementById('sina-script');
-        if (s) {
-          s.removeEventListener('load', this.parseSinaData);
-          s.parentNode.removeChild(s);
+        } catch(_) {
+          this.usdtCnyPrice = 0;
+          this.usdtSourceText = "汇率服务暂不可用";
         }
       },
+
+      // 修复 Sina JSONP：精确解析各品种索引，处理 GBK 编码，防内存泄漏
+      fetchSinaGlobalMarkets() {
+        const existing = document.getElementById('sina-global-script');
+        if (existing) return;
+        const s = document.createElement('script');
+        s.id = 'sina-global-script';
+        s.charset = 'gb2312';
+        s.src = 'https://hq.sinajs.cn/list=hf_GC,hf_CL,gb_dji,gb_ixic,s_sh000001';
+        document.head.appendChild(s);
+
+        const parseAndClean = () => {
+          const get = k => window[k] ? window[k].split(',') : [];
+          const safeVal = (arr, idx) => idx < arr.length ? parseFloat(arr[idx]) : 0;
+          const setPrice = (id, p, c) => {
+            const item = this.globalMarkets.find(m => m.id === id);
+            if (item && p > 0) { item.price = p.toFixed(2); item.change = c.toFixed(2); }
+          };
+
+          const gc = get('hq_str_hf_GC');
+          setPrice('GC=F', safeVal(gc, 4), safeVal(gc, 11)); // 黄金: 4现价 11涨幅%
+          
+          const cl = get('hq_str_hf_CL');
+          setPrice('CL=F', safeVal(cl, 4), safeVal(cl, 11)); // 原油
+
+          const dji = get('hq_str_gb_dji');
+          setPrice('^DJI', safeVal(dji, 1), safeVal(dji, 3)); // 道指: 1现价 3涨幅%
+
+          const ixic = get('hq_str_gb_ixic');
+          setPrice('^IXIC', safeVal(ixic, 1), safeVal(ixic, 3));
+
+          const sh = get('hq_str_s_sh000001');
+          setPrice('000001.SS', safeVal(sh, 3), safeVal(sh, 15)); // 上证: 3现价 15涨幅%
+          
+          this.sinaDataLoaded = true;
+          // 清理
+          const node = document.getElementById('sina-global-script');
+          if(node) node.parentNode.removeChild(node);
+        };
+
+        s.addEventListener('load', parseAndClean);
+        s.addEventListener('error', () => { this.sinaDataLoaded = true; parseAndClean(); });
+      },
+
       isShutdown(v) { return this.btcPrice > 0 && this.btcPrice < v; },
       refreshAhr() {
         if (this.btcPrice > 0) this.btcHistory.push(this.btcPrice);
-        if (this.btcHistory.length > 200) this.btcHistory = this.btcHistory.slice(-200);
-        if (this.btcHistory.length >= 10) {
-          const s = this.btcHistory.reduce((sum, p) => sum + Math.log(p), 0);
-          this.geoMean200 = Math.exp(s / this.btcHistory.length);
+        if (this.btcHistory.length > 300) this.btcHistory = this.btcHistory.slice(-300);
+        if (this.btcHistory.length >= 20) {
+          const logSum = this.btcHistory.reduce((s, p) => s + Math.log(p), 0);
+          this.geoMean200 = Math.exp(logSum / this.btcHistory.length);
         } else if (this.btcPrice > 0) this.geoMean200 = this.btcPrice * 0.85;
         
-        const days = (Date.now() - new Date("2009-01-03T00:00:00Z").getTime()) / 86400000;
+        const days = (Date.now() - new Date("2009-01-03").getTime()) / 86400000;
         this.fittedPrice = Math.pow(10, 5.84 * Math.log10(days) - 17.01);
       },
       initChart() {
         if (typeof echarts === "undefined") return;
-        if (!this.gaugeChartInstance) this.gaugeChartInstance = echarts.init(document.getElementById("gaugeChart"));
-        const m = window.innerWidth <= 1024;
-        this.gaugeChartInstance.setOption({
-          series: [{
-            type: "gauge", startAngle: 180, endAngle: 0, min: 0, max: 100,
-            center: ["50%", m ? "74%" : "76%"], radius: m ? "96%" : "104%", splitNumber: 4,
-            axisLine: { lineStyle: { width: m ? 8 : 12, color: [[0.25, "#ef4444"], [0.45, "#fb923c"], [0.55, "#facc15"], [0.75, "#4ade80"], [1, "#22c55e"]] } },
+        this.gaugeChartInstance = echarts.init(document.getElementById("gaugeChart"));
+        const opt = {
+          series: [{ type: "gauge", startAngle: 180, endAngle: 0, min: 0, max: 100,
+            center: ["50%", "75%"], radius: "100%",
+            axisLine: { lineStyle: { width: 10, color: [[0.25, "#ef4444"], [0.45, "#fb923c"], [0.55, "#facc15"], [0.75, "#4ade80"], [1, "#22c55e"]] } },
             axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
-            pointer: { length: "56%", width: m ? 4 : 7, itemStyle: { color: "#e2e8f0" } },
-            anchor: { show: true, size: m ? 7 : 9, itemStyle: { color: "#e2e8f0" } },
+            pointer: { length: "55%", width: 6, itemStyle: { color: "#e2e8f0" } },
+            anchor: { show: true, size: 8, itemStyle: { color: "#e2e8f0" } },
             detail: { show: false }, title: { show: false },
             data: [{ value: 50 }]
           }]
-        });
+        };
+        this.gaugeChartInstance.setOption(opt);
+        window.addEventListener('resize', () => this.gaugeChartInstance?.resize());
       },
       async fetchFearAndGreed() {
         try {
           const d = await safeFetch("https://api.alternative.me/fng/", {}, 3000);
-          if (d && d.data && d.data.length) {
-            const val = parseInt(d.data[0].value, 10);
-            this.fearGreedIndex = val;
-            if (val <= 25) { this.fearGreedClassification = "极度恐惧"; this.fgSubtext = "市场恐惧，分批建仓"; this.fgColor = "#ef4444"; }
-            else if (val <= 45) { this.fearGreedClassification = "恐惧"; this.fgSubtext = "情绪偏向悲观"; this.fgColor = "#fb923c"; }
-            else if (val <= 55) { this.fearGreedClassification = "中立"; this.fgSubtext = "情绪平稳，观望为主"; this.fgColor = "#facc15"; }
-            else if (val <= 75) { this.fearGreedClassification = "贪婪"; this.fgSubtext = "市场情绪乐观"; this.fgColor = "#4ade80"; }
-            else { this.fearGreedClassification = "极度贪婪"; this.fgSubtext = "极度贪婪，注意回调风险"; this.fgColor = "#22c55e"; }
-            if(this.gaugeChartInstance) this.gaugeChartInstance.setOption({ series: [{ data: [{ value: val }] }] });
+          if (d?.data?.[0]) {
+            const v = parseInt(d.data[0].value, 10);
+            this.fearGreedIndex = v;
+            this.fgSubtext = "数据来源: Alternative.me";
+            if (v <= 25) { this.fearGreedClassification = "极度恐惧"; this.fgColor = "#ef4444"; }
+            else if (v <= 45) { this.fearGreedClassification = "恐惧"; this.fgColor = "#fb923c"; }
+            else if (v <= 55) { this.fearGreedClassification = "中立"; this.fgColor = "#facc15"; }
+            else if (v <= 75) { this.fearGreedClassification = "贪婪"; this.fgColor = "#4ade80"; }
+            else { this.fearGreedClassification = "极度贪婪"; this.fgColor = "#22c55e"; }
+            this.gaugeChartInstance?.setOption({ series: [{ data: [{ value: v }] }] });
           }
-        } catch (_) {}
+        } catch(_) { this.fgSubtext = "获取指数失败"; }
       }
+    },
+    mounted() {
+      // ✅ 严格使用 addEventListener 绑定所有交互事件
+      document.getElementById('btnAudioTest').addEventListener('click', () => {
+        const audio = document.getElementById('alarmSound');
+        audio.play()
+          .then(() => alert("🔊 声音授权成功！价格波动 ≥2% 时将自动报警。"))
+          .catch(e => alert("❌ 浏览器拦截了自动播放，请检查静音设置或手动交互页面。"));
+      });
+
+      this.initChart();
+      this.fetchFearAndGreed();
+      this.fetchCryptoData();
+      this.fetchStableData();
+      this.fetchSinaGlobalMarkets();
+
+      setInterval(() => this.fetchCryptoData(), 4000);
+      setInterval(() => this.fetchStableData(), 18000);
+      setInterval(() => this.fetchSinaGlobalMarkets(), 12000);
     }
   });
 </script>
