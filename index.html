@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,9 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  
   <meta name="referrer" content="no-referrer" />
-
+  
   <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' rx='24' fill='%231b2842'/%3E%3Ctext x='50%25' y='55%25' font-size='80' text-anchor='middle' alignment-baseline='middle'%3E🚀%3C/text%3E%3C/svg%3E">
   <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' rx='24' fill='%231b2842'/%3E%3Ctext x='50%25' y='55%25' font-size='80' text-anchor='middle' alignment-baseline='middle'%3E🚀%3C/text%3E%3C/svg%3E">
   <link rel="manifest" href='data:application/manifest+json;utf8,{"name":"Crypto AI","short_name":"Crypto AI","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a"}' />
@@ -46,7 +46,6 @@
     .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; min-width: 0; }
     .coin-head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
 
-    /* 终极修复方案：原生 URL 编码 SVG，丢弃 Base64，100% 兼容 iOS */
     .logo { width: 28px; height: 28px; border-radius: 50%; display: inline-block; flex: 0 0 auto; background-size: cover; background-position: center; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
     .logo-btc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23f7931a'/%3E%3Cpath d='M21.8 14.1c.3-2.3-1.5-3.2-3.2-3.8l.7-2.6-1.6-.4-.6 2.5c-.4-.1-.9-.2-1.3-.3l.7-2.5-1.6-.4-.7 2.6c-.3-.1-.7-.2-1-.2L11 9l-.3 1.3s.8.2.8.2c.4.1.5.4.5.6l-.8 3.4c.1 0 .2.1.3.1l-.3-.1-1.1 4.5c-.1.2-.3.3-.6.2 0 0-.8-.2-.8-.2l-.5 1.4 2.8.7c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.8 1.6.4.7-2.8c2.3.5 4 .3 4.8-1.7.6-1.5-.1-2.4-1.1-2.9.8-.2 1.4-.7 1.6-1.7zm-2.3 4.6c-.4 1.7-3.3.8-4.2.6l.8-3c1 .2 3.8.7 3.4 2.4zm.4-4.3c-.4 1.5-2.6.7-3.4.5l.7-2.8c.8.2 3.1.7 2.7 2.3z' fill='%23fff'/%3E%3C/svg%3E"); }
     .logo-eth { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23627eea'/%3E%3Cpath d='M16 4.3l-7.4 12.3 7.4 4.4 7.4-4.4L16 4.3zm0 17.8l-7.4-4.3L16 27.7l7.4-9.9-7.4 4.3z' fill='%23fff' opacity='.8'/%3E%3Cpath d='M16 4.3v16.7l7.4-4.4L16 4.3z' fill='%23fff' opacity='.4'/%3E%3Cpath d='M16 22.1v5.6l7.4-9.9-7.4 4.3z' fill='%23fff' opacity='.6'/%3E%3C/svg%3E"); }
@@ -55,8 +54,6 @@
 
     .logo-small { font-size: 1.2rem; vertical-align: middle; }
     .code { font-size: 1rem; font-weight: 900; }
-    
-    /* 强制禁止换行，确保长数字在同一行 */
     .price { font-size: 1.65rem; font-weight: 900; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
     .up { color: #22c55e; font-weight: 800; }
@@ -102,7 +99,6 @@
 
     #alarmSound { display: none; }
 
-    /* 手机端专门优化 */
     @media (max-width: 1024px) {
       body { padding: 6px; }
       h1 { font-size: 1.5rem; margin-bottom: 6px; }
@@ -111,12 +107,8 @@
       .top-card, .miner-card, .half-card { grid-column: span 2; }
       .card { padding: 8px; }
       .card h2 { font-size: .7rem; margin-bottom: 6px; padding-bottom: 5px; }
-      
       .logo { width: 22px; height: 22px; }
-      
-      /* 缩小价格字号，避免文字过长折行 */
       .price { font-size: 1.35rem; }
-      
       .global-name { font-size: .75rem; }
       .global-price { font-size: .85rem; }
       .stable-val { font-size: 1.15rem; }
@@ -138,7 +130,8 @@
     <div class="card span-4 top-card">
       <h2 style="display:flex; justify-content:space-between; align-items:center;">
         <span>Crypto 实时价格 & 2% 波动报警</span>
-        <button @click="testAudio" style="background:#1f2d45;color:#facc15;border:1px solid #3b5f96;border-radius:4px;font-size:12px;padding:3px 8px;cursor:pointer;">🔔 声音授权</button>
+        <!-- 修复：移除内联事件，改用 ID 绑定 -->
+        <button id="btnAudioTest" style="background:#1f2d45;color:#facc15;border:1px solid #3b5f96;border-radius:4px;font-size:12px;padding:3px 8px;cursor:pointer;">🔔 声音授权</button>
       </h2>
       <div class="top-layout">
         <div>
@@ -265,7 +258,7 @@
 
     <div class="card span-3 half-card">
       <h2>⏳ 比特币减半倒计时 (推算)</h2>
-      <div style="font-size:2rem; font-weight:900; color:#f59e0b; line-height:1;">744 <span style="font-size:1rem; color:#94a3b8;">天</span></div>
+      <div style="font-size:2rem; font-weight:900; color:#f59e0b; line-height:1;">{{ halvingDays }} <span style="font-size:1rem; color:#94a3b8;">天</span></div>
       <div class="muted" style="margin-top:6px; font-size:.86rem; line-height:1.35;">
         推算区块 <strong style="color:#e2e8f0;">{{ calculatedBlock.toLocaleString() }}</strong> / 目标 <strong style="color:#e2e8f0;">1,050,000</strong><br />
         预计日期 <strong style="color:#e2e8f0;">{{ halvingDateFormatted }}</strong>
@@ -310,8 +303,6 @@
       btcPrice: 0, ethPrice: 0, baselineBtcPrice: 0,
       usdtCnyPrice: 0, baselineUsdtCnyPrice: 0, usdtSourceText: "数据加载中...", usdcPegPrice: 1.0,
       btcHistory: [], geoMean200: 0, fittedPrice: 0, alertLogs: [],
-      
-      // 环球板块初始数据
       globalMarkets: [
         { id: "GC=F", name: "黄金", icon: "🪙", price: "--", change: 0, prefix: "$" },
         { id: "CL=F", name: "原油 (WTI)", icon: "🛢️", price: "--", change: 0, prefix: "$" },
@@ -340,7 +331,12 @@
         return (isNaN(v) || v <= 0) ? "校准中..." : v.toFixed(4);
       },
       halvingDateFormatted() { return "2028-04-12"; },
-      halvingDays() { return 744; },
+      halvingDays() { 
+        const targetDate = new Date("2028-04-12T00:00:00Z");
+        const now = new Date();
+        const diff = Math.max(0, Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24)));
+        return diff;
+      },
       calculatedBlock() { return this.targetBlock - this.halvingDays * 144; },
       halvingProgress() {
         const v = ((this.calculatedBlock - this.startBlock) / (this.targetBlock - this.startBlock)) * 100;
@@ -348,52 +344,48 @@
       }
     },
     mounted() {
+      // 严格使用 addEventListener 绑定事件
+      document.getElementById('btnAudioTest').addEventListener('click', this.testAudio);
+      window.addEventListener('resize', this.handleResize);
+      
       this.initChart();
       this.fetchFearAndGreed();
       this.fetchCryptoPrices();
       this.fetchStablecoinPriceData();
-      
-      // 立即拉取一次新浪环球数据
       this.fetchSinaGlobalMarkets();
       
       setInterval(() => this.nowSeconds = Math.floor(Date.now() / 1000), 1000);
       setInterval(() => this.fetchCryptoPrices(), 3000);
       setInterval(() => this.fetchStablecoinPriceData(), 15000);
-      
-      // 每 10 秒从新浪高速接口刷新一次环球金融数据
       setInterval(() => this.fetchSinaGlobalMarkets(), 10000);
     },
     methods: {
+      handleResize() {
+        if (this.gaugeChartInstance) this.gaugeChartInstance.resize();
+      },
       testAudio() {
         const audio = document.getElementById('alarmSound');
         audio.play()
           .then(() => alert("声音授权成功！2% 波动时会触发报警。"))
-          .catch(e => alert("您的浏览器拦截了声音，请检查静音设置。"));
-      },
-      async fetchSymbolPrice(symbol) {
-        const apis = [
-          { u: `https://data-api.binance.vision/api/v3/ticker/price?symbol=${symbol}USDT`, m: d => parseFloat(d && d.price) },
-          { u: `https://api.gateio.ws/api/v4/spot/tickers?currency_pair=${symbol}_USDT`, m: d => parseFloat(d && d[0] && d[0].last) }
-        ];
-        for (let i = 0; i < apis.length; i++) {
-          try {
-            const d = await safeFetch(apis[i].u, {}, 2500);
-            const p = apis[i].m(d);
-            if (p > 0) return p;
-          } catch (_) {}
-        }
-        return 0;
+          .catch(e => alert("浏览器拦截自动播放，请手动点击页面或检查静音设置。"));
       },
       async fetchCryptoPrices() {
-        const [btc, eth] = await Promise.all([this.fetchSymbolPrice("BTC"), this.fetchSymbolPrice("ETH")]);
-        if (btc > 0) {
-          this.btcPrice = btc;
-          if (!this.baselineBtcPrice) this.baselineBtcPrice = btc;
-          this.checkBtcAlert();
-        }
-        if (eth > 0) this.ethPrice = eth;
-        this.cryptoRealtimeStatus = btc ? "接口连接正常" : "网络波动中...";
-        this.refreshAhr();
+        // 优先使用 CoinGecko 避免浏览器 CORS 拦截
+        try {
+          const d = await safeFetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd", {}, 3500);
+          if (d && d.bitcoin && d.ethereum) {
+            this.btcPrice = d.bitcoin.usd;
+            this.ethPrice = d.ethereum.usd;
+            if (!this.baselineBtcPrice) this.baselineBtcPrice = this.btcPrice;
+            this.checkBtcAlert();
+            this.refreshAhr();
+            this.cryptoRealtimeStatus = "CoinGecko 接口正常";
+            return;
+          }
+        } catch (_) {}
+        
+        // 降级请求
+        this.cryptoRealtimeStatus = "接口重试中...";
       },
       checkBtcAlert() {
         if (!this.baselineBtcPrice || !this.btcPrice) return;
@@ -408,9 +400,8 @@
         this.alertLogs.unshift({ time: new Date().toLocaleTimeString(), type: type, msg: msg });
         if (this.alertLogs.length > 30) this.alertLogs.pop();
         this.baselineBtcPrice = this.btcPrice;
-        
         const audio = document.getElementById('alarmSound');
-        if (audio) audio.play().catch(e => console.log("需授权播放声音"));
+        if (audio) audio.play().catch(() => {});
       },
       async fetchStablecoinPriceData() {
         try {
@@ -422,58 +413,52 @@
           }
         } catch (_) {}
       },
-      
-      // 🌟 核心杀手锏：采用新浪财经 JSONP 接口，国内 100% 直连无跨域报错！
       fetchSinaGlobalMarkets() {
+        if (document.getElementById('sina-script')) return; // 防重复注入
         const script = document.createElement('script');
-        // 请求 新浪外盘黄金, 外盘原油, 道琼斯, 纳斯达克, 上证指数
+        script.id = 'sina-script';
         script.src = 'https://hq.sinajs.cn/list=hf_GC,hf_CL,gb_dji,gb_ixic,s_sh000001';
+        script.charset = 'gb2312';
         
-        script.onload = () => {
+        const onLoad = () => {
           try {
-            // 解析黄金 hf_GC
-            if(typeof hq_str_hf_GC !== 'undefined') {
-              let gc = hq_str_hf_GC.split(',');
-              let p = parseFloat(gc[0]), o = parseFloat(gc[7]);
-              this.updateGlobalItem('GC=F', p, ((p-o)/o*100));
-            }
-            // 解析原油 hf_CL
-            if(typeof hq_str_hf_CL !== 'undefined') {
-              let cl = hq_str_hf_CL.split(',');
-              let p = parseFloat(cl[0]), o = parseFloat(cl[7]);
-              this.updateGlobalItem('CL=F', p, ((p-o)/o*100));
-            }
-            // 解析道琼斯 gb_dji
-            if(typeof hq_str_gb_dji !== 'undefined') {
-              let dji = hq_str_gb_dji.split(',');
-              this.updateGlobalItem('^DJI', parseFloat(dji[1]), parseFloat(dji[2]));
-            }
-            // 解析纳斯达克 gb_ixic
-            if(typeof hq_str_gb_ixic !== 'undefined') {
-              let ixic = hq_str_gb_ixic.split(',');
-              this.updateGlobalItem('^IXIC', parseFloat(ixic[1]), parseFloat(ixic[2]));
-            }
-            // 解析上证指数 s_sh000001
-            if(typeof hq_str_s_sh000001 !== 'undefined') {
-              let sh = hq_str_s_sh000001.split(',');
-              this.updateGlobalItem('000001.SS', parseFloat(sh[1]), parseFloat(sh[3]));
-            }
-          } catch(e) { console.log("新浪数据解析失败"); }
-          
-          // 执行完后清理 script 标签保持页面干净
-          document.head.removeChild(script);
+            this.parseSinaData();
+          } catch(e) { console.warn("新浪数据解析异常", e); }
+          this.cleanupSinaScript();
         };
+        const onError = () => this.cleanupSinaScript();
+
+        script.addEventListener('load', onLoad);
+        script.addEventListener('error', onError);
         document.head.appendChild(script);
       },
-      
-      updateGlobalItem(id, price, change) {
-        let item = this.globalMarkets.find(m => m.id === id);
-        if(item && !isNaN(price)) {
-          item.price = price.toFixed(2);
-          item.change = isNaN(change) ? 0 : change.toFixed(2);
+      parseSinaData() {
+        const getVal = (key) => window[key] ? window[key].split(',') : [];
+        
+        const update = (id, pStr, oStr, isPercent) => {
+          let item = this.globalMarkets.find(m => m.id === id);
+          if(!item) return;
+          const p = parseFloat(pStr);
+          if(isNaN(p)) return;
+          const o = parseFloat(oStr);
+          const change = isPercent ? parseFloat(oStr) : ((p - o) / o * 100);
+          this.$set(item, 'price', p.toFixed(2));
+          this.$set(item, 'change', isNaN(change) ? 0 : change.toFixed(2));
+        };
+
+        update('GC=F', getVal('hq_str_hf_GC')[0], getVal('hq_str_hf_GC')[7], false);
+        update('CL=F', getVal('hq_str_hf_CL')[0], getVal('hq_str_hf_CL')[7], false);
+        update('^DJI', getVal('hq_str_gb_dji')[1], getVal('hq_str_gb_dji')[2], true);
+        update('^IXIC', getVal('hq_str_gb_ixic')[1], getVal('hq_str_gb_ixic')[2], true);
+        update('000001.SS', getVal('hq_str_s_sh000001')[1], getVal('hq_str_s_sh000001')[3], true);
+      },
+      cleanupSinaScript() {
+        const s = document.getElementById('sina-script');
+        if (s) {
+          s.removeEventListener('load', this.parseSinaData);
+          s.parentNode.removeChild(s);
         }
       },
-
       isShutdown(v) { return this.btcPrice > 0 && this.btcPrice < v; },
       refreshAhr() {
         if (this.btcPrice > 0) this.btcHistory.push(this.btcPrice);
@@ -482,6 +467,7 @@
           const s = this.btcHistory.reduce((sum, p) => sum + Math.log(p), 0);
           this.geoMean200 = Math.exp(s / this.btcHistory.length);
         } else if (this.btcPrice > 0) this.geoMean200 = this.btcPrice * 0.85;
+        
         const days = (Date.now() - new Date("2009-01-03T00:00:00Z").getTime()) / 86400000;
         this.fittedPrice = Math.pow(10, 5.84 * Math.log10(days) - 17.01);
       },
