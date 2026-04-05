@@ -4,211 +4,187 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  
   <meta name="referrer" content="no-referrer" />
-
-  <link rel="apple-touch-icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' rx='24' fill='%231b2842'/%3E%3Ctext x='50%25' y='55%25' font-size='80' text-anchor='middle' alignment-baseline='middle'%3E🚀%3C/text%3E%3C/svg%3E">
-  <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' rx='24' fill='%231b2842'/%3E%3Ctext x='50%25' y='55%25' font-size='80' text-anchor='middle' alignment-baseline='middle'%3E🚀%3C/text%3E%3C/svg%3E">
-  <link rel="manifest" href='data:application/manifest+json;utf8,{"name":"Crypto AI","short_name":"Crypto AI","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a"}' />
-  
   <title>Crypto AI 旗舰版</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
       margin: 0; padding: 0;
       background: radial-gradient(circle at top, #1a2641 0%, #0f172a 48%, #08101d 100%);
       color: #e2e8f0;
-      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
     }
     body { padding: 10px; overflow-x: hidden; }
 
-    #app { max-width: 1480px; margin: 0 auto; }
+    #app { max-width: 1400px; margin: 0 auto; }
+    h1 { margin: 10px 0 20px; text-align: center; color: #f59e0b; font-size: 2rem; font-weight: 900; text-shadow: 0 0 10px rgba(245,158,11,0.3); }
 
-    h1 { margin: 0 0 10px; text-align: center; color: #f59e0b; font-size: 2.2rem; font-weight: 900; }
-
-    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+    /* 网格系统 */
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
     .span-2 { grid-column: span 2; }
     .span-3 { grid-column: span 3; }
     .span-4 { grid-column: span 4; }
 
-    .card { background: rgba(27, 40, 66, .95); border: 1px solid rgba(72, 99, 150, .55); border-radius: 12px; padding: 12px; min-width: 0; overflow: hidden; }
-    .card h2 { margin: 0 0 8px; color: #9fb0c8; font-size: .95rem; border-bottom: 1px solid rgba(72,99,150,.35); padding-bottom: 6px; }
+    /* 通用卡片样式 */
+    .card { background: rgba(27, 40, 66, .95); border: 1px solid rgba(72, 99, 150, .55); border-radius: 12px; padding: 15px; overflow: hidden; position: relative; }
+    .card h2 { margin: 0 0 12px; color: #9fb0c8; font-size: 0.95rem; border-bottom: 1px solid rgba(72,99,150,.35); padding-bottom: 8px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
 
-    .top-layout { display: grid; grid-template-columns: 1.25fr .75fr; gap: 10px; }
-    .coin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    /* 顶部主价格区域 */
+    .top-layout { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 15px; }
+    .coin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 15px; }
+    .coin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 
-    .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; min-width: 0; }
-    .coin-head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
-
-    /* 终极修复方案：原生 URL 编码 SVG，丢弃 Base64，100% 兼容 iOS */
-    .logo { width: 28px; height: 28px; border-radius: 50%; display: inline-block; flex: 0 0 auto; background-size: cover; background-position: center; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-    .logo-btc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23f7931a'/%3E%3Cpath d='M21.8 14.1c.3-2.3-1.5-3.2-3.2-3.8l.7-2.6-1.6-.4-.6 2.5c-.4-.1-.9-.2-1.3-.3l.7-2.5-1.6-.4-.7 2.6c-.3-.1-.7-.2-1-.2L11 9l-.3 1.3s.8.2.8.2c.4.1.5.4.5.6l-.8 3.4c.1 0 .2.1.3.1l-.3-.1-1.1 4.5c-.1.2-.3.3-.6.2 0 0-.8-.2-.8-.2l-.5 1.4 2.8.7c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.8 1.6.4.7-2.8c2.3.5 4 .3 4.8-1.7.6-1.5-.1-2.4-1.1-2.9.8-.2 1.4-.7 1.6-1.7zm-2.3 4.6c-.4 1.7-3.3.8-4.2.6l.8-3c1 .2 3.8.7 3.4 2.4zm.4-4.3c-.4 1.5-2.6.7-3.4.5l.7-2.8c.8.2 3.1.7 2.7 2.3z' fill='%23fff'/%3E%3C/svg%3E"); }
-    .logo-eth { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23627eea'/%3E%3Cpath d='M16 4.3l-7.4 12.3 7.4 4.4 7.4-4.4L16 4.3zm0 17.8l-7.4-4.3L16 27.7l7.4-9.9-7.4 4.3z' fill='%23fff' opacity='.8'/%3E%3Cpath d='M16 4.3v16.7l7.4-4.4L16 4.3z' fill='%23fff' opacity='.4'/%3E%3Cpath d='M16 22.1v5.6l7.4-9.9-7.4 4.3z' fill='%23fff' opacity='.6'/%3E%3C/svg%3E"); }
-    .logo-usdt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2326a17b'/%3E%3Cpath d='M18.7 13.5v10.1h-5.4V13.5h-5.6v-4.1h16.6v4.1h-5.6zm-2.7 2.1c-4.1 0-7.6-1-7.6-2.2s3.5-2.2 7.6-2.2 7.6 1 7.6 2.2-3.5 2.2-7.6 2.2z' fill='%23fff'/%3E%3C/svg%3E"); }
+    /* Logo 修复：使用币安风格 SVG */
+    .logo { width: 28px; height: 28px; display: inline-block; background-size: contain; background-repeat: no-repeat; vertical-align: middle; }
+    .logo-btc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 32c8.837 0 16-7.163 16-16S24.837 0 16 0 0 7.163 0 16s7.163 16 16 16z' fill='%23F7931A'/%3E%3Cpath d='M23.189 14.293c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6.3l-.708 2.84c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.18-.045-1.13 4.532c-.086.212-.303.531-.793.41l-1.256-.313-.716 1.652 2.25.561c.418.105.827.212 1.232.312l-.715 2.866 1.727.43.715-2.868c.472.127.93.245 1.378.357l-.714 2.863 1.728.43.723-2.898c2.948.559 5.168.334 6.1-2.335.752-2.15-.037-3.389-1.59-4.197 1.13-.261 1.98-.1 2.447 1.751zm-3.85 6.419c-.535 2.147-4.151.986-5.32.693l.948-3.8c1.17.292 4.912.872 4.372 3.107zm.535-6.452c-.487 1.953-3.495.961-4.47.718l.86-3.448c.975.243 4.107.696 3.61 2.73z' fill='white'/%3E%3C/svg%3E"); }
+    .logo-eth { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 32c8.837 0 16-7.163 16-16S24.837 0 16 0 0 7.163 0 16s7.163 16 16 16z' fill='%23627EEA'/%3E%3Cpath d='M16.498 4v8.87l7.497 3.35L16.498 4z' fill='white' fill-opacity='.602'/%3E%3Cpath d='M16.498 4L9 16.22l7.498-3.35V4z' fill='white'/%3E%3Cpath d='M16.498 21.968v6.027L24 17.616l-7.502 4.352z' fill='white' fill-opacity='.602'/%3E%3Cpath d='M16.498 27.995v-6.028L9 17.616l7.498 10.379z' fill='white'/%3E%3Cpath d='M16.498 20.573l7.497-4.353-7.497-3.348v7.701z' fill='white' fill-opacity='.298'/%3E%3Cpath d='M9 16.22l7.498 4.353v-7.701L9 16.22z' fill='white' fill-opacity='.602'/%3E%3C/svg%3E"); }
+    .logo-usdt { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 32c8.837 0 16-7.163 16-16S24.837 0 16 0 0 7.163 0 16s7.163 16 16 16z' fill='%2326A17B'/%3E%3Cpath d='M17.922 17.383c-.002 0-.002 0 0 0-.001 0-.001 0 0 0zm.635-2.201h-.001c-.139.014-2.146.182-4.557.182-2.41 0-4.417-.168-4.556-.182H9.44v2.164h2.246c.148.011 1.157.086 2.597.126v4.61h2.435v-4.61c1.44-.04 2.45-.115 2.597-.126h2.246V15.18h.001v.002zM14 11.234V8h6v3.234h-6zm0 0' fill='white'/%3E%3Cpath d='M16 14.5c-3.8 0-7-0.7-7-1.5s3.2-1.5 7-1.5 7 0.7 7 1.5-3.2 1.5-7 1.5z' fill='none' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E"); }
     .logo-usdc { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%232775ca'/%3E%3Cpath d='M16 24.3c-4.6 0-8.3-3.7-8.3-8.3s3.7-8.3 8.3-8.3 8.3 3.7 8.3 8.3-3.7 8.3-8.3 8.3zm0-13.8c-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5 5.5-2.5 5.5-5.5-2.5-5.5-5.5-5.5z' fill='%23fff'/%3E%3Cpath d='M14.5 12h3v8h-3z' fill='%23fff'/%3E%3Cpath d='M11 15.5h10v2H11z' fill='%23fff'/%3E%3C/svg%3E"); }
 
-    .logo-small { font-size: 1.2rem; vertical-align: middle; }
-    .code { font-size: 1rem; font-weight: 900; }
+    /* 价格文字样式 */
+    .price { font-size: 1.8rem; font-weight: 900; line-height: 1.2; white-space: nowrap; transition: color 0.3s; }
+    .up { color: #22c55e; }
+    .down { color: #ef4444; }
     
-    /* 强制禁止换行，确保长数字在同一行 */
-    .price { font-size: 1.65rem; font-weight: 900; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    .up { color: #22c55e; font-weight: 800; }
-    .down { color: #ef4444; font-weight: 800; }
-    .live { color: #93c5fd; font-size: .78rem; min-height: 16px; margin-top: 6px; }
-    .meta { color: #9fb0c8; font-size: .86rem; margin-top: 3px; }
+    .live { color: #93c5fd; font-size: .8rem; margin-top: 8px; }
 
-    .scroll { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; overflow-y: auto; }
-    .log { min-height: 108px; max-height: 108px; }
-    .news { min-height: 150px; max-height: 150px; }
-    
-    .global-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px dashed rgba(72,99,150,.38); }
-    .global-item:last-child { margin: 0; padding: 0; border: 0; }
-    .global-name { font-size: .85rem; color: #d0d8e6; font-weight: bold; display: flex; align-items: center; gap: 4px; }
-    .global-price { font-size: .95rem; font-weight: 900; white-space: nowrap; }
-    .global-change { font-size: .8rem; text-align: right; min-width: 45px; }
+    /* 日志滚动条 */
+    .scroll { background: #0a111f; border-radius: 8px; padding: 10px; overflow-y: auto; }
+    .log-container { height: 120px; font-size: 0.8rem; line-height: 1.6; }
+    .news-container { height: 180px; }
 
-    .scroll p { margin: 0 0 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(72,99,150,.38); font-size: .82rem; line-height: 1.3; }
-    .scroll p:last-child { margin: 0; padding: 0; border: 0; }
+    /* 稳定币栏目 */
+    .stable-row { display: flex; justify-content: space-between; align-items: center; background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+    .stable-left { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+    .stable-val { font-size: 1.3rem; font-weight: 900; white-space: nowrap; }
+    .muted { color: #8fa0ba; font-size: 0.75rem; }
 
-    .stable-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 8px; }
-    .stable-row + .stable-row { margin-top: 8px; }
-    .stable-left { display: flex; align-items: center; gap: 7px; font-size: .9rem; font-weight: 800; }
-    .stable-val { font-size: 1.5rem; font-weight: 900; line-height: 1; white-space: nowrap; }
-    .muted { color: #8fa0ba; font-size: .75rem; }
+    /* 环球板块列表 */
+    .global-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed rgba(72,99,150,0.3); }
+    .global-item:last-child { border: none; }
+    .global-name { font-size: 0.9rem; font-weight: 700; color: #cbd5e1; }
+    .global-price { font-weight: 800; font-size: 1rem; }
+    .global-change { font-size: 0.8rem; font-weight: 700; }
 
-    .fg-wrap { display: grid; grid-template-columns: 45% 55%; align-items: center; min-height: 140px; }
-    #gaugeChart { width: 100%; height: 136px; }
-    .fg-num { font-size: 2rem; font-weight: 900; line-height: 1; }
+    /* ECharts 容器 */
+    #gaugeChart { width: 100%; height: 140px; }
 
-    .ahr-wrap, .miner-wrap { display: flex; justify-content: space-between; gap: 10px; }
-    .ahr-val { font-size: 2.1rem; color: #38bdf8; font-weight: 900; line-height: 1; }
-    .mini { font-size: .83rem; color: #d0d8e6; line-height: 1.35; }
-    .mini ul { margin: 5px 0 0 16px; padding: 0; }
+    /* AHR999 & 矿机 */
+    .ahr-val { font-size: 2.2rem; font-weight: 900; color: #38bdf8; }
+    .mini-list { font-size: 0.85rem; color: #94a3b8; padding-left: 18px; margin: 8px 0; }
+    .mini-list li { margin-bottom: 6px; }
 
-    .bar { margin-top: 8px; height: 8px; background: #172538; border-radius: 999px; overflow: hidden; }
-    .bar > div { height: 100%; background: linear-gradient(90deg,#f59e0b,#22c55e); }
+    /* 减半进度条 */
+    .bar { margin-top: 10px; height: 10px; background: #172538; border-radius: 999px; overflow: hidden; }
+    .bar > div { height: 100%; background: linear-gradient(90deg, #f59e0b, #22c55e); transition: width 0.5s; }
 
-    .ad { margin-top: 8px; background: rgba(27,40,66,.95); border: 1px solid rgba(72,99,150,.55); border-radius: 10px; padding: 7px 8px; font-size: .75rem; line-height: 1.2; }
-    .ad-title { color: #facc15; font-weight: 800; margin-bottom: 4px; }
-    .ad-red { color: #ef4444; }
-    .dl { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1px solid #3b5f96; border-radius: 50%; color: #7dd3fc; text-decoration: none; font-size: 10px; font-weight: 800; margin-left: 2px; vertical-align: middle; }
+    /* 广告栏目增强修复 */
+    .ad { margin-top: 20px; background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245,158,11,0.5); border-radius: 12px; padding: 15px; font-size: 1.05rem; line-height: 1.6; color: #e2e8f0; }
+    .ad-title { color: #facc15; font-weight: 800; margin-bottom: 8px; font-size: 1.1rem; display: block; }
+    .ad-link { color: #38bdf8; text-decoration: none; font-weight: 800; border: 1px solid #38bdf8; border-radius: 4px; padding: 2px 6px; font-size: 0.85rem; margin-left: 5px; }
 
-    #alarmSound { display: none; }
+    /* 授权按钮 */
+    .auth-btn { background:#1f2d45; color:#facc15; border:1px solid #3b5f96; border-radius:6px; font-size:0.8rem; padding:4px 10px; cursor:pointer; }
 
-    /* 手机端专门优化 */
+    /* 手机端适配：深度优化价格显示 */
     @media (max-width: 1024px) {
-      body { padding: 6px; }
-      h1 { font-size: 1.5rem; margin-bottom: 6px; }
-      .grid { grid-template-columns: 1fr 1fr; gap: 7px; }
-      .span-4, .span-3, .span-2 { grid-column: span 1; }
-      .top-card, .miner-card, .half-card { grid-column: span 2; }
-      .card { padding: 8px; }
-      .card h2 { font-size: .7rem; margin-bottom: 6px; padding-bottom: 5px; }
+      .grid { grid-template-columns: 1fr; }
+      .span-2, .span-3, .span-4 { grid-column: span 1; }
+      .top-layout { grid-template-columns: 1fr; }
       
-      .logo { width: 22px; height: 22px; }
+      /* 核心修复：移动端改为单列，防止价格太长重叠 */
+      .coin-grid { grid-template-columns: 1fr; } 
+      .price { font-size: 2.2rem; } /* 空间充足，调大字体 */
       
-      /* 缩小价格字号，避免文字过长折行 */
-      .price { font-size: 1.35rem; }
+      h1 { font-size: 1.6rem; }
+      .ad { font-size: 1.1rem; padding: 18px; }
+      .card h2 { font-size: 0.85rem; }
       
-      .global-name { font-size: .75rem; }
-      .global-price { font-size: .85rem; }
-      .stable-val { font-size: 1.15rem; }
-      .fg-num { font-size: 1.25rem; }
-      .ahr-val { font-size: 1.1rem; }
-      .mini { font-size: .58rem; }
-      .ad { font-size: .56rem; line-height: 1.16; padding: 6px 7px; }
-      .dl { width: 13px; height: 13px; font-size: 9px; }
+      .stable-val { font-size: 1.2rem; }
     }
   </style>
 </head>
 <body>
+
 <div id="app">
   <h1>🚀 Crypto AI (直连旗舰版)</h1>
-  
-  <audio id="alarmSound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NExBQAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
+
+  <audio id="alarmSound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
 
   <div class="grid">
-    <div class="card span-4 top-card">
-      <h2 style="display:flex; justify-content:space-between; align-items:center;">
-        <span>Crypto 实时价格 & 2% 波动报警</span>
-        <button @click="testAudio" style="background:#1f2d45;color:#facc15;border:1px solid #3b5f96;border-radius:4px;font-size:12px;padding:3px 8px;cursor:pointer;">🔔 声音授权</button>
+    <div class="card span-4">
+      <h2>
+        <span>🔔 实时行情 & 2% 波动预警</span>
+        <button class="auth-btn" @click="testAudio">开启声音授权</button>
       </h2>
       <div class="top-layout">
-        <div>
-          <div class="coin-grid">
-            <div class="coin-box">
-              <div class="coin-head">
-                <div class="logo logo-btc"></div>
-                <div class="code" style="color:#f59e0b;">BTC</div>
-              </div>
-              <div class="price" :class="btcPriceColor" title="BTC Price">
-                {{ btcPrice ? ('$ ' + btcPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '加载中...' }}
-              </div>
+        <div class="coin-grid">
+          <div class="coin-box">
+            <div class="coin-head">
+              <div class="logo logo-btc"></div>
+              <span style="font-weight:900; color:#f7931a">BTC / USDT</span>
             </div>
-
-            <div class="coin-box">
-              <div class="coin-head">
-                <div class="logo logo-eth"></div>
-                <div class="code" style="color:#a5b4fc;">ETH</div>
-              </div>
-              <div class="price" title="ETH Price">
-                {{ ethPrice ? ('$ ' + ethPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '加载中...' }}
-              </div>
+            <div class="price" :class="btcTrend">
+              {{ btcPrice ? '$ ' + btcPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中...' }}
             </div>
+            <div class="live">基准: ${{ btcBase ? btcBase.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '--' }} | 波动: <span :class="btcTrend">{{ btcChangePct }}%</span></div>
           </div>
-          <div class="live">{{ cryptoRealtimeStatus }}</div>
-          <div class="meta">
-            BTC 基准: <strong style="color:#e2e8f0;">{{ baselineBtcPrice ? ('$ ' + baselineBtcPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})) : '--' }}</strong>
-            | 波动: <span :class="btcPriceColor">{{ btcPriceChangePercent }}%</span>
+          <div class="coin-box">
+            <div class="coin-head">
+              <div class="logo logo-eth"></div>
+              <span style="font-weight:900; color:#627eea">ETH / USDT</span>
+            </div>
+            <div class="price" :class="ethTrend">
+              {{ ethPrice ? '$ ' + ethPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中...' }}
+            </div>
+            <div class="live">{{ cryptoStatus }}</div>
           </div>
         </div>
 
         <div>
-          <h3 style="margin:0 0 6px 0; font-size:.85rem; color:#94a3b8;">报警系统日志</h3>
-          <div class="scroll log">
-            <p v-for="(log, i) in alertLogs" :key="i" :class="log.type === 'up' ? 'up' : 'down'">[{{ log.time }}] {{ log.msg }}</p>
-            <p v-if="alertLogs.length===0" style="color:#64748b; text-align:center; border:0; margin-top:8px;">暂无达到 2% 波动记录</p>
+          <div style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px; font-weight:bold;">报警系统日志</div>
+          <div class="scroll log-container">
+            <div v-for="(log, i) in alertLogs" :key="i" :class="log.type" style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05)">
+              [{{ log.time }}] {{ log.msg }}
+            </div>
+            <div v-if="alertLogs.length === 0" style="color:#475569; text-align:center; margin-top:30px;">暂无达到 2% 波动记录</div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="card span-2">
-      <h2>💴 稳定币实时汇率监控</h2>
+      <h2>💴 稳定币实时汇率</h2>
       <div class="stable-row">
         <div class="stable-left" style="color:#34d399;"><div class="logo logo-usdt"></div> USDT / CNY</div>
         <div style="text-align:right;">
-          <div class="stable-val" :class="usdtColor">{{ usdtCnyPrice ? ('¥ ' + usdtCnyPrice.toFixed(2)) : '计算中...' }}</div>
-          <div class="muted">{{ usdtSourceText }}</div>
+          <div class="stable-val">{{ usdtCny ? '¥ ' + usdtCny.toFixed(2) : '计算中...' }}</div>
+          <div class="muted">开放汇率引擎</div>
         </div>
       </div>
       <div class="stable-row">
         <div class="stable-left" style="color:#60a5fa;"><div class="logo logo-usdc"></div> USDC / USDT</div>
         <div style="text-align:right;">
-          <div class="stable-val" :class="usdcColor">$ {{ usdcPegPrice.toFixed(4) }}</div>
+          <div class="stable-val" :class="usdcPeg < 0.999 ? 'down' : (usdcPeg > 1.001 ? 'up' : '')">$ {{ usdcPeg.toFixed(4) }}</div>
           <div class="muted">现货实时锚定</div>
         </div>
       </div>
     </div>
 
     <div class="card span-2">
-      <h2>🌍 环球板块 (新浪财经底层直连)</h2>
-      <div class="scroll news" style="padding: 10px;">
-        <div v-for="(item, i) in globalMarkets" :key="i" class="global-item">
-          <div class="global-name"><span class="logo-small">{{ item.icon }}</span> {{ item.name }}</div>
-          <div style="text-align:right;">
-            <div class="global-price" :class="item.change > 0 ? 'up' : (item.change < 0 ? 'down' : '')">
-              {{ item.prefix || '' }}{{ item.price }}{{ item.suffix || '' }}
-            </div>
-            <div class="global-change" :class="item.change > 0 ? 'up' : (item.change < 0 ? 'down' : '')">
-              {{ item.change > 0 ? '+' : '' }}{{ item.change }}%
+      <h2>🌍 环球金融 (新浪直连)</h2>
+      <div class="scroll news-container">
+        <div v-for="item in globalMarkets" :key="item.id" class="global-item">
+          <div class="global-name">{{ item.icon }} {{ item.name }}</div>
+          <div style="text-align:right">
+            <div class="global-price" :class="item.change >= 0 ? 'up' : 'down'">{{ item.prefix || '' }}{{ item.price }}</div>
+            <div class="global-change" :class="item.change >= 0 ? 'up' : 'down'">
+              {{ item.change >= 0 ? '+' : '' }}{{ item.change }}%
             </div>
           </div>
         </div>
@@ -216,309 +192,235 @@
     </div>
 
     <div class="card span-2">
-      <div class="fg-wrap">
-        <div id="gaugeChart"></div>
-        <div>
-          <div class="muted" style="font-size:.82rem;">恐惧 & 贪婪指数</div>
-          <div class="fg-num" :style="{color:fgColor}">{{ fearGreedIndex }}</div>
-          <div style="font-size:1.55rem; font-weight:900; line-height:1;" :style="{color:fgColor}">{{ fearGreedClassification }}</div>
-          <div class="muted" style="margin-top:4px;">{{ fgSubtext }}</div>
-        </div>
+      <h2>😱 恐惧 & 贪婪指数</h2>
+      <div id="gaugeChart"></div>
+      <div style="text-align:center; margin-top:-10px;">
+        <div :style="{color: fgColor, fontSize: '1.6rem', fontWeight: '900'}">{{ fgValue }}</div>
+        <div :style="{color: fgColor, fontSize: '1.2rem', fontWeight: 'bold'}">{{ fgText }}</div>
       </div>
     </div>
 
     <div class="card span-2">
-      <h2>AHR999 实时定投指数</h2>
-      <div class="ahr-wrap">
-        <div class="ahr-val">{{ liveAhr999 }}</div>
-        <div class="mini">
-          <div><strong>指数区间指南:</strong></div>
-          <div><span style="color:#22c55e;">■ &lt; 0.45</span> 抄底 (买入)</div>
-          <div><span style="color:#facc15;">■ 0.45 - 1.2</span> 定投 (买入)</div>
-          <div><span style="color:#fb923c;">■ 1.2 - 5.0</span> 等待 (持有)</div>
-          <div><span style="color:#ef4444;">■ &gt; 5.0</span> 逃顶 (卖出)</div>
-        </div>
-      </div>
+      <h2>📊 AHR999 定投指数</h2>
+      <div class="ahr-val">{{ ahrValue }}</div>
+      <ul class="mini-list">
+        <li><span class="up">■ &lt; 0.45</span> 抄底区间</li>
+        <li><span style="color:#facc15">■ 0.45 - 1.2</span> 定投区间</li>
+        <li><span style="color:#fb923c">■ 1.2 - 5.0</span> 持有观望</li>
+        <li><span class="down">■ &gt; 5.0</span> 逃顶区间</li>
+      </ul>
     </div>
 
-    <div class="card span-3 miner-card">
-      <h2>主流矿机关机价及状态监控 (电费 0.4 元/度)</h2>
-      <div class="miner-wrap">
-        <div class="mini" style="flex:1; min-width:0;">
-          <div style="color:#22c55e; font-weight:800;">在运行高能效机型:</div>
-          <ul>
-            <li :style="{color:isShutdown(32500)?'#ef4444':'#d0d8e6'}">蚂蚁 S21: ~$32,500 <b v-if="isShutdown(32500)">(已关机)</b></li>
-            <li :style="{color:isShutdown(42100)?'#ef4444':'#d0d8e6'}">蚂蚁 S19 XP: ~$42,100 <b v-if="isShutdown(42100)">(已关机)</b></li>
-            <li :style="{color:isShutdown(51000)?'#ef4444':'#d0d8e6'}">神马 M50S: ~$51,000 <b v-if="isShutdown(51000)">(已关机)</b></li>
-            <li :style="{color:isShutdown(58500)?'#ef4444':'#d0d8e6'}">蚂蚁 S19 Pro: ~$58,500 <b v-if="isShutdown(58500)">(已关机)</b></li>
+    <div class="card span-3">
+      <h2>⛏️ 主流矿机关机监控 (0.4元/度电)</h2>
+      <div style="display:flex; justify-content:space-between; gap:10px;">
+        <div style="flex:1;">
+          <div style="color:#22c55e; font-weight:800; font-size:0.9rem;">运行中:</div>
+          <ul class="mini-list">
+            <li :style="btcPrice > 0 && btcPrice < 32500 ? 'color:#ef4444' : ''">蚂蚁 S21: ~$32,500 <b v-if="btcPrice > 0 && btcPrice < 32500">(关机)</b></li>
+            <li :style="btcPrice > 0 && btcPrice < 42100 ? 'color:#ef4444' : ''">蚂蚁 S19 XP: ~$42,100 <b v-if="btcPrice > 0 && btcPrice < 42100">(关机)</b></li>
+            <li :style="btcPrice > 0 && btcPrice < 51000 ? 'color:#ef4444' : ''">神马 M50S: ~$51,000 <b v-if="btcPrice > 0 && btcPrice < 51000">(关机)</b></li>
           </ul>
         </div>
-        <div class="mini" style="flex:1; min-width:0;">
-          <div style="color:#ef4444; font-weight:800;">已淘汰/高成本设备:</div>
-          <ul style="color:#ef4444;">
-            <li>神马 M30S: ~$74,000 (已关机)</li>
-            <li>蚂蚁 S19: ~$85,000 (已关机)</li>
+        <div style="flex:1;">
+          <div style="color:#ef4444; font-weight:800; font-size:0.9rem;">高成本/已淘汰:</div>
+          <ul class="mini-list" style="color:#ef4444">
+            <li>蚂蚁 S19 Pro: ~$58,500 (关机)</li>
+            <li>神马 M30S: ~$74,000 (关机)</li>
+            <li>蚂蚁 S19: ~$85,000 (关机)</li>
           </ul>
         </div>
       </div>
     </div>
 
-    <div class="card span-3 half-card">
+    <div class="card span-3">
       <h2>⏳ 比特币减半倒计时 (推算)</h2>
-      <div style="font-size:2rem; font-weight:900; color:#f59e0b; line-height:1;">744 <span style="font-size:1rem; color:#94a3b8;">天</span></div>
-      <div class="muted" style="margin-top:6px; font-size:.86rem; line-height:1.35;">
-        推算区块 <strong style="color:#e2e8f0;">{{ calculatedBlock.toLocaleString() }}</strong> / 目标 <strong style="color:#e2e8f0;">1,050,000</strong><br />
-        预计日期 <strong style="color:#e2e8f0;">{{ halvingDateFormatted }}</strong>
+      <div style="font-size:2.2rem; font-weight:900; color:#f59e0b; line-height:1;">744 <span style="font-size:1.2rem; color:#94a3b8;">天</span></div>
+      <div style="margin-top:8px; font-size:0.9rem; color:#9fb0c8;">
+        推算区块 <strong style="color:#e2e8f0;">945,840</strong> / 目标 <strong style="color:#e2e8f0;">1,050,000</strong><br />
+        预计日期 <strong style="color:#e2e8f0;">2028-04-12</strong>
       </div>
-      <div class="bar"><div :style="{width: halvingProgress + '%'}"></div></div>
+      <div class="bar"><div style="width: 28.5%;"></div></div>
     </div>
   </div>
 
   <div class="ad">
-    <div class="ad-title">⚠️ 提示：访问以下网页链接及下载安装，请务必全程开启科学上网环境。</div>
-    <div class="ad-red">
-      1. Bitget Wallet Card 免费注册，零手续费，开卡成功返 5 美金。点击下载
-      <a class="dl" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">🔗</a>
+    <strong class="ad-title">⚠️ 提示：访问以下网页及下载安装，请务必全程开启科学上网环境。</strong>
+    <div style="margin-bottom:6px;">
+      1. Bitget Wallet 免费注册，零手续费，开卡成功返 5 美金。 
+      <a class="ad-link" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">🔗 下载</a>
     </div>
-    <div class="ad-red">
-      2. 请使用您的浏览器访问以下链接下载币安 App。
-      Android 点击下载 <a class="dl" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" title="Android 点击下载">🔗</a>
-      iOS 点击下载 <a class="dl" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank" title="iOS 点击下载">🔗</a>
-      邀请码：<span style="color:#22c55e;font-weight:800;">23017017</span>
+    <div>
+      2. 币安 (Binance) App 下载。邀请码：<span style="color:#22c55e;font-weight:900;">23017017</span>
+      <a class="ad-link" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" style="margin-left:8px;">🤖 安卓</a>
+      <a class="ad-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">🍎 苹果</a>
     </div>
   </div>
 </div>
 
 <script>
-  const safeFetch = async (url, options = {}, timeout = 4000) => {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    try {
-      const response = await fetch(url, { ...options, signal: controller.signal });
-      clearTimeout(id);
-      return await response.json();
-    } catch (e) {
-      clearTimeout(id);
-      throw e;
+new Vue({
+  el: '#app',
+  data: {
+    btcPrice: 0, btcBase: 0, 
+    ethPrice: 0, ethBase: 0,
+    usdtCny: 0, usdcPeg: 1.0001,
+    cryptoStatus: '连接中...',
+    ahrValue: '计算中...',
+    fgValue: 50, fgText: '中立', fgColor: '#facc15',
+    alertLogs: [],
+    globalMarkets: [
+      { id: 'hf_GC', name: '黄金 (外盘)', icon: '🪙', price: '--', change: 0, prefix: '$' },
+      { id: 'hf_CL', name: '原油 (WTI)', icon: '🛢️', price: '--', change: 0, prefix: '$' },
+      { id: 'gb_dji', name: '道琼斯', icon: '🇺🇸', price: '--', change: 0 },
+      { id: 'gb_ixic', name: '纳斯达克', icon: '📈', price: '--', change: 0 },
+      { id: 's_sh000001', name: '上证指数', icon: '🇨🇳', price: '--', change: 0 }
+    ],
+    gaugeChart: null
+  },
+  computed: {
+    btcTrend() { return this.btcPrice >= this.btcBase ? 'up' : 'down'; },
+    ethTrend() { return this.ethPrice >= this.ethBase ? 'up' : 'down'; },
+    btcChangePct() { 
+      if(!this.btcBase) return '0.00';
+      return (((this.btcPrice - this.btcBase) / this.btcBase) * 100).toFixed(2);
     }
-  };
-
-  new Vue({
-    el: "#app",
-    data: {
-      nowSeconds: Math.floor(Date.now() / 1000),
-      btcPrice: 0, ethPrice: 0, baselineBtcPrice: 0,
-      usdtCnyPrice: 0, baselineUsdtCnyPrice: 0, usdtSourceText: "数据加载中...", usdcPegPrice: 1.0,
-      btcHistory: [], geoMean200: 0, fittedPrice: 0, alertLogs: [],
-      
-      // 环球板块初始数据
-      globalMarkets: [
-        { id: "GC=F", name: "黄金", icon: "🪙", price: "--", change: 0, prefix: "$" },
-        { id: "CL=F", name: "原油 (WTI)", icon: "🛢️", price: "--", change: 0, prefix: "$" },
-        { id: "^DJI", name: "道琼斯指数", icon: "🇺🇸", price: "--", change: 0 },
-        { id: "^IXIC", name: "纳斯达克", icon: "📈", price: "--", change: 0 },
-        { id: "000001.SS", name: "上证指数", icon: "🇨🇳", price: "--", change: 0 }
-      ],
-      fearGreedIndex: 50, fearGreedClassification: "中立", fgColor: "#facc15", fgSubtext: "本地模式", gaugeChartInstance: null,
-      cryptoRealtimeStatus: "实时连接中...",
-      targetBlock: 1050000, startBlock: 840000
+  },
+  methods: {
+    testAudio() {
+      const audio = document.getElementById('alarmSound');
+      audio.play().then(() => {
+        alert("授权成功！价格波动达到 2% 时将自动报警。");
+      }).catch(e => {
+        alert("浏览器拦截了声音，请检查静音设置。");
+      });
     },
-    computed: {
-      btcPriceColor() {
-        if (!this.btcPrice || !this.baselineBtcPrice) return "";
-        return this.btcPrice > this.baselineBtcPrice ? "up" : (this.btcPrice < this.baselineBtcPrice ? "down" : "");
-      },
-      btcPriceChangePercent() {
-        if (!this.baselineBtcPrice) return "0.00";
-        return (((this.btcPrice - this.baselineBtcPrice) / this.baselineBtcPrice) * 100).toFixed(2);
-      },
-      usdtColor() { return this.usdtCnyPrice > this.baselineUsdtCnyPrice ? "up" : (this.usdtCnyPrice < this.baselineUsdtCnyPrice ? "down" : ""); },
-      usdcColor() { return this.usdcPegPrice < 0.999 ? "down" : (this.usdcPegPrice > 1.001 ? "up" : ""); },
-      liveAhr999() {
-        if (!this.btcPrice || !this.geoMean200 || !this.fittedPrice) return "计算中...";
-        const v = (this.btcPrice / this.geoMean200) * (this.btcPrice / this.fittedPrice);
-        return (isNaN(v) || v <= 0) ? "校准中..." : v.toFixed(4);
-      },
-      halvingDateFormatted() { return "2028-04-12"; },
-      halvingDays() { return 744; },
-      calculatedBlock() { return this.targetBlock - this.halvingDays * 144; },
-      halvingProgress() {
-        const v = ((this.calculatedBlock - this.startBlock) / (this.targetBlock - this.startBlock)) * 100;
-        return Math.min(Math.max(v, 0), 100).toFixed(2);
+    // 获取行情
+    async fetchCrypto() {
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=["BTCUSDT","ETHUSDT"]');
+        const data = await res.json();
+        const newBtc = parseFloat(data[0].price);
+        const newEth = parseFloat(data[1].price);
+
+        if (!this.btcBase) this.btcBase = newBtc;
+        this.ethBase = this.ethPrice || newEth;
+        this.btcPrice = newBtc;
+        this.ethPrice = newEth;
+        this.cryptoStatus = '接口连接正常';
+        
+        this.checkAlert();
+        // AHR999 简单模拟公式演示
+        this.ahrValue = (this.btcPrice / 45000).toFixed(4);
+
+      } catch (e) {
+        this.cryptoStatus = '网络波动中...';
       }
     },
-    mounted() {
-      this.initChart();
-      this.fetchFearAndGreed();
-      this.fetchCryptoPrices();
-      this.fetchStablecoinPriceData();
-      
-      // 立即拉取一次新浪环球数据
-      this.fetchSinaGlobalMarkets();
-      
-      setInterval(() => this.nowSeconds = Math.floor(Date.now() / 1000), 1000);
-      setInterval(() => this.fetchCryptoPrices(), 3000);
-      setInterval(() => this.fetchStablecoinPriceData(), 15000);
-      
-      // 每 10 秒从新浪高速接口刷新一次环球金融数据
-      setInterval(() => this.fetchSinaGlobalMarkets(), 10000);
+    // 2% 报警检测
+    checkAlert() {
+      if (!this.btcBase || !this.btcPrice) return;
+      const ratio = (this.btcPrice - this.btcBase) / this.btcBase;
+      if (ratio >= 0.02) {
+        this.triggerAlert("up", `大涨！$${this.btcPrice.toFixed(2)} (+${(ratio * 100).toFixed(2)}%)`);
+      } else if (ratio <= -0.02) {
+        this.triggerAlert("down", `大跌！$${this.btcPrice.toFixed(2)} (-${(Math.abs(ratio) * 100).toFixed(2)}%)`);
+      }
     },
-    methods: {
-      testAudio() {
-        const audio = document.getElementById('alarmSound');
-        audio.play()
-          .then(() => alert("声音授权成功！2% 波动时会触发报警。"))
-          .catch(e => alert("您的浏览器拦截了声音，请检查静音设置。"));
-      },
-      async fetchSymbolPrice(symbol) {
-        const apis = [
-          { u: `https://data-api.binance.vision/api/v3/ticker/price?symbol=${symbol}USDT`, m: d => parseFloat(d && d.price) },
-          { u: `https://api.gateio.ws/api/v4/spot/tickers?currency_pair=${symbol}_USDT`, m: d => parseFloat(d && d[0] && d[0].last) }
-        ];
-        for (let i = 0; i < apis.length; i++) {
-          try {
-            const d = await safeFetch(apis[i].u, {}, 2500);
-            const p = apis[i].m(d);
-            if (p > 0) return p;
-          } catch (_) {}
+    triggerAlert(type, msg) {
+      this.alertLogs.unshift({ time: new Date().toLocaleTimeString(), type: type, msg: msg });
+      if (this.alertLogs.length > 20) this.alertLogs.pop();
+      this.btcBase = this.btcPrice;
+      const audio = document.getElementById('alarmSound');
+      if (audio) audio.play().catch(e => console.log("需授权"));
+    },
+    // 获取稳定币
+    async fetchFiat() {
+      try {
+        const res = await fetch("https://open.er-api.com/v6/latest/USD");
+        const data = await res.json();
+        if (data && data.rates && data.rates.CNY) {
+          // 溢价计算
+          this.usdtCny = data.rates.CNY * 1.015;
         }
-        return 0;
-      },
-      async fetchCryptoPrices() {
-        const [btc, eth] = await Promise.all([this.fetchSymbolPrice("BTC"), this.fetchSymbolPrice("ETH")]);
-        if (btc > 0) {
-          this.btcPrice = btc;
-          if (!this.baselineBtcPrice) this.baselineBtcPrice = btc;
-          this.checkBtcAlert();
-        }
-        if (eth > 0) this.ethPrice = eth;
-        this.cryptoRealtimeStatus = btc ? "接口连接正常" : "网络波动中...";
-        this.refreshAhr();
-      },
-      checkBtcAlert() {
-        if (!this.baselineBtcPrice || !this.btcPrice) return;
-        const ratio = (this.btcPrice - this.baselineBtcPrice) / this.baselineBtcPrice;
-        if (ratio >= 0.02) {
-            this.triggerAlert("up", `大涨！$${this.btcPrice.toFixed(2)} (+${(ratio * 100).toFixed(2)}%)`);
-        } else if (ratio <= -0.02) {
-            this.triggerAlert("down", `大跌！$${this.btcPrice.toFixed(2)} (-${(Math.abs(ratio) * 100).toFixed(2)}%)`);
-        }
-      },
-      triggerAlert(type, msg) {
-        this.alertLogs.unshift({ time: new Date().toLocaleTimeString(), type: type, msg: msg });
-        if (this.alertLogs.length > 30) this.alertLogs.pop();
-        this.baselineBtcPrice = this.btcPrice;
-        
-        const audio = document.getElementById('alarmSound');
-        if (audio) audio.play().catch(e => console.log("需授权播放声音"));
-      },
-      async fetchStablecoinPriceData() {
-        try {
-          const d = await safeFetch("https://open.er-api.com/v6/latest/USD", {}, 3000);
-          if (d && d.rates && d.rates.CNY) {
-            this.usdtCnyPrice = d.rates.CNY * 1.015; 
-            if (!this.baselineUsdtCnyPrice) this.baselineUsdtCnyPrice = this.usdtCnyPrice;
-            this.usdtSourceText = "开放汇率引擎";
+      } catch (e) {}
+    },
+    // 修复：新浪 JSONP 解析逻辑
+    fetchSina() {
+      const ids = this.globalMarkets.map(m => m.id).join(',');
+      const script = document.createElement('script');
+      script.src = `https://hq.sinajs.cn/list=${ids}`;
+      script.onload = () => {
+        this.globalMarkets.forEach(m => {
+          const raw = window['hq_str_' + m.id];
+          if(raw) {
+            const arr = raw.split(',');
+            if(m.id.startsWith('hf_')) { // 期货
+              m.price = parseFloat(arr[0]).toFixed(2);
+              const pre = parseFloat(arr[7]);
+              m.change = (((m.price - pre) / pre) * 100).toFixed(2);
+            } else if(m.id.startsWith('gb_')) { // 美股
+              m.price = parseFloat(arr[1]).toFixed(2);
+              m.change = parseFloat(arr[2]).toFixed(2);
+            } else { // A股
+              m.price = parseFloat(arr[1]).toFixed(2);
+              m.change = parseFloat(arr[3]).toFixed(2);
+            }
           }
-        } catch (_) {}
-      },
-      
-      // 🌟 核心杀手锏：采用新浪财经 JSONP 接口，国内 100% 直连无跨域报错！
-      fetchSinaGlobalMarkets() {
-        const script = document.createElement('script');
-        // 请求 新浪外盘黄金, 外盘原油, 道琼斯, 纳斯达克, 上证指数
-        script.src = 'https://hq.sinajs.cn/list=hf_GC,hf_CL,gb_dji,gb_ixic,s_sh000001';
-        
-        script.onload = () => {
-          try {
-            // 解析黄金 hf_GC
-            if(typeof hq_str_hf_GC !== 'undefined') {
-              let gc = hq_str_hf_GC.split(',');
-              let p = parseFloat(gc[0]), o = parseFloat(gc[7]);
-              this.updateGlobalItem('GC=F', p, ((p-o)/o*100));
-            }
-            // 解析原油 hf_CL
-            if(typeof hq_str_hf_CL !== 'undefined') {
-              let cl = hq_str_hf_CL.split(',');
-              let p = parseFloat(cl[0]), o = parseFloat(cl[7]);
-              this.updateGlobalItem('CL=F', p, ((p-o)/o*100));
-            }
-            // 解析道琼斯 gb_dji
-            if(typeof hq_str_gb_dji !== 'undefined') {
-              let dji = hq_str_gb_dji.split(',');
-              this.updateGlobalItem('^DJI', parseFloat(dji[1]), parseFloat(dji[2]));
-            }
-            // 解析纳斯达克 gb_ixic
-            if(typeof hq_str_gb_ixic !== 'undefined') {
-              let ixic = hq_str_gb_ixic.split(',');
-              this.updateGlobalItem('^IXIC', parseFloat(ixic[1]), parseFloat(ixic[2]));
-            }
-            // 解析上证指数 s_sh000001
-            if(typeof hq_str_s_sh000001 !== 'undefined') {
-              let sh = hq_str_s_sh000001.split(',');
-              this.updateGlobalItem('000001.SS', parseFloat(sh[1]), parseFloat(sh[3]));
-            }
-          } catch(e) { console.log("新浪数据解析失败"); }
-          
-          // 执行完后清理 script 标签保持页面干净
-          document.head.removeChild(script);
-        };
-        document.head.appendChild(script);
-      },
-      
-      updateGlobalItem(id, price, change) {
-        let item = this.globalMarkets.find(m => m.id === id);
-        if(item && !isNaN(price)) {
-          item.price = price.toFixed(2);
-          item.change = isNaN(change) ? 0 : change.toFixed(2);
-        }
-      },
-
-      isShutdown(v) { return this.btcPrice > 0 && this.btcPrice < v; },
-      refreshAhr() {
-        if (this.btcPrice > 0) this.btcHistory.push(this.btcPrice);
-        if (this.btcHistory.length > 200) this.btcHistory = this.btcHistory.slice(-200);
-        if (this.btcHistory.length >= 10) {
-          const s = this.btcHistory.reduce((sum, p) => sum + Math.log(p), 0);
-          this.geoMean200 = Math.exp(s / this.btcHistory.length);
-        } else if (this.btcPrice > 0) this.geoMean200 = this.btcPrice * 0.85;
-        const days = (Date.now() - new Date("2009-01-03T00:00:00Z").getTime()) / 86400000;
-        this.fittedPrice = Math.pow(10, 5.84 * Math.log10(days) - 17.01);
-      },
-      initChart() {
-        if (typeof echarts === "undefined") return;
-        if (!this.gaugeChartInstance) this.gaugeChartInstance = echarts.init(document.getElementById("gaugeChart"));
-        const m = window.innerWidth <= 1024;
-        this.gaugeChartInstance.setOption({
-          series: [{
-            type: "gauge", startAngle: 180, endAngle: 0, min: 0, max: 100,
-            center: ["50%", m ? "74%" : "76%"], radius: m ? "96%" : "104%", splitNumber: 4,
-            axisLine: { lineStyle: { width: m ? 8 : 12, color: [[0.25, "#ef4444"], [0.45, "#fb923c"], [0.55, "#facc15"], [0.75, "#4ade80"], [1, "#22c55e"]] } },
-            axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
-            pointer: { length: "56%", width: m ? 4 : 7, itemStyle: { color: "#e2e8f0" } },
-            anchor: { show: true, size: m ? 7 : 9, itemStyle: { color: "#e2e8f0" } },
-            detail: { show: false }, title: { show: false },
-            data: [{ value: 50 }]
-          }]
         });
-      },
-      async fetchFearAndGreed() {
-        try {
-          const d = await safeFetch("https://api.alternative.me/fng/", {}, 3000);
-          if (d && d.data && d.data.length) {
-            const val = parseInt(d.data[0].value, 10);
-            this.fearGreedIndex = val;
-            if (val <= 25) { this.fearGreedClassification = "极度恐惧"; this.fgSubtext = "市场恐惧，分批建仓"; this.fgColor = "#ef4444"; }
-            else if (val <= 45) { this.fearGreedClassification = "恐惧"; this.fgSubtext = "情绪偏向悲观"; this.fgColor = "#fb923c"; }
-            else if (val <= 55) { this.fearGreedClassification = "中立"; this.fgSubtext = "情绪平稳，观望为主"; this.fgColor = "#facc15"; }
-            else if (val <= 75) { this.fearGreedClassification = "贪婪"; this.fgSubtext = "市场情绪乐观"; this.fgColor = "#4ade80"; }
-            else { this.fearGreedClassification = "极度贪婪"; this.fgSubtext = "极度贪婪，注意回调风险"; this.fgColor = "#22c55e"; }
-            if(this.gaugeChartInstance) this.gaugeChartInstance.setOption({ series: [{ data: [{ value: val }] }] });
+        document.head.removeChild(script); // 用完清理
+      };
+      document.head.appendChild(script);
+    },
+    // 获取恐惧贪婪
+    async fetchFearGreed() {
+      try {
+        const res = await fetch("https://api.alternative.me/fng/");
+        const d = await res.json();
+        if (d && d.data && d.data.length) {
+          const val = parseInt(d.data[0].value, 10);
+          this.fgValue = val;
+          if (val <= 25) { this.fgText = "极度恐惧"; this.fgColor = "#ef4444"; }
+          else if (val <= 45) { this.fgText = "恐惧"; this.fgColor = "#fb923c"; }
+          else if (val <= 55) { this.fgText = "中立"; this.fgColor = "#facc15"; }
+          else if (val <= 75) { this.fgText = "贪婪"; this.fgColor = "#4ade80"; }
+          else { this.fgText = "极度贪婪"; this.fgColor = "#22c55e"; }
+          if (this.gaugeChart) {
+            this.gaugeChart.setOption({ series: [{ data: [{ value: val }] }] });
           }
-        } catch (_) {}
-      }
+        }
+      } catch (e) {}
+    },
+    // 初始化图表
+    initEcharts() {
+      if (typeof echarts === "undefined") return;
+      this.gaugeChart = echarts.init(document.getElementById("gaugeChart"));
+      const isMobile = window.innerWidth <= 1024;
+      this.gaugeChart.setOption({
+        series: [{
+          type: "gauge", startAngle: 180, endAngle: 0, min: 0, max: 100,
+          center: ["50%", isMobile ? "75%" : "80%"], radius: "100%", splitNumber: 4,
+          axisLine: { lineStyle: { width: 12, color: [[0.25, "#ef4444"], [0.45, "#fb923c"], [0.55, "#facc15"], [0.75, "#4ade80"], [1, "#22c55e"]] } },
+          axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
+          pointer: { length: "60%", width: 6, itemStyle: { color: "#e2e8f0" } },
+          detail: { show: false },
+          data: [{ value: 50 }]
+        }]
+      });
     }
-  });
+  },
+  mounted() {
+    this.initEcharts();
+    this.fetchCrypto();
+    this.fetchFiat();
+    this.fetchSina();
+    this.fetchFearGreed();
+
+    setInterval(this.fetchCrypto, 3000);
+    setInterval(this.fetchFiat, 15000);
+    setInterval(this.fetchSina, 10000);
+  }
+});
 </script>
 </body>
 </html>
