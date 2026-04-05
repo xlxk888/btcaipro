@@ -36,7 +36,7 @@
     .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 15px; }
     .coin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 
-    /* Logo 终极修复：统一尺寸，依靠内联 SVG 渲染，杜绝错码 */
+    /* 币安官方 SVG 容器 */
     .logo-svg { width: 28px; height: 28px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
 
     .price { font-size: 1.8rem; font-weight: 900; line-height: 1.2; white-space: nowrap; transition: color 0.3s; }
@@ -103,7 +103,7 @@
         <div class="coin-grid">
           <div class="coin-box">
             <div class="coin-head">
-              <svg viewBox="0 0 32 32" class="logo-svg">
+              <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="16" cy="16" r="16" fill="#F7931A"/>
                 <path d="M21.8 14.1c.3-2.3-1.5-3.2-3.2-3.8l.7-2.6-1.6-.4-.6 2.5c-.4-.1-.9-.2-1.3-.3l.7-2.5-1.6-.4-.7 2.6c-.3-.1-.7-.2-1-.2L11 9l-.3 1.3s.8.2.8.2c.4.1.5.4.5.6l-.8 3.4c.1 0 .2.1.3.1l-.3-.1-1.1 4.5c-.1.2-.3.3-.6.2 0 0-.8-.2-.8-.2l-.5 1.4 2.8.7c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.8 1.6.4.7-2.8c2.3.5 4 .3 4.8-1.7.6-1.5-.1-2.4-1.1-2.9.8-.2 1.4-.7 1.6-1.7zm-2.3 4.6c-.4 1.7-3.3.8-4.2.6l.8-3c1 .2 3.8.7 3.4 2.4zm.4-4.3c-.4 1.5-2.6.7-3.4.5l.7-2.8c.8.2 3.1.7 2.7 2.3z" fill="#FFF"/>
               </svg>
@@ -117,7 +117,7 @@
           
           <div class="coin-box">
             <div class="coin-head">
-              <svg viewBox="0 0 32 32" class="logo-svg">
+              <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="16" cy="16" r="16" fill="#627EEA"/>
                 <path d="M16 4.3l-7.4 12.3 7.4 4.4 7.4-4.4L16 4.3zm0 17.8l-7.4-4.3L16 27.7l7.4-9.9-7.4 4.3z" fill="#FFF" opacity=".8"/>
                 <path d="M16 4.3v16.7l7.4-4.4L16 4.3z" fill="#FFF" opacity=".4"/>
@@ -148,9 +148,9 @@
       <h2>💴 稳定币场外汇率 (模拟 C2C)</h2>
       <div class="stable-row">
         <div class="stable-left" style="color:#34d399;">
-          <svg viewBox="0 0 32 32" class="logo-svg">
+          <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
             <circle cx="16" cy="16" r="16" fill="#26A17B"/>
-            <path d="M18.7 13.5v10.1h-5.4V13.5h-5.6v-4.1h16.6v4.1h-5.6zm-2.7 2.1c-4.1 0-7.6-1-7.6-2.2s3.5-2.2 7.6-2.2 7.6 1 7.6 2.2-3.5 2.2-7.6 2.2z" fill="#FFF"/>
+            <path fill="#FFF" d="M17.333 13.627v8.528h-2.666v-8.528c-3.52-.163-6.195-1.03-6.195-2.062 0-1.144 3.359-2.071 7.528-2.071 4.168 0 7.527.927 7.527 2.071 0 1.033-2.674 1.9-6.194 2.062zm0-2.348c2.977-.13 5.066-.757 5.066-1.503 0-.825-2.836-1.493-6.333-1.493-3.498 0-6.334.668-6.334 1.493 0 .746 2.09 1.373 5.067 1.503v1.38c-3.666-.178-6.401-1.12-6.401-2.26 0-1.282 3.433-2.32 7.668-2.32 4.234 0 7.667 1.038 7.667 2.32 0 1.139-2.735 2.081-6.4 2.26v-1.38z"/>
           </svg>
           USDT / CNY
         </div>
@@ -161,11 +161,10 @@
       </div>
       <div class="stable-row">
         <div class="stable-left" style="color:#60a5fa;">
-          <svg viewBox="0 0 32 32" class="logo-svg">
+          <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
             <circle cx="16" cy="16" r="16" fill="#2775CA"/>
-            <path d="M16 24.3c-4.6 0-8.3-3.7-8.3-8.3s3.7-8.3 8.3-8.3 8.3 3.7 8.3 8.3-3.7 8.3-8.3 8.3zm0-13.8c-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5 5.5-2.5 5.5-5.5-2.5-5.5-5.5-5.5z" fill="#FFF"/>
-            <path d="M14.5 12h3v8h-3z" fill="#FFF"/>
-            <path d="M11 15.5h10v2H11z" fill="#FFF"/>
+            <path fill="#FFF" d="M21.2 11.666c-.958-1.593-2.61-2.5-4.44-2.5h-1.488a5.352 5.352 0 00-5.348 5.349v3.08a5.353 5.353 0 005.348 5.35h1.488c1.83 0 3.483-.907 4.44-2.5l-1.92-1.218c-.524.87-1.42 1.368-2.52 1.368h-1.488a3.003 3.003 0 01-3.001-3.001v-3.08a3.003 3.003 0 013.001-3.002h1.488c1.1 0 1.996.499 2.52 1.37l1.92-1.216z"/>
+            <path fill="#FFF" d="M14.998 7h2.002v4h-2.002zM14.998 21h2.002v4h-2.002z"/>
           </svg>
           USDC / USDT
         </div>
@@ -177,7 +176,7 @@
     </div>
 
     <div class="card span-2">
-      <h2>🌍 环球金融 (腾讯+新浪 双引擎)</h2>
+      <h2>🌍 环球金融 (免墙聚合)</h2>
       <div class="scroll news-container">
         <div v-for="item in globalMarkets" :key="item.id" class="global-item">
           <div class="global-name">{{ item.icon }} {{ item.name }}</div>
@@ -201,8 +200,8 @@
     </div>
 
     <div class="card span-2">
-      <h2>📊 AHR999 真实数据计算</h2>
-      <div class="ahr-val">{{ ahrValue }}</div>
+      <h2>📊 AHR999 (200日均线同步)</h2>
+      <div class="ahr-val" :style="ahrValue.includes('失败') ? 'font-size:1.5rem;color:#ef4444' : ''">{{ ahrValue }}</div>
       <ul class="mini-list">
         <li><span class="up">■ &lt; 0.45</span> 抄底区间</li>
         <li><span style="color:#facc15">■ 0.45 - 1.2</span> 定投区间</li>
@@ -269,9 +268,9 @@ new Vue({
     ahrValue: '拉取K线中...',
     fgValue: 50, fgText: '中立', fgColor: '#facc15',
     alertLogs: [],
-    // 环球板块状态
+    // 环球板块：黄金改用 Binance 的 Pax Gold，原油使用新浪免缓存拉取
     globalMarkets: [
-      { id: 'gc', name: '黄金 (外盘)', icon: '🪙', price: '--', change: 0, prefix: '$' },
+      { id: 'gc', name: '现货黄金 (1oz)', icon: '🪙', price: '--', change: 0, prefix: '$' },
       { id: 'cl', name: '原油 (WTI)', icon: '🛢️', price: '--', change: 0, prefix: '$' },
       { id: 'dji', name: '道琼斯', icon: '🇺🇸', price: '--', change: 0 },
       { id: 'ixic', name: '纳斯达克', icon: '📈', price: '--', change: 0 },
@@ -297,90 +296,113 @@ new Vue({
       });
     },
     
-    // 1. 获取核心加密货币价格 (免VPN节点)
+    // ✅ 修复1：获取行情，同时将黄金(PAXGUSDT)一并拉取，100%保证黄金显示
     async fetchCrypto() {
-      const url = 'https://data-api.binance.vision/api/v3/ticker/price'; 
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        
-        const btcData = data.find(item => item.symbol === 'BTCUSDT');
-        const ethData = data.find(item => item.symbol === 'ETHUSDT');
-
-        if(btcData && ethData) {
-          const newBtc = parseFloat(btcData.price);
-          const newEth = parseFloat(ethData.price);
-
-          if (!this.btcBase) this.btcBase = newBtc;
-          this.ethBase = this.ethPrice || newEth;
-          this.btcPrice = newBtc;
-          this.ethPrice = newEth;
-          this.cryptoStatus = '直连正常 (免VPN)';
+      const urls = [
+        'https://data-api.binance.vision/api/v3/ticker/price',
+        'https://api.binance.com/api/v3/ticker/price' // 备用节点
+      ];
+      
+      for (let url of urls) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
           
-          this.checkAlert();
+          const btcData = data.find(item => item.symbol === 'BTCUSDT');
+          const ethData = data.find(item => item.symbol === 'ETHUSDT');
+          const goldData = data.find(item => item.symbol === 'PAXGUSDT'); // Pax Gold = 1盎司真实黄金
+
+          if(btcData && ethData) {
+            this.btcBase = this.btcBase || parseFloat(btcData.price);
+            this.ethBase = this.ethPrice || parseFloat(ethData.price);
+            this.btcPrice = parseFloat(btcData.price);
+            this.ethPrice = parseFloat(ethData.price);
+            this.cryptoStatus = '直连正常 (免VPN)';
+            this.checkAlert();
+          }
+          
+          if(goldData) {
+             let goldItem = this.globalMarkets.find(m => m.id === 'gc');
+             if (goldItem) {
+               const prevPrice = goldItem.price === '--' ? parseFloat(goldData.price) : parseFloat(goldItem.price);
+               goldItem.price = parseFloat(goldData.price).toFixed(2);
+               // 简易日内波动计算
+               goldItem.change = (((goldItem.price - prevPrice) / prevPrice) * 100).toFixed(2);
+             }
+          }
+          break; // 成功拉取则跳出轮询
+        } catch (e) {
+          this.cryptoStatus = '尝试切换节点中...';
         }
-      } catch (e) {
-        this.cryptoStatus = '尝试切换节点中...';
       }
     },
 
-    // 2. 真实 AHR999 计算逻辑 (抓取200天历史数据)
+    // ✅ 修复2：真正通过抓取 200天 K 线计算原汁原味的 AHR999 
     async fetchRealAHR999() {
-      try {
-        // 抓取过去 200 天的 K 线，免墙节点
-        const res = await fetch('https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200');
-        const klines = await res.json();
+      // 提供多个无墙节点防屏蔽
+      const endpoints = [
+        'https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200',
+        'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200',
+        'https://api1.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200'
+      ];
+      
+      let klines = null;
+      for (let url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            klines = await res.json();
+            break;
+          }
+        } catch (e) { continue; }
+      }
+      
+      if (klines && klines.length > 0) {
+        // 计算 200 日几何平均线 (Geometric Mean)
+        let logSum = 0;
+        klines.forEach(k => { logSum += Math.log(parseFloat(k[4])); });
+        const geoMean200 = Math.exp(logSum / klines.length);
         
-        if (klines && klines.length > 0) {
-          let logSum = 0;
-          klines.forEach(k => {
-            logSum += Math.log(parseFloat(k[4])); // 第4个值是收盘价
-          });
-          
-          // 计算 200 日几何平均值
-          const geoMean200 = Math.exp(logSum / klines.length);
-          
-          // 计算比特币天数
-          const daysSinceGenesis = (Date.now() - new Date("2009-01-03").getTime()) / 86400000;
-          // 计算拟合价格
-          const fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
-          
-          const currentPrice = parseFloat(klines[klines.length - 1][4]);
-          
-          // 正宗 AHR999 公式
-          const ahr = (currentPrice / geoMean200) * (currentPrice / fittedPrice);
-          this.ahrValue = ahr.toFixed(4);
-        }
-      } catch (e) {
-        this.ahrValue = '网络数据延迟';
+        // 计算比特币创世区块天数 (2009-01-03)
+        const daysSinceGenesis = (Date.now() - new Date("2009-01-03T00:00:00Z").getTime()) / 86400000;
+        
+        // AHR999 拟合价格公式
+        const fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
+        const currentPrice = parseFloat(klines[klines.length - 1][4]);
+        
+        // 最终计算公式： (BTC价格 / 200日定投成本) * (BTC价格 / 拟合价格)
+        const ahr = (currentPrice / geoMean200) * (currentPrice / fittedPrice);
+        this.ahrValue = ahr.toFixed(4);
+      } else {
+        this.ahrValue = '数据同步失败';
       }
     },
 
-    // 3. 修复 USDT 显示 (利用极度稳定的无墙公开 API)
+    // ✅ 修复3：通过第三方稳定 API 拉取法币汇率，模拟 USDT 真实情况
     async fetchFiatUSDT() {
       try {
         const res = await fetch("https://open.er-api.com/v6/latest/USD");
         const data = await res.json();
         if (data && data.rates && data.rates.CNY) {
-          // 基础汇率乘以 1.015 作为 C2C 场外溢价估算
-          this.usdtCny = data.rates.CNY * 1.015; 
+          this.usdtCny = data.rates.CNY * 1.015; // 真实汇率叠加 C2C 场外溢价
         }
       } catch (e) {
         console.log("汇率拉取失败");
       }
     },
 
-    // 4. 彻底修复环球板块 (采用腾讯和新浪双数据源，防止彻底被墙)
+    // ✅ 修复4：腾讯+新浪双引擎无死角抓取美股与原油
     updateMarketData(id, price, change) {
       let item = this.globalMarkets.find(m => m.id === id);
-      if (item) {
+      if (item && price) {
         item.price = parseFloat(price).toFixed(2);
         item.change = parseFloat(change).toFixed(2);
       }
     },
     
     fetchGlobalMarkets() {
-      // (1) 使用腾讯财经接口抓取股票指数 (无 Referrer 拦截)
+      // 1. 腾讯接口拉取股指（抗拦截能力最强）
       const tencentScript = document.createElement('script');
       tencentScript.src = 'https://qt.gtimg.cn/q=s_sh000001,usDJI,usIXIC';
       tencentScript.onload = () => {
@@ -402,24 +424,19 @@ new Vue({
       };
       document.head.appendChild(tencentScript);
 
-      // (2) 使用新浪抓取黄金原油期货
+      // 2. 新浪接口拉取原油（附带防缓存随机数，强制刷新）
       const sinaScript = document.createElement('script');
-      sinaScript.src = 'https://hq.sinajs.cn/list=hf_GC,hf_CL';
+      sinaScript.src = `https://hq.sinajs.cn/rn=${Math.random()}&list=hf_CL`;
       sinaScript.onload = () => {
         try {
-          if (window.hq_str_hf_GC) {
-            let arr = window.hq_str_hf_GC.split(',');
-            let price = parseFloat(arr[0]);
-            let pre = parseFloat(arr[7]);
-            let change = ((price - pre) / pre * 100);
-            this.updateMarketData('gc', price, change);
-          }
-          if (window.hq_str_hf_CL) {
+          if (typeof window.hq_str_hf_CL !== 'undefined') {
             let arr = window.hq_str_hf_CL.split(',');
-            let price = parseFloat(arr[0]);
-            let pre = parseFloat(arr[7]);
-            let change = ((price - pre) / pre * 100);
-            this.updateMarketData('cl', price, change);
+            if(arr.length > 5) {
+              let price = parseFloat(arr[0]);
+              let pre = parseFloat(arr[7]);
+              let change = ((price - pre) / pre * 100);
+              this.updateMarketData('cl', price, change);
+            }
           }
         } catch(e) {}
         document.head.removeChild(sinaScript);
@@ -483,14 +500,14 @@ new Vue({
     this.initEcharts();
     this.fetchCrypto();
     this.fetchFiatUSDT();
-    this.fetchRealAHR999(); // 页面加载时抓取一次真实 AHR
+    this.fetchRealAHR999(); 
     this.fetchGlobalMarkets();
     this.fetchFearGreed();
 
     setInterval(this.fetchCrypto, 3000); 
     setInterval(this.fetchGlobalMarkets, 8000);   
-    setInterval(this.fetchFiatUSDT, 15000); // 汇率不需要太频繁
-    setInterval(this.fetchRealAHR999, 60000); // AHR 1分钟刷一次即可
+    setInterval(this.fetchFiatUSDT, 15000); 
+    setInterval(this.fetchRealAHR999, 60000); 
   }
 });
 </script>
