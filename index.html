@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="referrer" content="no-referrer" />
-  <title>Crypto AI 旗舰版</title>
+  <title>Crypto AI 日常版</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
@@ -36,8 +36,8 @@
     .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 15px; }
     .coin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 
-    /* Logo 修正容器 */
-    .logo-svg { width: 28px; height: 28px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    .logo-svg, .logo-img { width: 28px; height: 28px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    .logo-img { border-radius: 999px; background: transparent; }
 
     .price { font-size: 1.8rem; font-weight: 900; line-height: 1.2; white-space: nowrap; transition: color 0.3s; }
     .up { color: #22c55e; }
@@ -77,7 +77,7 @@
       .grid { grid-template-columns: 1fr; }
       .span-2, .span-3, .span-4 { grid-column: span 1; }
       .top-layout { grid-template-columns: 1fr; }
-      .coin-grid { grid-template-columns: 1fr; } 
+      .coin-grid { grid-template-columns: 1fr; }
       .price { font-size: 2.2rem; }
       h1 { font-size: 1.6rem; }
       .ad { font-size: 1.1rem; padding: 18px; }
@@ -89,14 +89,14 @@
 <body>
 
 <div id="app">
-  <h1>🚀 Crypto AI (直连旗舰版)</h1>
+  <h1>🪙 Crypto AI (直连日常版)</h1>
 
   <audio id="alarmSound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
 
   <div class="grid">
     <div class="card span-4">
       <h2>
-        <span>🔔 实时行情 & 2% 波动预警</span>
+        <span>📈 实时行情 & 2% 波动预警</span>
         <button class="auth-btn" @click="testAudio">开启声音授权</button>
       </h2>
       <div class="top-layout">
@@ -110,11 +110,11 @@
               <span style="font-weight:900; color:#f7931a">BTC / USDT</span>
             </div>
             <div class="price" :class="btcTrend">
-              {{ btcPrice ? '$ ' + btcPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中...' }}
+              {{ btcPrice ? '$ ' + btcPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中 ...' }}
             </div>
             <div class="live">基准: ${{ btcBase ? btcBase.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '--' }} | 波动: <span :class="btcTrend">{{ btcChangePct }}%</span></div>
           </div>
-          
+
           <div class="coin-box">
             <div class="coin-head">
               <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
@@ -126,7 +126,7 @@
               <span style="font-weight:900; color:#627eea">ETH / USDT</span>
             </div>
             <div class="price" :class="ethTrend">
-              {{ ethPrice ? '$ ' + ethPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中...' }}
+              {{ ethPrice ? '$ ' + ethPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中 ...' }}
             </div>
             <div class="live" :style="cryptoStatus.includes('正常') ? 'color:#4ade80' : 'color:#facc15'">{{ cryptoStatus }}</div>
           </div>
@@ -145,27 +145,20 @@
     </div>
 
     <div class="card span-2">
-      <h2>💴 稳定币 (币安 C2C 同步价)</h2>
+      <h2>🧾 稳定币 (币安 C2C 购买价)</h2>
       <div class="stable-row">
         <div class="stable-left" style="color:#34d399;">
-          <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="16" cy="16" r="16" fill="#26A17B"/>
-            <path fill="#FFF" fill-rule="evenodd" d="M17.333 13.627v8.528h-2.666v-8.528c-3.52-.163-6.195-1.03-6.195-2.062 0-1.144 3.359-2.071 7.528-2.071 4.168 0 7.527.927 7.527 2.071 0 1.033-2.674 1.9-6.194 2.062zm0-2.348c2.977-.13 5.066-.757 5.066-1.503 0-.825-2.836-1.493-6.333-1.493-3.498 0-6.334.668-6.334 1.493 0 .746 2.09 1.373 5.067 1.503v1.38c-3.666-.178-6.401-1.12-6.401-2.26 0-1.282 3.433-2.32 7.668-2.32 4.234 0 7.667 1.038 7.667 2.32 0 1.139-2.735 2.081-6.4 2.26v-1.38z"/>
-          </svg>
+          <img class="logo-img" alt="USDT" referrerpolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/vadimmalykhin/binance-icons/crypto/usdt.svg" />
           USDT / CNY
         </div>
         <div style="text-align:right;">
-          <div class="stable-val">{{ usdtCny ? '¥ ' + usdtCny.toFixed(2) : '抓取挂单中...' }}</div>
-          <div class="muted">代理直连币安 P2P</div>
+          <div class="stable-val">{{ usdtCny ? '¥ ' + usdtCny.toFixed(2) : '获取挂单中 ...' }}</div>
+          <div class="muted">来源：{{ usdtCnySource }}（<a href="https://p2p.binance.com/en/trade/all-payments/USDT?fiat=CNY" target="_blank" style="color:#38bdf8; text-decoration:none;">打开币安P2P</a>）</div>
         </div>
       </div>
       <div class="stable-row">
         <div class="stable-left" style="color:#60a5fa;">
-          <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="16" cy="16" r="16" fill="#2775CA"/>
-            <path fill="#FFF" fill-rule="evenodd" d="M21.2 11.666c-.958-1.593-2.61-2.5-4.44-2.5h-1.488a5.352 5.352 0 00-5.348 5.349v3.08a5.353 5.353 0 005.348 5.35h1.488c1.83 0 3.483-.907 4.44-2.5l-1.92-1.218c-.524.87-1.42 1.368-2.52 1.368h-1.488a3.003 3.003 0 01-3.001-3.001v-3.08a3.003 3.003 0 013.001-3.002h1.488c1.1 0 1.996.499 2.52 1.37l1.92-1.216z"/>
-            <path fill="#FFF" d="M14.998 7h2.002v4h-2.002zM14.998 21h2.002v4h-2.002z"/>
-          </svg>
+          <img class="logo-img" alt="USDC" referrerpolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/vadimmalykhin/binance-icons/crypto/usdc.svg" />
           USDC / USDT
         </div>
         <div style="text-align:right;">
@@ -191,7 +184,7 @@
     </div>
 
     <div class="card span-2">
-      <h2>😱 恐惧 & 贪婪指数</h2>
+      <h2>😱 恐慌 & 贪婪指数</h2>
       <div id="gaugeChart"></div>
       <div style="text-align:center; margin-top:-10px;">
         <div :style="{color: fgColor, fontSize: '1.6rem', fontWeight: '900'}">{{ fgValue }}</div>
@@ -200,18 +193,18 @@
     </div>
 
     <div class="card span-2">
-      <h2>📊 真实 AHR999 (200日同步)</h2>
+      <h2>🧮 真实 AHR999 (对齐 AICoin)</h2>
       <div class="ahr-val" :style="ahrValue.includes('失败') ? 'font-size:1.5rem;color:#ef4444' : ''">{{ ahrValue }}</div>
       <ul class="mini-list">
-        <li><span class="up">■ &lt; 0.45</span> 抄底区间</li>
-        <li><span style="color:#facc15">■ 0.45 - 1.2</span> 定投区间</li>
-        <li><span style="color:#fb923c">■ 1.2 - 5.0</span> 持有观望</li>
-        <li><span class="down">■ &gt; 5.0</span> 逃顶区间</li>
+        <li><span class="up">当 < 0.45</span> 抄底区间</li>
+        <li><span style="color:#facc15">当 0.45 - 1.2</span> 定投区间</li>
+        <li><span style="color:#fb923c">当 1.2 - 5.0</span> 持有观察</li>
+        <li><span class="down">当 > 5.0</span> 追高区间</li>
       </ul>
     </div>
 
     <div class="card span-3">
-      <h2>⛏️ 主流矿机关机监控 (0.4元/度电)</h2>
+      <h2>🥽 主流矿机关机监控 (0.4元/度电)</h2>
       <div style="display:flex; justify-content:space-between; gap:10px;">
         <div style="flex:1;">
           <div style="color:#22c55e; font-weight:800; font-size:0.9rem;">运行中:</div>
@@ -244,15 +237,15 @@
   </div>
 
   <div class="ad">
-    <strong class="ad-title">⚠️ 提示：访问以下网页及下载安装，请务必全程开启科学上网环境。</strong>
+    <strong class="ad-title">🧠 提示：访问以下网页及下载安装，请务必全程开启科学上网环境。</strong>
     <div style="margin-bottom:6px;">
-      1. Bitget Wallet 免费注册，零手续费，开卡成功返 5 美金。 
-      <a class="ad-link" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">🔗 下载</a>
+      1. Bitget Wallet 免费注册，零手续费，开卡成功返 5 美金。
+      <a class="ad-link" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">📥 下载</a>
     </div>
     <div>
       2. 币安 (Binance) App 下载。邀请码：<span style="color:#22c55e;font-weight:900;">23017017</span>
-      <a class="ad-link" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" style="margin-left:8px;">🤖 安卓</a>
-      <a class="ad-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">🍎 苹果</a>
+      <a class="ad-link" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" style="margin-left:8px;">📦 安卓</a>
+      <a class="ad-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">🖥 苹果</a>
     </div>
   </div>
 </div>
@@ -261,19 +254,19 @@
 new Vue({
   el: '#app',
   data: {
-    btcPrice: 0, btcBase: 0, 
+    btcPrice: 0, btcBase: 0,
     ethPrice: 0, ethBase: 0,
     usdtCny: 0, usdcPeg: 1.0001,
-    cryptoStatus: '正在初始化...',
-    ahrValue: '拉取K线中...',
+    usdtCnySource: '汇率估算',
+    cryptoStatus: '正在初始化 ...',
+    ahrValue: '拉取数据中 ...',
     fgValue: 50, fgText: '中立', fgColor: '#facc15',
     alertLogs: [],
-    // 黄金采用币安 PAXG，原油保持新浪防墙获取
     globalMarkets: [
-      { id: 'gc', name: '黄金 (1oz)', icon: '🪙', price: '--', change: 0, prefix: '$' },
+      { id: 'gc', name: '黄金 (1oz)', icon: '🟡', price: '--', change: 0, prefix: '$' },
       { id: 'cl', name: '原油 (WTI)', icon: '🛢️', price: '--', change: 0, prefix: '$' },
-      { id: 'dji', name: '道琼斯', icon: '🇺🇸', price: '--', change: 0 },
-      { id: 'ixic', name: '纳斯达克', icon: '📈', price: '--', change: 0 },
+      { id: 'dji', name: '道琼斯', icon: '📊', price: '--', change: 0 },
+      { id: 'ixic', name: '纳斯达克', icon: '🚀', price: '--', change: 0 },
       { id: 'sh', name: '上证指数', icon: '🇨🇳', price: '--', change: 0 }
     ],
     gaugeChart: null
@@ -281,111 +274,173 @@ new Vue({
   computed: {
     btcTrend() { return this.btcPrice >= this.btcBase ? 'up' : 'down'; },
     ethTrend() { return this.ethPrice >= this.ethBase ? 'up' : 'down'; },
-    btcChangePct() { 
-      if(!this.btcBase) return '0.00';
+    btcChangePct() {
+      if (!this.btcBase) return '0.00';
       return (((this.btcPrice - this.btcBase) / this.btcBase) * 100).toFixed(2);
     }
   },
   methods: {
+    async fetchJsonWithFallback(url, options = {}) {
+      // Prefer endpoints that already send permissive CORS headers.
+      // When blocked (e.g., Binance P2P), fallback to a small pool of CORS proxies.
+      const corsProxies = [
+        // widely used open CORS proxy (best-effort; may rate-limit)
+        (u) => `https://cors.isomorphic-git.org/${u}`,
+        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      ];
+
+      const tryFetch = async (u) => {
+        const res = await fetch(u, { cache: 'no-store', referrerPolicy: 'no-referrer', ...options });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      };
+
+      // 1) direct
+      try {
+        return await tryFetch(url);
+      } catch (e) {}
+
+      // 2) proxied
+      for (const wrap of corsProxies) {
+        try {
+          // Some proxies dislike relative URLs; always pass absolute.
+          const proxied = wrap(url);
+          return await tryFetch(proxied);
+        } catch (e) {}
+      }
+
+      throw new Error('All JSON fetch attempts failed');
+    },
+
+    async fetchTextWithFallback(url, options = {}) {
+      const corsProxies = [
+        (u) => `https://cors.isomorphic-git.org/${u}`,
+        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      ];
+
+      const tryFetch = async (u) => {
+        const res = await fetch(u, { cache: 'no-store', referrerPolicy: 'no-referrer', ...options });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.text();
+      };
+
+      try {
+        return await tryFetch(url);
+      } catch (e) {}
+
+      for (const wrap of corsProxies) {
+        try {
+          return await tryFetch(wrap(url));
+        } catch (e) {}
+      }
+
+      throw new Error('All text fetch attempts failed');
+    },
+
     testAudio() {
       const audio = document.getElementById('alarmSound');
       audio.play().then(() => {
         alert("授权成功！价格波动达到 2% 时将自动报警。");
-      }).catch(e => {
+      }).catch(() => {
         alert("浏览器拦截了声音，请检查静音设置。");
       });
     },
-    
-    // 核心行情拉取
+
     async fetchCrypto() {
       const url = 'https://data-api.binance.vision/api/v3/ticker/price';
       try {
         const res = await fetch(url);
         const data = await res.json();
-        
+
         const btcData = data.find(item => item.symbol === 'BTCUSDT');
         const ethData = data.find(item => item.symbol === 'ETHUSDT');
-        const goldData = data.find(item => item.symbol === 'PAXGUSDT'); 
+        const goldData = data.find(item => item.symbol === 'PAXGUSDT');
+        const usdcData = data.find(item => item.symbol === 'USDCUSDT');
 
-        if(btcData && ethData) {
+        if (btcData && ethData) {
           this.btcBase = this.btcBase || parseFloat(btcData.price);
-          this.ethBase = this.ethPrice || parseFloat(ethData.price);
+          this.ethBase = this.ethBase || parseFloat(ethData.price);
           this.btcPrice = parseFloat(btcData.price);
           this.ethPrice = parseFloat(ethData.price);
-          this.cryptoStatus = '直连正常 (免VPN)';
+          this.cryptoStatus = '直连正常 (免 VPN)';
           this.checkAlert();
         }
-        
-        if(goldData) {
-           let goldItem = this.globalMarkets.find(m => m.id === 'gc');
-           if (goldItem) {
-             const currentPrice = parseFloat(goldData.price);
-             const prevPrice = goldItem.price === '--' ? currentPrice : parseFloat(goldItem.price);
-             goldItem.price = currentPrice.toFixed(2);
-             goldItem.change = (((currentPrice - prevPrice) / prevPrice) * 100).toFixed(2);
-           }
+
+        if (goldData) {
+          const goldItem = this.globalMarkets.find(m => m.id === 'gc');
+          if (goldItem) {
+            const currentPrice = parseFloat(goldData.price);
+            const prevPrice = goldItem.price === '--' ? currentPrice : parseFloat(goldItem.price);
+            goldItem.price = currentPrice.toFixed(2);
+            goldItem.change = (((currentPrice - prevPrice) / prevPrice) * 100).toFixed(2);
+          }
+        }
+
+        if (usdcData && usdcData.price) {
+          this.usdcPeg = parseFloat(usdcData.price);
         }
       } catch (e) {
-        this.cryptoStatus = '尝试切换节点中...';
+        this.cryptoStatus = '尝试切换节点中 ...';
       }
     },
 
-    // ✅ 核心修复：多代理爬虫强制抓取币安真实的 C2C 商家挂单网页
     async fetchRealC2CPrice() {
-      const targetUrl = 'https://p2p.binance.com/en/trade/all-payments/USDT?fiat=CNY';
-      const encodedUrl = encodeURIComponent(targetUrl);
-      
-      // 代理池轮询：确保在不翻墙的情况下也能拿到真实的网页数据
-      const proxies = [
-        `https://api.allorigins.win/get?url=${encodedUrl}`,
-        `https://api.codetabs.com/v1/proxy?quest=${encodedUrl}`
-      ];
+      // IMPORTANT REALITY (pure front-end):
+      // - Binance P2P search API is blocked by CORS in browsers.
+      // - Public CORS proxies are often blocked/limited by Cloudflare and can be unstable across networks.
+      //
+      // Strategy:
+      // - Best-effort attempt via proxy pool.
+      // - Stable fallback: FX-based estimate (works everywhere, no CORS surprises).
 
-      let fetched = false;
-
-      for (let proxy of proxies) {
-        try {
-          const res = await fetch(proxy, { referrerPolicy: "no-referrer" });
-          let htmlText = '';
-          if (proxy.includes('allorigins')) {
-            const data = await res.json();
-            htmlText = data.contents;
-          } else {
-            htmlText = await res.text();
-          }
-          
-          // 极客黑科技：使用正则直接从币安 SSR（服务端渲染）预注水的 JSON 数据里抠出第一名商家价格！
-          const match = htmlText.match(/"price":"(\d+\.\d{2})"/);
-          if (match && match[1]) {
-            this.usdtCny = parseFloat(match[1]);
-            fetched = true;
-            break; // 拿到真价格立马退出循环
-          }
-        } catch (e) {
-          continue; // 节点不行就换下一个代理
+      const estimateFromFx = async () => {
+        const fx = await this.fetchJsonWithFallback("https://open.er-api.com/v6/latest/USD");
+        if (fx && fx.rates && fx.rates.CNY) {
+          this.usdtCny = fx.rates.CNY * 1.018;
+          this.usdtCnySource = '汇率估算';
+          return true;
         }
-      }
+        return false;
+      };
 
-      // 如果国内网络环境极差导致代理池全军覆没，执行最后兜底
-      if (!fetched) {
-        try {
-          const res = await fetch("https://open.er-api.com/v6/latest/USD");
-          const data = await res.json();
-          if (data && data.rates && data.rates.CNY) {
-            // 根据历史大数据，币安真实 C2C 大概比基础离岸汇率贵 1.8% 左右
-            this.usdtCny = data.rates.CNY * 1.018; 
-          }
-        } catch (e) {}
+      let ok = false;
+      try {
+        const url = 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
+        const body = {
+          asset: 'USDT',
+          fiat: 'CNY',
+          tradeType: 'BUY',
+          page: 1,
+          rows: 10,
+          publisherType: 'merchant'
+        };
+
+        const data = await this.fetchJsonWithFallback(url, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const first = data && data.data && data.data[0];
+        const price = first && first.adv && first.adv.price;
+        if (price) {
+          this.usdtCny = parseFloat(price);
+          this.usdtCnySource = '币安P2P(代理)';
+          ok = true;
+        }
+      } catch (e) {}
+
+      if (!ok) {
+        try { ok = await estimateFromFx(); } catch (e) {}
       }
     },
 
-    // AHR999 保持真实同步
     async fetchRealAHR999() {
       const endpoints = [
-        'https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200',
-        'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=200'
+        'https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201',
+        'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201'
       ];
-      
+
       let klines = null;
       for (let url of endpoints) {
         try {
@@ -394,62 +449,77 @@ new Vue({
             klines = await res.json();
             break;
           }
-        } catch (e) { continue; }
+        } catch (e) {}
       }
-      
-      if (klines && klines.length > 0) {
-        let logSum = 0;
-        klines.forEach(k => { logSum += Math.log(parseFloat(k[4])); });
-        const geoMean200 = Math.exp(logSum / klines.length);
-        
-        const daysSinceGenesis = (Date.now() - new Date("2009-01-03T00:00:00Z").getTime()) / 86400000;
-        
-        const fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
-        const currentPrice = parseFloat(klines[klines.length - 1][4]);
-        
-        const ahr = (currentPrice / geoMean200) * (currentPrice / fittedPrice);
-        this.ahrValue = ahr.toFixed(4);
-      } else {
+
+      if (!klines || klines.length < 201) {
         this.ahrValue = '数据同步失败';
+        return;
       }
+
+      // Drop the last candle (often today's unclosed daily kline)
+      const closed = klines.slice(0, -1); // 200 items
+
+      // AICoin 常见口径：200 日定投成本更接近 “200日均线的定投成本”（很多实现用算术均值；几何均值会更低）
+      // 用算术均值能更贴近 AICoin 面板的数值区间。
+      let sum = 0;
+      for (let k of closed) sum += parseFloat(k[4]);
+      const avg200 = sum / closed.length;
+
+      // daysSinceGenesis：取整天数（UTC），避免小数天带来的拟合漂移
+      const genesis = Date.parse("2009-01-03T00:00:00Z");
+      const now = Date.now();
+      const daysSinceGenesis = Math.max(1, Math.floor((now - genesis) / 86400000));
+
+      const fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
+      const currentPrice = this.btcPrice || parseFloat(closed[closed.length - 1][4]);
+
+      const ahr = (currentPrice / avg200) * (currentPrice / fittedPrice);
+      this.ahrValue = ahr.toFixed(4);
     },
 
     updateMarketData(id, price, change) {
-      let item = this.globalMarkets.find(m => m.id === id);
-      if (item && price) {
+      const item = this.globalMarkets.find(m => m.id === id);
+      if (item && price !== null && price !== undefined && price !== '' && !Number.isNaN(parseFloat(price))) {
         item.price = parseFloat(price).toFixed(2);
         item.change = parseFloat(change).toFixed(2);
       }
     },
-    
-    // 环球板块保持防封锁同步
+
     async fetchGlobalMarkets() {
       const tencentScript = document.createElement('script');
       tencentScript.src = 'https://qt.gtimg.cn/q=s_sh000001,usDJI,usIXIC';
       tencentScript.onload = () => {
         try {
-          if (window.v_s_sh000001) { let arr=window.v_s_sh000001.split('~'); this.updateMarketData('sh', arr[3], arr[32]); }
-          if (window.v_usDJI) { let arr=window.v_usDJI.split('~'); this.updateMarketData('dji', arr[3], arr[32]); }
-          if (window.v_usIXIC) { let arr=window.v_usIXIC.split('~'); this.updateMarketData('ixic', arr[3], arr[32]); }
-        } catch(e) {}
+          if (window.v_s_sh000001) { const arr = window.v_s_sh000001.split('~'); this.updateMarketData('sh', arr[3], arr[32]); }
+          if (window.v_usDJI) { const arr = window.v_usDJI.split('~'); this.updateMarketData('dji', arr[3], arr[32]); }
+          if (window.v_usIXIC) { const arr = window.v_usIXIC.split('~'); this.updateMarketData('ixic', arr[3], arr[32]); }
+        } catch (e) {}
         document.head.removeChild(tencentScript);
       };
       document.head.appendChild(tencentScript);
 
-      const sinaOil = 'https://hq.sinajs.cn/list=hf_CL';
-      const proxyOil = `https://api.allorigins.win/raw?url=${encodeURIComponent(sinaOil)}`;
       try {
-          const res = await fetch(proxyOil);
-          const text = await res.text();
-          const match = text.match(/="(.*)"/);
-          if (match) {
-              const parts = match[1].split(',');
-              const price = parseFloat(parts[0]);
-              const pre = parseFloat(parts[7]);
-              const change = ((price - pre) / pre * 100).toFixed(2);
-              this.updateMarketData('cl', price, change);
+        // Stooq supports direct fetch with permissive CORS in most browsers.
+        // Also add cache buster to avoid stale responses in some networks.
+        const stooqDaily = `https://stooq.com/q/d/l/?s=cl.f&i=d&_=${Date.now()}`;
+        const csv = await this.fetchTextWithFallback(stooqDaily);
+        const lines = csv.split(/\\r?\\n/).map(s => s.trim()).filter(Boolean);
+        if (lines.length >= 3) {
+          const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+          const closeIdx = header.indexOf('close');
+          if (closeIdx !== -1) {
+            const last = lines[lines.length - 1].split(',');
+            const prev = lines[lines.length - 2].split(',');
+            const lastClose = parseFloat(last[closeIdx]);
+            const prevClose = parseFloat(prev[closeIdx]);
+            if (!Number.isNaN(lastClose) && !Number.isNaN(prevClose) && prevClose !== 0) {
+              const change = ((lastClose - prevClose) / prevClose) * 100;
+              this.updateMarketData('cl', lastClose, change);
+            }
           }
-      } catch(e) {}
+        }
+      } catch (e) {}
     },
 
     checkAlert() {
@@ -466,11 +536,11 @@ new Vue({
       if (this.alertLogs.length > 20) this.alertLogs.pop();
       this.btcBase = this.btcPrice;
       const audio = document.getElementById('alarmSound');
-      if (audio) audio.play().catch(e => console.log("需授权"));
+      if (audio) audio.play().catch(() => {});
     },
 
     async fetchFearGreed() {
-      try { 
+      try {
         const res = await fetch("https://api.alternative.me/fng/");
         const d = await res.json();
         if (d && d.data && d.data.length) {
@@ -481,9 +551,7 @@ new Vue({
           else if (val <= 55) { this.fgText = "中立"; this.fgColor = "#facc15"; }
           else if (val <= 75) { this.fgText = "贪婪"; this.fgColor = "#4ade80"; }
           else { this.fgText = "极度贪婪"; this.fgColor = "#22c55e"; }
-          if (this.gaugeChart) {
-            this.gaugeChart.setOption({ series: [{ data: [{ value: val }] }] });
-          }
+          if (this.gaugeChart) this.gaugeChart.setOption({ series: [{ data: [{ value: val }] }] });
         }
       } catch (e) {}
     },
@@ -506,19 +574,16 @@ new Vue({
   },
   mounted() {
     this.initEcharts();
-    
-    // 初始化全量数据
     this.fetchCrypto();
-    this.fetchRealC2CPrice(); // 实时拉取币安真实 C2C
-    this.fetchRealAHR999(); 
+    this.fetchRealC2CPrice();
+    this.fetchRealAHR999();
     this.fetchGlobalMarkets();
     this.fetchFearGreed();
 
-    // 定时轮询器
-    setInterval(this.fetchCrypto, 3000); // 行情 3秒刷新
-    setInterval(this.fetchGlobalMarkets, 8000); 
-    setInterval(this.fetchRealC2CPrice, 20000); // 网页爬虫性能消耗稍大，20秒刷新一次即可
-    setInterval(this.fetchRealAHR999, 60000); 
+    setInterval(this.fetchCrypto, 3000);
+    setInterval(this.fetchGlobalMarkets, 8000);
+    setInterval(this.fetchRealC2CPrice, 20000);
+    setInterval(this.fetchRealAHR999, 60000);
   }
 });
 </script>
