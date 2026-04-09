@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="referrer" content="no-referrer" />
-  <title>Crypto AI 日常版</title>
+  <title>Crypto AI V3</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
@@ -89,7 +89,7 @@
 <body>
 
 <div id="app">
-  <h1>🪙 Crypto AI (直连日常版)</h1>
+  <h1>🪙 Crypto AI (V3 终极版)</h1>
 
   <audio id="alarmSound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
 
@@ -107,7 +107,7 @@
                 <circle cx="16" cy="16" r="16" fill="#F7931A"/>
                 <path fill="#FFF" d="M23.189 14.293c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6.3l-.708 2.84c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.18-.045-1.13 4.532c-.086.212-.303.531-.793.41l-1.256-.313-.716 1.652 2.25.561c.418.105.827.212 1.232.312l-.715 2.866 1.727.43.715-2.868c.472.127.93.245 1.378.357l-.714 2.863 1.728.43.723-2.898c2.948.559 5.168.334 6.1-2.335.752-2.15-.037-3.389-1.59-4.197 1.13-.261 1.98-.1 2.447 1.751zm-3.85 6.419c-.535 2.147-4.151.986-5.32.693l.948-3.8c1.17.292 4.912.872 4.372 3.107zm.535-6.452c-.487 1.953-3.495.961-4.47.718l.86-3.448c.975.243 4.107.696 3.61 2.73z"/>
               </svg>
-              <span style="font-weight:900; color:#f7931a">BTC / USDT</span>
+              <span style="font-weight:900; color:#f7931a">BTC / USD</span>
             </div>
             <div class="price" :class="btcTrend">
               {{ btcPrice ? '$ ' + btcPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中 ...' }}
@@ -123,7 +123,7 @@
                 <path d="M16 4.3v16.7l7.4-4.4L16 4.3z" fill="#FFF" opacity=".4"/>
                 <path d="M16 22.1v5.6l7.4-9.9-7.4 4.3z" fill="#FFF" opacity=".6"/>
               </svg>
-              <span style="font-weight:900; color:#627eea">ETH / USDT</span>
+              <span style="font-weight:900; color:#627eea">ETH / USD</span>
             </div>
             <div class="price" :class="ethTrend">
               {{ ethPrice ? '$ ' + ethPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中 ...' }}
@@ -145,37 +145,37 @@
     </div>
 
     <div class="card span-2">
-      <h2>🧾 稳定币 (币安 C2C 购买价)</h2>
+      <h2>🧾 稳定币 (防封锁抓取)</h2>
       <div class="stable-row">
         <div class="stable-left" style="color:#34d399;">
           <img class="logo-img" alt="USDT" referrerpolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/vadimmalykhin/binance-icons/crypto/usdt.svg" />
           USDT / CNY
         </div>
         <div style="text-align:right;">
-          <div class="stable-val">{{ usdtCny ? '¥ ' + usdtCny.toFixed(2) : '获取挂单中 ...' }}</div>
-          <div class="muted">来源：{{ usdtCnySource }}（<a href="https://p2p.binance.com/en/trade/all-payments/USDT?fiat=CNY" target="_blank" style="color:#38bdf8; text-decoration:none;">打开币安P2P</a>）</div>
+          <div class="stable-val" :style="usdtCnySource.includes('估算') ? 'color:#facc15;font-size:1.1rem' : ''">{{ usdtCny ? '¥ ' + usdtCny.toFixed(2) : '获取中 ...' }}</div>
+          <div class="muted">来源: {{ usdtCnySource }}</div>
         </div>
       </div>
       <div class="stable-row">
         <div class="stable-left" style="color:#60a5fa;">
           <img class="logo-img" alt="USDC" referrerpolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/vadimmalykhin/binance-icons/crypto/usdc.svg" />
-          USDC / USDT
+          USDC / USD
         </div>
         <div style="text-align:right;">
-          <div class="stable-val" :class="usdcPeg < 0.999 ? 'down' : (usdcPeg > 1.001 ? 'up' : '')">$ {{ usdcPeg.toFixed(4) }}</div>
+          <div class="stable-val" :class="usdcClass">$ {{ usdcPeg.toFixed(4) }}</div>
           <div class="muted">现货实时锚定</div>
         </div>
       </div>
     </div>
 
     <div class="card span-2">
-      <h2>🌍 环球金融 (防封锁聚合)</h2>
+      <h2>🌍 环球金融 (免跨域直连)</h2>
       <div class="scroll news-container">
         <div v-for="item in globalMarkets" :key="item.id" class="global-item">
           <div class="global-name">{{ item.icon }} {{ item.name }}</div>
           <div style="text-align:right">
-            <div class="global-price" :class="item.change >= 0 ? 'up' : 'down'">{{ item.prefix || '' }}{{ item.price }}</div>
-            <div class="global-change" :class="item.change >= 0 ? 'up' : 'down'">
+            <div class="global-price" :class="item.change >= 0 ? 'up' : 'down'" :style="item.price.includes('拦截') ? 'color:#ef4444;font-size:0.8rem' : ''">{{ item.prefix || '' }}{{ item.price }}</div>
+            <div class="global-change" :class="item.change >= 0 ? 'up' : 'down'" v-if="!item.price.includes('拦截')">
               {{ item.change >= 0 ? '+' : '' }}{{ item.change }}%
             </div>
           </div>
@@ -193,13 +193,13 @@
     </div>
 
     <div class="card span-2">
-      <h2>🧮 真实 AHR999 (对齐 AICoin)</h2>
-      <div class="ahr-val" :style="ahrValue.includes('失败') ? 'font-size:1.5rem;color:#ef4444' : ''">{{ ahrValue }}</div>
+      <h2>🧮 真实 AHR999 (严选公式)</h2>
+      <div class="ahr-val" :style="ahrValue.includes('拦截') ? 'font-size:1.2rem;color:#ef4444' : ''">{{ ahrValue }}</div>
       <ul class="mini-list">
-        <li><span class="up">当 < 0.45</span> 抄底区间</li>
+        <li><span class="up">当 &lt; 0.45</span> 抄底区间</li>
         <li><span style="color:#facc15">当 0.45 - 1.2</span> 定投区间</li>
         <li><span style="color:#fb923c">当 1.2 - 5.0</span> 持有观察</li>
-        <li><span class="down">当 > 5.0</span> 追高区间</li>
+        <li><span class="down">当 &gt; 5.0</span> 追高区间</li>
       </ul>
     </div>
 
@@ -209,9 +209,9 @@
         <div style="flex:1;">
           <div style="color:#22c55e; font-weight:800; font-size:0.9rem;">运行中:</div>
           <ul class="mini-list">
-            <li :style="btcPrice > 0 && btcPrice < 32500 ? 'color:#ef4444' : ''">蚂蚁 S21: ~$32,500 <b v-if="btcPrice > 0 && btcPrice < 32500">(关机)</b></li>
-            <li :style="btcPrice > 0 && btcPrice < 42100 ? 'color:#ef4444' : ''">蚂蚁 S19 XP: ~$42,100 <b v-if="btcPrice > 0 && btcPrice < 42100">(关机)</b></li>
-            <li :style="btcPrice > 0 && btcPrice < 51000 ? 'color:#ef4444' : ''">神马 M50S: ~$51,000 <b v-if="btcPrice > 0 && btcPrice < 51000">(关机)</b></li>
+            <li :style="isShutdown(32500) ? 'color:#ef4444' : ''">蚂蚁 S21: ~$32,500 <b v-if="isShutdown(32500)">(关机)</b></li>
+            <li :style="isShutdown(42100) ? 'color:#ef4444' : ''">蚂蚁 S19 XP: ~$42,100 <b v-if="isShutdown(42100)">(关机)</b></li>
+            <li :style="isShutdown(51000) ? 'color:#ef4444' : ''">神马 M50S: ~$51,000 <b v-if="isShutdown(51000)">(关机)</b></li>
           </ul>
         </div>
         <div style="flex:1;">
@@ -226,13 +226,20 @@
     </div>
 
     <div class="card span-3">
-      <h2>⏳ 比特币减半倒计时 (推算)</h2>
-      <div style="font-size:2.2rem; font-weight:900; color:#f59e0b; line-height:1;">744 <span style="font-size:1.2rem; color:#94a3b8;">天</span></div>
-      <div style="margin-top:8px; font-size:0.9rem; color:#9fb0c8;">
-        推算区块 <strong style="color:#e2e8f0;">945,840</strong> / 目标 <strong style="color:#e2e8f0;">1,050,000</strong><br />
-        预计日期 <strong style="color:#e2e8f0;">2028-04-12</strong>
+      <h2>⏳ 比特币减半倒计时 (目标 1,050,000 块)</h2>
+      <div style="font-size:2.2rem; font-weight:900; color:#f59e0b; line-height:1;">
+        {{ halvingDaysRemaining !== null ? halvingDaysRemaining : '--' }}
+        <span style="font-size:1.2rem; color:#94a3b8;">天</span>
       </div>
-      <div class="bar"><div style="width: 28.5%;"></div></div>
+      <div style="margin-top:8px; font-size:0.9rem; color:#9fb0c8;">
+        当前区块 <strong style="color:#e2e8f0;">{{ halvingCurrentHeight !== null ? halvingCurrentHeight.toLocaleString() : '--' }}</strong>
+        / 目标 <strong style="color:#e2e8f0;">{{ halvingTargetHeight.toLocaleString() }}</strong><br />
+        预计日期 <strong style="color:#e2e8f0;" :style="halvingEtaText.includes('失败') ? 'color:#ef4444' : ''">{{ halvingEtaText }}</strong>
+        <span style="color:#64748b;">（按 10 分钟/块估算）</span>
+      </div>
+      <div class="bar">
+        <div :style="{ width: halvingProgressPct + '%' }"></div>
+      </div>
     </div>
   </div>
 
@@ -248,6 +255,7 @@
       <a class="ad-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">🖥 苹果</a>
     </div>
   </div>
+
 </div>
 
 <script>
@@ -257,9 +265,9 @@ new Vue({
     btcPrice: 0, btcBase: 0,
     ethPrice: 0, ethBase: 0,
     usdtCny: 0, usdcPeg: 1.0001,
-    usdtCnySource: '汇率估算',
+    usdtCnySource: '加载中...',
     cryptoStatus: '正在初始化 ...',
-    ahrValue: '拉取数据中 ...',
+    ahrValue: '计算中 ...',
     fgValue: 50, fgText: '中立', fgColor: '#facc15',
     alertLogs: [],
     globalMarkets: [
@@ -269,6 +277,11 @@ new Vue({
       { id: 'ixic', name: '纳斯达克', icon: '🚀', price: '--', change: 0 },
       { id: 'sh', name: '上证指数', icon: '🇨🇳', price: '--', change: 0 }
     ],
+    halvingTargetHeight: 1050000,
+    halvingCurrentHeight: null,
+    halvingDaysRemaining: null,
+    halvingEtaText: '--',
+    halvingProgressPct: 0,
     gaugeChart: null
   },
   computed: {
@@ -277,66 +290,18 @@ new Vue({
     btcChangePct() {
       if (!this.btcBase) return '0.00';
       return (((this.btcPrice - this.btcBase) / this.btcBase) * 100).toFixed(2);
+    },
+    usdcClass() {
+      if (this.usdcPeg < 0.999) return 'down';
+      if (this.usdcPeg > 1.001) return 'up';
+      return '';
     }
   },
   methods: {
-    async fetchJsonWithFallback(url, options = {}) {
-      // Prefer endpoints that already send permissive CORS headers.
-      // When blocked (e.g., Binance P2P), fallback to a small pool of CORS proxies.
-      const corsProxies = [
-        // widely used open CORS proxy (best-effort; may rate-limit)
-        (u) => `https://cors.isomorphic-git.org/${u}`,
-        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-      ];
-
-      const tryFetch = async (u) => {
-        const res = await fetch(u, { cache: 'no-store', referrerPolicy: 'no-referrer', ...options });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.json();
-      };
-
-      // 1) direct
-      try {
-        return await tryFetch(url);
-      } catch (e) {}
-
-      // 2) proxied
-      for (const wrap of corsProxies) {
-        try {
-          // Some proxies dislike relative URLs; always pass absolute.
-          const proxied = wrap(url);
-          return await tryFetch(proxied);
-        } catch (e) {}
-      }
-
-      throw new Error('All JSON fetch attempts failed');
+    isShutdown(cost) {
+      return this.btcPrice > 0 && this.btcPrice < cost;
     },
-
-    async fetchTextWithFallback(url, options = {}) {
-      const corsProxies = [
-        (u) => `https://cors.isomorphic-git.org/${u}`,
-        (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-      ];
-
-      const tryFetch = async (u) => {
-        const res = await fetch(u, { cache: 'no-store', referrerPolicy: 'no-referrer', ...options });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.text();
-      };
-
-      try {
-        return await tryFetch(url);
-      } catch (e) {}
-
-      for (const wrap of corsProxies) {
-        try {
-          return await tryFetch(wrap(url));
-        } catch (e) {}
-      }
-
-      throw new Error('All text fetch attempts failed');
-    },
-
+    
     testAudio() {
       const audio = document.getElementById('alarmSound');
       audio.play().then(() => {
@@ -362,7 +327,7 @@ new Vue({
           this.ethBase = this.ethBase || parseFloat(ethData.price);
           this.btcPrice = parseFloat(btcData.price);
           this.ethPrice = parseFloat(ethData.price);
-          this.cryptoStatus = '直连正常 (免 VPN)';
+          this.cryptoStatus = '直连刷新正常';
           this.checkAlert();
         }
 
@@ -380,113 +345,115 @@ new Vue({
           this.usdcPeg = parseFloat(usdcData.price);
         }
       } catch (e) {
-        this.cryptoStatus = '尝试切换节点中 ...';
+        this.cryptoStatus = '行情接口遭拦截';
       }
     },
 
     async fetchRealC2CPrice() {
-      // IMPORTANT REALITY (pure front-end):
-      // - Binance P2P search API is blocked by CORS in browsers.
-      // - Public CORS proxies are often blocked/limited by Cloudflare and can be unstable across networks.
-      //
-      // Strategy:
-      // - Best-effort attempt via proxy pool.
-      // - Stable fallback: FX-based estimate (works everywhere, no CORS surprises).
-
       const estimateFromFx = async () => {
-        const fx = await this.fetchJsonWithFallback("https://open.er-api.com/v6/latest/USD");
-        if (fx && fx.rates && fx.rates.CNY) {
-          this.usdtCny = fx.rates.CNY * 1.018;
-          this.usdtCnySource = '汇率估算';
-          return true;
+        try {
+          const res = await fetch("https://open.er-api.com/v6/latest/USD");
+          const fx = await res.json();
+          if (fx && fx.rates && fx.rates.CNY) {
+            this.usdtCny = fx.rates.CNY * 1.018; 
+            this.usdtCnySource = '节点墙了代理-已切汇率估算';
+          }
+        } catch(e) {
+           this.usdtCnySource = '接口全线被拦截';
         }
-        return false;
       };
 
-      let ok = false;
       try {
         const url = 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
-        const body = {
-          asset: 'USDT',
-          fiat: 'CNY',
-          tradeType: 'BUY',
-          page: 1,
-          rows: 10,
-          publisherType: 'merchant'
-        };
-
-        const data = await this.fetchJsonWithFallback(url, {
+        const body = { asset: 'USDT', fiat: 'CNY', tradeType: 'BUY', page: 1, rows: 10, publisherType: 'merchant' };
+        
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+        
+        const res = await fetch(proxyUrl, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(body)
         });
+        
+        if (!res.ok) throw new Error("C2C blocked");
+        const data = await res.json();
+        
+        const ads = (data && data.data) ? data.data : [];
+        if (ads.length === 0) throw new Error("Empty data");
 
-        const first = data && data.data && data.data[0];
-        const price = first && first.adv && first.adv.price;
-        if (price) {
-          this.usdtCny = parseFloat(price);
-          this.usdtCnySource = '币安P2P(代理)';
-          ok = true;
+        let parsed = ads.map(row => {
+          return {
+            price: parseFloat(row.adv.price),
+            minAmt: parseFloat(row.adv.minSingleTransAmount),
+            monthOrderCount: parseInt(row.advertiser.monthOrderCount),
+            monthFinishRate: parseFloat(row.advertiser.monthFinishRate)
+          };
+        }).filter(x => Number.isFinite(x.price) && x.price > 0);
+
+        // 过滤垃圾挂单
+        let filtered = parsed.filter(x => 
+          x.monthOrderCount >= 30 && x.monthFinishRate >= 0.95 && x.minAmt >= 500
+        );
+        
+        // 修复点2：严格抓取买二价或买三价
+        let sorted = filtered.sort((a, b) => a.price - b.price);
+        let chosen = null;
+        if (sorted.length >= 2) chosen = sorted[1]; // 强制取第二个(买二)
+        else if (sorted.length === 1) chosen = sorted[0];
+        else {
+            let rawSorted = parsed.sort((a, b) => a.price - b.price);
+            chosen = rawSorted.length >= 2 ? rawSorted[1] : rawSorted[0];
         }
-      } catch (e) {}
 
-      if (!ok) {
-        try { ok = await estimateFromFx(); } catch (e) {}
+        if (chosen) {
+          this.usdtCny = chosen.price;
+          this.usdtCnySource = '商户买二真实价';
+        } else {
+          throw new Error("No ads");
+        }
+      } catch (e) {
+        await estimateFromFx();
       }
     },
 
     async fetchRealAHR999() {
-      const endpoints = [
-        'https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201',
-        'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201'
-      ];
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201');
+        if(!res.ok) throw new Error("Blocked");
+        const klines = await res.json();
+        if (!klines || klines.length < 201) throw new Error("Kline error");
 
-      let klines = null;
-      for (let url of endpoints) {
-        try {
-          const res = await fetch(url);
-          if (res.ok) {
-            klines = await res.json();
-            break;
-          }
-        } catch (e) {}
+        const closed = klines.slice(0, -1); 
+
+        let logSum = 0;
+        for (let i = 0; i < closed.length; i++) {
+            logSum += Math.log(parseFloat(closed[i][4])); 
+        }
+        const geoMean200 = Math.exp(logSum / closed.length);
+
+        const genesis = new Date('2009-01-03T00:00:00Z').getTime();
+        const daysSinceGenesis = (Date.now() - genesis) / (1000 * 60 * 60 * 24); 
+        const fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
+
+        const currentPrice = this.btcPrice || parseFloat(closed[closed.length - 1][4]);
+
+        const ahr = (currentPrice / geoMean200) * (currentPrice / fittedPrice);
+        this.ahrValue = ahr.toFixed(4);
+      } catch(e) {
+        this.ahrValue = 'API遭网络拦截';
       }
-
-      if (!klines || klines.length < 201) {
-        this.ahrValue = '数据同步失败';
-        return;
-      }
-
-      // Drop the last candle (often today's unclosed daily kline)
-      const closed = klines.slice(0, -1); // 200 items
-
-      // AICoin 常见口径：200 日定投成本更接近 “200日均线的定投成本”（很多实现用算术均值；几何均值会更低）
-      // 用算术均值能更贴近 AICoin 面板的数值区间。
-      let sum = 0;
-      for (let k of closed) sum += parseFloat(k[4]);
-      const avg200 = sum / closed.length;
-
-      // daysSinceGenesis：取整天数（UTC），避免小数天带来的拟合漂移
-      const genesis = Date.parse("2009-01-03T00:00:00Z");
-      const now = Date.now();
-      const daysSinceGenesis = Math.max(1, Math.floor((now - genesis) / 86400000));
-
-      const fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
-      const currentPrice = this.btcPrice || parseFloat(closed[closed.length - 1][4]);
-
-      const ahr = (currentPrice / avg200) * (currentPrice / fittedPrice);
-      this.ahrValue = ahr.toFixed(4);
     },
 
     updateMarketData(id, price, change) {
       const item = this.globalMarkets.find(m => m.id === id);
-      if (item && price !== null && price !== undefined && price !== '' && !Number.isNaN(parseFloat(price))) {
-        item.price = parseFloat(price).toFixed(2);
-        item.change = parseFloat(change).toFixed(2);
+      if (item) {
+        item.price = price === '遭拦截' ? price : parseFloat(price).toFixed(2);
+        item.change = change === 0 ? 0 : parseFloat(change).toFixed(2);
       }
     },
 
     async fetchGlobalMarkets() {
+      // 获取股指（腾讯接口，JSONP免跨域）
       const tencentScript = document.createElement('script');
       tencentScript.src = 'https://qt.gtimg.cn/q=s_sh000001,usDJI,usIXIC';
       tencentScript.onload = () => {
@@ -499,27 +466,55 @@ new Vue({
       };
       document.head.appendChild(tencentScript);
 
-      try {
-        // Stooq supports direct fetch with permissive CORS in most browsers.
-        // Also add cache buster to avoid stale responses in some networks.
-        const stooqDaily = `https://stooq.com/q/d/l/?s=cl.f&i=d&_=${Date.now()}`;
-        const csv = await this.fetchTextWithFallback(stooqDaily);
-        const lines = csv.split(/\\r?\\n/).map(s => s.trim()).filter(Boolean);
-        if (lines.length >= 3) {
-          const header = lines[0].split(',').map(h => h.trim().toLowerCase());
-          const closeIdx = header.indexOf('close');
-          if (closeIdx !== -1) {
-            const last = lines[lines.length - 1].split(',');
-            const prev = lines[lines.length - 2].split(',');
-            const lastClose = parseFloat(last[closeIdx]);
-            const prevClose = parseFloat(prev[closeIdx]);
-            if (!Number.isNaN(lastClose) && !Number.isNaN(prevClose) && prevClose !== 0) {
-              const change = ((lastClose - prevClose) / prevClose) * 100;
-              this.updateMarketData('cl', lastClose, change);
+      // 修复点3：获取原油彻底改为新浪财经 (JSONP 脚本注入法)，100%无视跨域，不会被拦截
+      const sinaScript = document.createElement('script');
+      sinaScript.src = 'https://hq.sinajs.cn/list=hf_CL';
+      sinaScript.onload = () => {
+        try {
+          if (window.hq_str_hf_CL) {
+            const arr = window.hq_str_hf_CL.split(',');
+            const currentPrice = parseFloat(arr[0]);
+            const prevPrice = parseFloat(arr[7]);
+            if (currentPrice && prevPrice) {
+               const change = ((currentPrice - prevPrice) / prevPrice) * 100;
+               this.updateMarketData('cl', currentPrice, change);
             }
           }
+        } catch (e) {
+           this.updateMarketData('cl', '遭拦截', 0);
         }
-      } catch (e) {}
+        document.head.removeChild(sinaScript);
+      };
+      document.head.appendChild(sinaScript);
+    },
+
+    async fetchHalvingCountdown() {
+      try {
+        const res = await fetch('https://mempool.space/api/blocks/tip/height');
+        if (!res.ok) throw new Error('Blocked');
+        
+        const heightStr = await res.text();
+        const height = parseInt(heightStr.trim(), 10);
+        if (!Number.isFinite(height)) return;
+
+        this.halvingTargetHeight = 1050000; 
+        this.halvingCurrentHeight = height;
+
+        const remainingBlocks = Math.max(0, this.halvingTargetHeight - height);
+        const remainingSeconds = remainingBlocks * 10 * 60; 
+        this.halvingDaysRemaining = Math.ceil(remainingSeconds / 86400);
+
+        const eta = new Date(Date.now() + remainingSeconds * 1000);
+        const pad = n => String(n).padStart(2, '0');
+        this.halvingEtaText = `${eta.getFullYear()}-${pad(eta.getMonth() + 1)}-${pad(eta.getDate())}`;
+
+        const epochStart = 840000; 
+        const epochEnd = 1050000;
+        const progressPct = ((height - epochStart) / (epochEnd - epochStart)) * 100;
+        this.halvingProgressPct = Math.max(0, Math.min(100, progressPct)).toFixed(2);
+      } catch (error) {
+        this.halvingEtaText = '节点连接失败';
+      }
     },
 
     checkAlert() {
@@ -531,6 +526,7 @@ new Vue({
         this.triggerAlert("down", `大跌！$${this.btcPrice.toFixed(2)} (-${(Math.abs(ratio) * 100).toFixed(2)}%)`);
       }
     },
+    
     triggerAlert(type, msg) {
       this.alertLogs.unshift({ time: new Date().toLocaleTimeString(), type: type, msg: msg });
       if (this.alertLogs.length > 20) this.alertLogs.pop();
@@ -555,6 +551,7 @@ new Vue({
         }
       } catch (e) {}
     },
+    
     initEcharts() {
       if (typeof echarts === "undefined") return;
       this.gaugeChart = echarts.init(document.getElementById("gaugeChart"));
@@ -579,11 +576,13 @@ new Vue({
     this.fetchRealAHR999();
     this.fetchGlobalMarkets();
     this.fetchFearGreed();
+    this.fetchHalvingCountdown();
 
     setInterval(this.fetchCrypto, 3000);
     setInterval(this.fetchGlobalMarkets, 8000);
     setInterval(this.fetchRealC2CPrice, 20000);
     setInterval(this.fetchRealAHR999, 60000);
+    setInterval(this.fetchHalvingCountdown, 10 * 60 * 1000);
   }
 });
 </script>
