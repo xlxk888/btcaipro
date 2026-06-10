@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="referrer" content="no-referrer" />
-  <title>Crypto AI V3</title>
+  <title>Crypto AI</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
@@ -18,48 +18,93 @@
       color: #e2e8f0;
       font-family: -apple-system, "PingFang SC", sans-serif;
     }
-    body { padding: 10px; overflow-x: hidden; }
+    body { padding: 14px; overflow-x: hidden; }
 
-    #app { max-width: 1400px; margin: 0 auto; }
-    h1 { margin: 10px 0 20px; text-align: center; color: #f59e0b; font-size: 2rem; font-weight: 900; }
+    #app { max-width: 1440px; margin: 0 auto; }
+    h1 { margin: 4px 0 18px; text-align: center; color: #f59e0b; font-size: 2rem; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .brand-logo { width: 36px; height: 36px; flex-shrink: 0; }
 
-    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; align-items: stretch; }
     .span-2 { grid-column: span 2; }
     .span-3 { grid-column: span 3; }
     .span-4 { grid-column: span 4; }
 
-    .card { background: rgba(27, 40, 66, .95); border: 1px solid rgba(72, 99, 150, .55); border-radius: 12px; padding: 15px; position: relative; }
-    .card h2 { margin: 0 0 12px; color: #9fb0c8; font-size: 0.95rem; border-bottom: 1px solid rgba(72,99,150,.35); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .card { background: rgba(27, 40, 66, .95); border: 1px solid rgba(72, 99, 150, .55); border-radius: 10px; padding: 14px; position: relative; box-shadow: 0 14px 34px rgba(0,0,0,.16); }
+    .card h2 { margin: 0 0 12px; color: #a9b8cf; font-size: 0.95rem; border-bottom: 1px solid rgba(72,99,150,.35); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 
-    .top-layout { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 15px; }
-    .coin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 15px; }
+    .market-card { min-height: 334px; display: flex; flex-direction: column; }
+    .market-card .top-layout { flex: 1; }
+    .top-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(260px, .75fr); gap: 12px; align-items: stretch; }
+    .coin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 100%; }
+    .coin-box { background: #111a2a; border: 1px solid #1f2d45; border-radius: 9px; padding: 18px; min-height: 154px; display: flex; flex-direction: column; justify-content: center; }
     .coin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .log-panel { display: flex; flex-direction: column; min-height: 0; }
 
     .logo-svg, .logo-img { width: 28px; height: 28px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
     .logo-img { border-radius: 999px; background: transparent; }
 
-    .price { font-size: 1.8rem; font-weight: 900; line-height: 1.2; white-space: nowrap; transition: color 0.3s; }
+    .price { font-size: 1.75rem; font-weight: 900; line-height: 1.2; white-space: nowrap; transition: color 0.3s; }
     .up { color: #22c55e; }
     .down { color: #ef4444; }
     .live { color: #93c5fd; font-size: .8rem; margin-top: 8px; }
 
     .scroll { background: #0a111f; border-radius: 8px; padding: 10px; overflow-y: auto; }
-    .log-container { height: 120px; font-size: 0.8rem; line-height: 1.6; }
-    .news-container { height: 180px; }
+    .log-container { flex: 1; min-height: 154px; font-size: 0.8rem; line-height: 1.6; }
+    .empty-log { color:#475569; text-align:center; padding-top:48px; }
+    .news-container { min-height: 226px; overflow: visible; }
 
-    .stable-row { display: flex; justify-content: space-between; align-items: center; background: #111a2a; border: 1px solid #1f2d45; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
-    .stable-left { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+    .stable-row { display: flex; justify-content: space-between; align-items: center; background: #111a2a; border: 1px solid #1f2d45; border-radius: 9px; padding: 10px; margin-bottom: 10px; }
+    .stable-left { display: flex; align-items: center; gap: 8px; font-weight: bold; min-width: 0; }
     .stable-val { font-size: 1.3rem; font-weight: 900; white-space: nowrap; }
     .muted { color: #8fa0ba; font-size: 0.75rem; }
+    .stocks-card { min-height: 334px; display: flex; flex-direction: column; }
+    .stock-list { flex: 1; height: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0; background: transparent; overflow: visible; }
+    .stock-row { display: grid; grid-template-columns: 54px minmax(0, 1fr); padding: 9px; margin: 0; min-height: 60px; gap: 8px; }
+    .stock-row:nth-child(7) { grid-column: 1 / -1; }
+    .stock-row .stable-left { display: contents; }
+    .stock-row .stable-left > div { display: none; }
+    .stock-symbol { min-width: 46px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #334155; border-radius: 6px; background: #172538; color: #e2e8f0; font-size: 0.78rem; font-weight: 900; }
+    .stock-name { max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.78rem; color: #cbd5e1; line-height: 1.2; }
+    .stock-time { max-width: 78px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .stock-meta { text-align: right; min-width: 0; }
+    .stock-val { font-size: 0.98rem; font-weight: 900; white-space: nowrap; }
+    .stock-change { font-size: 0.75rem; font-weight: 800; }
+    .stocks-footer { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
 
-    .global-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed rgba(72,99,150,0.3); }
+    .global-item { display: flex; justify-content: space-between; align-items: center; min-height: 43px; padding: 8px 0; border-bottom: 1px dashed rgba(72,99,150,0.3); }
     .global-item:last-child { border: none; }
     .global-name { font-size: 0.9rem; font-weight: 700; color: #cbd5e1; }
     .global-price { font-weight: 800; font-size: 1rem; }
     .global-change { font-size: 0.8rem; font-weight: 700; }
 
-    #gaugeChart { width: 100%; height: 140px; }
+    .gauge-card, .ahr-card, .global-card { min-height: 286px; }
+    .gauge-card { display: flex; flex-direction: column; }
+    .fear-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(112px, 0.72fr) minmax(180px, 1.28fr);
+      gap: 12px;
+      align-items: stretch;
+      background: #0a111f;
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 226px;
+    }
+    .fear-score {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(72,99,150,.45);
+      border-radius: 8px;
+      background: #111a2a;
+    }
+    .fear-value { font-size: 2.7rem; font-weight: 900; line-height: 1; }
+    .fear-text { margin-top: 8px; font-size: 1.05rem; font-weight: 900; }
+    .fear-meter { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    #gaugeChart { width: 100%; height: 172px; }
+    .fear-scale { display: flex; justify-content: space-between; color: #8fa0ba; font-size: 0.72rem; padding: 0 8px; margin-top: -4px; }
 
     .ahr-val { font-size: 2.2rem; font-weight: 900; color: #38bdf8; }
     .mini-list { font-size: 0.85rem; color: #94a3b8; padding-left: 18px; margin: 8px 0; }
@@ -76,8 +121,21 @@
     @media (max-width: 1024px) {
       .grid { grid-template-columns: 1fr; }
       .span-2, .span-3, .span-4 { grid-column: span 1; }
+      .market-card, .stocks-card, .gauge-card, .ahr-card, .global-card { min-height: auto; }
       .top-layout { grid-template-columns: 1fr; }
       .coin-grid { grid-template-columns: 1fr; }
+      .stock-list { grid-template-columns: 1fr; }
+      .stock-row { display: flex; }
+      .stock-row .stable-left { display: flex; }
+      .stock-row .stable-left > div { display: block; }
+      .stock-name { max-width: 180px; }
+      .stock-time { max-width: 180px; }
+      .log-container { min-height: 120px; }
+      .news-container { min-height: auto; }
+      .fear-body { grid-template-columns: 1fr; min-height: auto; }
+      .fear-meter { order: 1; }
+      .fear-score { order: 2; min-height: 104px; }
+      #gaugeChart { height: 158px; }
       .price { font-size: 2.2rem; }
       h1 { font-size: 1.6rem; }
       .ad { font-size: 1.1rem; padding: 18px; }
@@ -89,12 +147,18 @@
 <body>
 
 <div id="app">
-  <h1>🪙 Crypto AI (V3 终极版)</h1>
+  <h1>
+    <svg viewBox="0 0 32 32" class="brand-logo" xmlns="http://www.w3.org/2000/svg" aria-label="Bitcoin">
+      <circle cx="16" cy="16" r="16" fill="#F7931A"/>
+      <path fill="#FFF" d="M23.189 14.293c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6.3l-.708 2.84c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.18-.045-1.13 4.532c-.086.212-.303.531-.793.41l-1.256-.313-.716 1.652 2.25.561c.418.105.827.212 1.232.312l-.715 2.866 1.727.43.715-2.868c.472.127.93.245 1.378.357l-.714 2.863 1.728.43.723-2.898c2.948.559 5.168.334 6.1-2.335.752-2.15-.037-3.389-1.59-4.197 1.13-.261 1.98-.1 2.447 1.751zm-3.85 6.419c-.535 2.147-4.151.986-5.32.693l.948-3.8c1.17.292 4.912.872 4.372 3.107zm.535-6.452c-.487 1.953-3.495.961-4.47.718l.86-3.448c.975.243 4.107.696 3.61 2.73z"/>
+    </svg>
+    <span>Crypto AI</span>
+  </h1>
 
   <audio id="alarmSound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
 
   <div class="grid">
-    <div class="card span-4">
+    <div class="card span-4 market-card">
       <h2>
         <span>📈 实时行情 & 2% 波动预警</span>
         <button class="auth-btn" @click="testAudio">开启声音授权</button>
@@ -132,43 +196,46 @@
           </div>
         </div>
 
-        <div>
+        <div class="log-panel">
           <div style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px; font-weight:bold;">报警系统日志</div>
           <div class="scroll log-container">
             <div v-for="(log, i) in alertLogs" :key="i" :class="log.type" style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05)">
               [{{ log.time }}] {{ log.msg }}
             </div>
-            <div v-if="alertLogs.length === 0" style="color:#475569; text-align:center; margin-top:30px;">暂无达到 2% 波动记录</div>
+            <div v-if="alertLogs.length === 0" class="empty-log">暂无达到 2% 波动记录</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card span-2">
-      <h2>🧾 稳定币 (防封锁抓取)</h2>
-      <div class="stable-row">
-        <div class="stable-left" style="color:#34d399;">
-          <img class="logo-img" alt="USDT" referrerpolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/vadimmalykhin/binance-icons/crypto/usdt.svg" />
-          USDT / CNY
-        </div>
-        <div style="text-align:right;">
-          <div class="stable-val" :style="usdtCnySource.includes('估算') ? 'color:#facc15;font-size:1.1rem' : ''">{{ usdtCny ? '¥ ' + usdtCny.toFixed(2) : '获取中 ...' }}</div>
-          <div class="muted">来源: {{ usdtCnySource }}</div>
+    <div class="card span-2 stocks-card">
+      <h2>🇺🇸 美股</h2>
+      <div class="scroll stock-list">
+        <div v-for="stock in stocks" :key="stock.symbol" class="stable-row stock-row">
+          <div class="stable-left">
+            <span class="stock-symbol">{{ stock.symbol }}</span>
+            <div>
+              <div class="stock-name">{{ stock.name }}</div>
+              <div class="muted stock-time">{{ stock.time || stockStatus }}</div>
+            </div>
+          </div>
+          <div class="stock-meta">
+            <div class="stock-val" :class="stock.trend || (stock.changePct >= 0 ? 'up' : 'down')">
+              {{ stock.price === '--' ? '获取中 ...' : '$ ' + stock.price }}
+            </div>
+            <div class="stock-change" :class="stock.changePct >= 0 ? 'up' : 'down'">
+              {{ stock.changePct >= 0 ? '+' : '' }}{{ stock.changePct.toFixed(2) }}%
+            </div>
+          </div>
         </div>
       </div>
-      <div class="stable-row">
-        <div class="stable-left" style="color:#60a5fa;">
-          <img class="logo-img" alt="USDC" referrerpolicy="no-referrer" src="https://cdn.jsdelivr.net/gh/vadimmalykhin/binance-icons/crypto/usdc.svg" />
-          USDC / USD
-        </div>
-        <div style="text-align:right;">
-          <div class="stable-val" :class="usdcClass">$ {{ usdcPeg.toFixed(4) }}</div>
-          <div class="muted">现货实时锚定</div>
-        </div>
+      <div class="muted stocks-footer">
+        <span>刷新间隔: {{ stockRefreshMs }}ms</span>
+        <span>{{ stockStatus }}</span>
       </div>
     </div>
 
-    <div class="card span-2">
+    <div class="card span-2 global-card">
       <h2>🌍 环球金融 (免跨域直连)</h2>
       <div class="scroll news-container">
         <div v-for="item in globalMarkets" :key="item.id" class="global-item">
@@ -183,16 +250,25 @@
       </div>
     </div>
 
-    <div class="card span-2">
+    <div class="card span-2 gauge-card">
       <h2>😱 恐慌 & 贪婪指数</h2>
-      <div id="gaugeChart"></div>
-      <div style="text-align:center; margin-top:-10px;">
-        <div :style="{color: fgColor, fontSize: '1.6rem', fontWeight: '900'}">{{ fgValue }}</div>
-        <div :style="{color: fgColor, fontSize: '1.2rem', fontWeight: 'bold'}">{{ fgText }}</div>
+      <div class="fear-body">
+        <div class="fear-score" :style="{ borderColor: fgColor }">
+          <div class="fear-value" :style="{color: fgColor}">{{ fgValue }}</div>
+          <div class="fear-text" :style="{color: fgColor}">{{ fgText }}</div>
+        </div>
+        <div class="fear-meter">
+          <div id="gaugeChart"></div>
+          <div class="fear-scale">
+            <span>恐惧</span>
+            <span>中立</span>
+            <span>贪婪</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="card span-2">
+    <div class="card span-2 ahr-card">
       <h2>🧮 真实 AHR999 (严选公式)</h2>
       <div class="ahr-val" :style="ahrValue.includes('拦截') ? 'font-size:1.2rem;color:#ef4444' : ''">{{ ahrValue }}</div>
       <ul class="mini-list">
@@ -251,7 +327,7 @@
     </div>
     <div>
       2. 币安 (Binance) App 下载。邀请码：<span style="color:#22c55e;font-weight:900;">23017017</span>
-      <a class="ad-link" href="https://download.bmwweb.cc/pack/BNApp_00000058.apk" target="_blank" style="margin-left:8px;">📦 安卓</a>
+      <a class="ad-link" href="https://www.bsmkweb.cc/register?ref=23017017" target="_blank" style="margin-left:8px;">📦 安卓</a>
       <a class="ad-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">🖥 苹果</a>
     </div>
   </div>
@@ -264,12 +340,22 @@ new Vue({
   data: {
     btcPrice: 0, btcBase: 0,
     ethPrice: 0, ethBase: 0,
-    usdtCny: 0, usdcPeg: 1.0001,
-    usdtCnySource: '加载中...',
     cryptoStatus: '正在初始化 ...',
     ahrValue: '计算中 ...',
     fgValue: 50, fgText: '中立', fgColor: '#facc15',
     alertLogs: [],
+    stocks: [
+      { symbol: 'NVDA', query: 'usNVDA', name: 'NVIDIA', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
+      { symbol: 'TSLA', query: 'usTSLA', name: 'Tesla', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
+      { symbol: 'SPCX', query: 'usSPCX', name: 'SPCX ETF', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
+      { symbol: 'CRCL', query: 'usCRCL', name: 'Circle', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
+      { symbol: 'MU', query: 'usMU', name: 'Micron', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
+      { symbol: 'LITE', query: 'usLITE', name: 'Lumentum', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
+      { symbol: 'COHR', query: 'usCOHR', name: 'Coherent', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' }
+    ],
+    stockStatus: '等待刷新',
+    stockRefreshMs: 800,
+    stockRequestPending: false,
     globalMarkets: [
       { id: 'gc', name: '黄金 (1oz)', icon: '🟡', price: '--', change: 0, prefix: '$' },
       { id: 'cl', name: '原油 (WTI)', icon: '🛢️', price: '--', change: 0, prefix: '$' },
@@ -290,11 +376,6 @@ new Vue({
     btcChangePct() {
       if (!this.btcBase) return '0.00';
       return (((this.btcPrice - this.btcBase) / this.btcBase) * 100).toFixed(2);
-    },
-    usdcClass() {
-      if (this.usdcPeg < 0.999) return 'down';
-      if (this.usdcPeg > 1.001) return 'up';
-      return '';
     }
   },
   methods: {
@@ -320,7 +401,6 @@ new Vue({
         const btcData = data.find(item => item.symbol === 'BTCUSDT');
         const ethData = data.find(item => item.symbol === 'ETHUSDT');
         const goldData = data.find(item => item.symbol === 'PAXGUSDT');
-        const usdcData = data.find(item => item.symbol === 'USDCUSDT');
 
         if (btcData && ethData) {
           this.btcBase = this.btcBase || parseFloat(btcData.price);
@@ -340,80 +420,54 @@ new Vue({
             goldItem.change = (((currentPrice - prevPrice) / prevPrice) * 100).toFixed(2);
           }
         }
-
-        if (usdcData && usdcData.price) {
-          this.usdcPeg = parseFloat(usdcData.price);
-        }
       } catch (e) {
         this.cryptoStatus = '行情接口遭拦截';
       }
     },
 
-    async fetchRealC2CPrice() {
-      const estimateFromFx = async () => {
-        try {
-          const res = await fetch("https://open.er-api.com/v6/latest/USD");
-          const fx = await res.json();
-          if (fx && fx.rates && fx.rates.CNY) {
-            this.usdtCny = fx.rates.CNY * 1.018; 
-            this.usdtCnySource = '节点墙了代理-已切汇率估算';
-          }
-        } catch(e) {
-           this.usdtCnySource = '接口全线被拦截';
-        }
+    fetchUSStocks() {
+      if (this.stockRequestPending) return;
+      this.stockRequestPending = true;
+
+      const script = document.createElement('script');
+      const query = this.stocks.map(stock => stock.query).join(',');
+      script.src = `https://qt.gtimg.cn/q=${query}&_=${Date.now()}`;
+
+      const cleanup = () => {
+        this.stockRequestPending = false;
+        if (script.parentNode) document.head.removeChild(script);
       };
 
-      try {
-        const url = 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
-        const body = { asset: 'USDT', fiat: 'CNY', tradeType: 'BUY', page: 1, rows: 10, publisherType: 'merchant' };
-        
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-        
-        const res = await fetch(proxyUrl, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        
-        if (!res.ok) throw new Error("C2C blocked");
-        const data = await res.json();
-        
-        const ads = (data && data.data) ? data.data : [];
-        if (ads.length === 0) throw new Error("Empty data");
+      script.onload = () => {
+        try {
+          this.stocks.forEach(stock => {
+            const raw = window[`v_${stock.query}`];
+            if (!raw) return;
 
-        let parsed = ads.map(row => {
-          return {
-            price: parseFloat(row.adv.price),
-            minAmt: parseFloat(row.adv.minSingleTransAmount),
-            monthOrderCount: parseInt(row.advertiser.monthOrderCount),
-            monthFinishRate: parseFloat(row.advertiser.monthFinishRate)
-          };
-        }).filter(x => Number.isFinite(x.price) && x.price > 0);
+            const arr = raw.split('~');
+            const price = parseFloat(arr[3]);
+            const changePct = parseFloat(arr[32]);
+            if (!Number.isFinite(price) || price <= 0) return;
 
-        // 过滤垃圾挂单
-        let filtered = parsed.filter(x => 
-          x.monthOrderCount >= 30 && x.monthFinishRate >= 0.95 && x.minAmt >= 500
-        );
-        
-        // 修复点2：严格抓取买二价或买三价
-        let sorted = filtered.sort((a, b) => a.price - b.price);
-        let chosen = null;
-        if (sorted.length >= 2) chosen = sorted[1]; // 强制取第二个(买二)
-        else if (sorted.length === 1) chosen = sorted[0];
-        else {
-            let rawSorted = parsed.sort((a, b) => a.price - b.price);
-            chosen = rawSorted.length >= 2 ? rawSorted[1] : rawSorted[0];
+            stock.trend = stock.lastPrice === null || price >= stock.lastPrice ? 'up' : 'down';
+            stock.lastPrice = price;
+            stock.price = price.toFixed(2);
+            stock.changePct = Number.isFinite(changePct) ? changePct : 0;
+            stock.time = arr[30] || new Date().toLocaleTimeString();
+          });
+          this.stockStatus = `已刷新 ${new Date().toLocaleTimeString()}`;
+        } catch (e) {
+          this.stockStatus = '美股接口解析失败';
         }
+        cleanup();
+      };
 
-        if (chosen) {
-          this.usdtCny = chosen.price;
-          this.usdtCnySource = '商户买二真实价';
-        } else {
-          throw new Error("No ads");
-        }
-      } catch (e) {
-        await estimateFromFx();
-      }
+      script.onerror = () => {
+        this.stockStatus = '美股接口连接失败';
+        cleanup();
+      };
+
+      document.head.appendChild(script);
     },
 
     async fetchRealAHR999() {
@@ -447,45 +501,34 @@ new Vue({
     updateMarketData(id, price, change) {
       const item = this.globalMarkets.find(m => m.id === id);
       if (item) {
-        item.price = price === '遭拦截' ? price : parseFloat(price).toFixed(2);
-        item.change = change === 0 ? 0 : parseFloat(change).toFixed(2);
+        const parsedPrice = parseFloat(price);
+        const parsedChange = parseFloat(change);
+        item.price = price === '遭拦截' || !Number.isFinite(parsedPrice) ? '遭拦截' : parsedPrice.toFixed(2);
+        item.change = Number.isFinite(parsedChange) ? parsedChange.toFixed(2) : 0;
       }
     },
 
     async fetchGlobalMarkets() {
-      // 获取股指（腾讯接口，JSONP免跨域）
+      // 腾讯接口支持股指和 WTI 原油，避免新浪接口因 Referer 被 Forbidden。
       const tencentScript = document.createElement('script');
-      tencentScript.src = 'https://qt.gtimg.cn/q=s_sh000001,usDJI,usIXIC';
+      tencentScript.src = `https://qt.gtimg.cn/q=s_sh000001,usDJI,usIXIC,hf_CL&_=${Date.now()}`;
       tencentScript.onload = () => {
         try {
-          if (window.v_s_sh000001) { const arr = window.v_s_sh000001.split('~'); this.updateMarketData('sh', arr[3], arr[32]); }
+          if (window.v_s_sh000001) { const arr = window.v_s_sh000001.split('~'); this.updateMarketData('sh', arr[3], arr[5]); }
           if (window.v_usDJI) { const arr = window.v_usDJI.split('~'); this.updateMarketData('dji', arr[3], arr[32]); }
           if (window.v_usIXIC) { const arr = window.v_usIXIC.split('~'); this.updateMarketData('ixic', arr[3], arr[32]); }
+          if (window.v_hf_CL) {
+            const arr = window.v_hf_CL.split(',');
+            const price = parseFloat(arr[0]);
+            const changePct = parseFloat(arr[1]);
+            if (Number.isFinite(price) && price > 0) {
+              this.updateMarketData('cl', price, Number.isFinite(changePct) ? changePct : 0);
+            }
+          }
         } catch (e) {}
         document.head.removeChild(tencentScript);
       };
       document.head.appendChild(tencentScript);
-
-      // 修复点3：获取原油彻底改为新浪财经 (JSONP 脚本注入法)，100%无视跨域，不会被拦截
-      const sinaScript = document.createElement('script');
-      sinaScript.src = 'https://hq.sinajs.cn/list=hf_CL';
-      sinaScript.onload = () => {
-        try {
-          if (window.hq_str_hf_CL) {
-            const arr = window.hq_str_hf_CL.split(',');
-            const currentPrice = parseFloat(arr[0]);
-            const prevPrice = parseFloat(arr[7]);
-            if (currentPrice && prevPrice) {
-               const change = ((currentPrice - prevPrice) / prevPrice) * 100;
-               this.updateMarketData('cl', currentPrice, change);
-            }
-          }
-        } catch (e) {
-           this.updateMarketData('cl', '遭拦截', 0);
-        }
-        document.head.removeChild(sinaScript);
-      };
-      document.head.appendChild(sinaScript);
     },
 
     async fetchHalvingCountdown() {
@@ -551,6 +594,18 @@ new Vue({
         }
       } catch (e) {}
     },
+
+    resizeGauge() {
+      if (!this.gaugeChart) return;
+      const isMobile = window.innerWidth <= 1024;
+      this.gaugeChart.setOption({
+        series: [{
+          center: ["50%", isMobile ? "72%" : "70%"],
+          radius: isMobile ? "92%" : "90%"
+        }]
+      });
+      this.gaugeChart.resize();
+    },
     
     initEcharts() {
       if (typeof echarts === "undefined") return;
@@ -559,7 +614,7 @@ new Vue({
       this.gaugeChart.setOption({
         series: [{
           type: "gauge", startAngle: 180, endAngle: 0, min: 0, max: 100,
-          center: ["50%", isMobile ? "75%" : "80%"], radius: "100%", splitNumber: 4,
+          center: ["50%", isMobile ? "72%" : "70%"], radius: isMobile ? "92%" : "90%", splitNumber: 4,
           axisLine: { lineStyle: { width: 12, color: [[0.25, "#ef4444"], [0.45, "#fb923c"], [0.55, "#facc15"], [0.75, "#4ade80"], [1, "#22c55e"]] } },
           axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
           pointer: { length: "60%", width: 6, itemStyle: { color: "#e2e8f0" } },
@@ -567,20 +622,22 @@ new Vue({
           data: [{ value: 50 }]
         }]
       });
+      window.addEventListener('resize', this.resizeGauge);
     }
   },
   mounted() {
     this.initEcharts();
+    this.$nextTick(this.resizeGauge);
     this.fetchCrypto();
-    this.fetchRealC2CPrice();
+    this.fetchUSStocks();
     this.fetchRealAHR999();
     this.fetchGlobalMarkets();
     this.fetchFearGreed();
     this.fetchHalvingCountdown();
 
     setInterval(this.fetchCrypto, 3000);
+    setInterval(this.fetchUSStocks, this.stockRefreshMs);
     setInterval(this.fetchGlobalMarkets, 8000);
-    setInterval(this.fetchRealC2CPrice, 20000);
     setInterval(this.fetchRealAHR999, 60000);
     setInterval(this.fetchHalvingCountdown, 10 * 60 * 1000);
   }
