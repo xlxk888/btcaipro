@@ -13,14 +13,19 @@
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
+      width: 100%;
+      max-width: 100%;
       margin: 0; padding: 0;
+      overflow-x: hidden;
       background: radial-gradient(circle at top, #1a2641 0%, #0f172a 48%, #08101d 100%);
       color: #e2e8f0;
       font-family: -apple-system, "PingFang SC", sans-serif;
+      scrollbar-width: none;
     }
-    body { padding: 14px; overflow-x: hidden; }
+    body { padding: 14px; overflow-x: hidden; -ms-overflow-style: none; }
+    html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
-    #app { max-width: 1440px; margin: 0 auto; }
+    #app { width: 100%; max-width: 1440px; margin: 0 auto; overflow-x: clip; }
     h1 { margin: 4px 0 18px; text-align: center; color: #f59e0b; font-size: 2rem; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 10px; }
     .brand-logo { width: 36px; height: 36px; flex-shrink: 0; }
 
@@ -28,8 +33,9 @@
     .span-2 { grid-column: span 2; }
     .span-3 { grid-column: span 3; }
     .span-4 { grid-column: span 4; }
+    .span-6 { grid-column: span 6; }
 
-    .card { background: rgba(27, 40, 66, .95); border: 1px solid rgba(72, 99, 150, .55); border-radius: 10px; padding: 14px; position: relative; box-shadow: 0 14px 34px rgba(0,0,0,.16); }
+    .card { min-width: 0; background: rgba(27, 40, 66, .95); border: 1px solid rgba(72, 99, 150, .55); border-radius: 10px; padding: 14px; position: relative; box-shadow: 0 14px 34px rgba(0,0,0,.16); }
     .card h2 { margin: 0 0 12px; color: #a9b8cf; font-size: 0.95rem; border-bottom: 1px solid rgba(72,99,150,.35); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 
     .market-card { min-height: 334px; display: flex; flex-direction: column; }
@@ -48,7 +54,8 @@
     .down { color: #ef4444; }
     .live { color: #93c5fd; font-size: .8rem; margin-top: 8px; }
 
-    .scroll { background: #0a111f; border-radius: 8px; padding: 10px; overflow-y: auto; }
+    .scroll { background: #0a111f; border-radius: 8px; padding: 10px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+    .scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
     .log-container { flex: 1; min-height: 154px; font-size: 0.8rem; line-height: 1.6; }
     .empty-log { color:#475569; text-align:center; padding-top:48px; }
     .news-container { min-height: 226px; overflow: visible; }
@@ -58,17 +65,22 @@
     .stable-val { font-size: 1.3rem; font-weight: 900; white-space: nowrap; }
     .muted { color: #8fa0ba; font-size: 0.75rem; }
     .stocks-card { min-height: 334px; display: flex; flex-direction: column; }
-    .stock-list { flex: 1; height: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0; background: transparent; overflow: visible; }
-    .stock-row { display: grid; grid-template-columns: 54px minmax(0, 1fr); padding: 9px; margin: 0; min-height: 60px; gap: 8px; }
-    .stock-row:nth-child(7) { grid-column: 1 / -1; }
+    .stock-form { display: grid; grid-template-columns: minmax(0, 1fr) 78px; gap: 8px; margin-bottom: 10px; }
+    .stock-input { height: 34px; border: 1px solid rgba(72,99,150,.75); border-radius: 8px; background: #0a111f; color: #e2e8f0; padding: 0 10px; outline: none; }
+    .stock-add-btn { height: 34px; border: 0; border-radius: 8px; background: #1f9d55; color: #07111f; font-size: .8rem; font-weight: 900; cursor: pointer; }
+    .stock-list { flex: 1; height: auto; display: grid; grid-template-columns: 1fr; gap: 8px; padding: 0; background: transparent; overflow: visible; }
+    .stock-row { min-width: 0; display: grid; grid-template-columns: 54px minmax(0, 1fr) minmax(96px, auto) 84px; padding: 6px 8px; margin: 0; min-height: 54px; gap: 8px; cursor: pointer; }
+    .stock-row:hover { background: rgba(15,23,42,.72); }
+    .stock-row:nth-child(7) { grid-column: auto; }
     .stock-row .stable-left { display: contents; }
-    .stock-row .stable-left > div { display: none; }
+    .stock-row .stable-left > div { display: block; }
     .stock-symbol { min-width: 46px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #334155; border-radius: 6px; background: #172538; color: #e2e8f0; font-size: 0.78rem; font-weight: 900; }
-    .stock-name { max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.78rem; color: #cbd5e1; line-height: 1.2; }
-    .stock-time { max-width: 78px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .stock-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.78rem; color: #cbd5e1; line-height: 1.2; }
+    .stock-time { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .stock-meta { text-align: right; min-width: 0; }
     .stock-val { font-size: 0.98rem; font-weight: 900; white-space: nowrap; }
     .stock-change { font-size: 0.75rem; font-weight: 800; }
+    .stock-actions { min-width: 78px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
     .stocks-footer { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
 
     .global-item { display: flex; justify-content: space-between; align-items: center; min-height: 43px; padding: 8px 0; border-bottom: 1px dashed rgba(72,99,150,0.3); }
@@ -102,6 +114,8 @@
     }
     .fear-value { font-size: 2.7rem; font-weight: 900; line-height: 1; }
     .fear-text { margin-top: 8px; font-size: 1.05rem; font-weight: 900; }
+    .fear-label { color: #a9b8cf; font-size: .8rem; font-weight: 900; letter-spacing: 0; }
+    .fear-gauge-value { display: none; }
     .fear-meter { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
     #gaugeChart { width: 100%; height: 172px; }
     .fear-scale { display: flex; justify-content: space-between; color: #8fa0ba; font-size: 0.72rem; padding: 0 8px; margin-top: -4px; }
@@ -110,37 +124,588 @@
     .mini-list { font-size: 0.85rem; color: #94a3b8; padding-left: 18px; margin: 8px 0; }
     .mini-list li { margin-bottom: 6px; }
 
-    .bar { margin-top: 10px; height: 10px; background: #172538; border-radius: 999px; overflow: hidden; }
+    .bar { margin-top: 7px; height: 6px; background: #172538; border-radius: 999px; overflow: hidden; }
     .bar > div { height: 100%; background: linear-gradient(90deg, #f59e0b, #22c55e); transition: width 0.5s; }
 
     .ad { margin-top: 20px; background: rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245,158,11,0.5); border-radius: 12px; padding: 15px; font-size: 1.05rem; line-height: 1.6; color: #e2e8f0; }
     .ad-title { color: #facc15; font-weight: 800; margin-bottom: 8px; font-size: 1.1rem; display: block; }
     .ad-link { color: #38bdf8; text-decoration: none; font-weight: 800; border: 1px solid #38bdf8; border-radius: 4px; padding: 2px 6px; font-size: 0.85rem; margin-left: 5px; }
-    .auth-btn { background:#1f2d45; color:#facc15; border:1px solid #3b5f96; border-radius:6px; font-size:0.8rem; padding:4px 10px; cursor:pointer; }
+
+    .chart-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(2, 6, 23, .78);
+      backdrop-filter: blur(6px);
+    }
+    .chart-panel {
+      width: min(1120px, 100%);
+      max-height: min(760px, calc(100vh - 36px));
+      display: flex;
+      flex-direction: column;
+      background: #0a111f;
+      border: 1px solid rgba(72,99,150,.62);
+      border-radius: 10px;
+      box-shadow: 0 22px 60px rgba(0,0,0,.45);
+      overflow: hidden;
+    }
+    .chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #111a2a;
+      border-bottom: 1px solid rgba(72,99,150,.38);
+    }
+    .chart-title { min-width: 0; }
+    .chart-title strong { display: block; font-size: 1rem; color: #e2e8f0; }
+    .chart-title span { display: block; color: #8fa0ba; font-size: .78rem; margin-top: 2px; }
+    .chart-actions { display: flex; align-items: center; gap: 8px; }
+    .chart-link, .chart-close {
+      height: 30px;
+      border-radius: 7px;
+      border: 1px solid rgba(148,163,184,.38);
+      background: #0f172a;
+      color: #cbd5e1;
+      font-size: .78rem;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .chart-link { display: inline-flex; align-items: center; padding: 0 10px; }
+    .chart-close { width: 30px; }
+    .interval-tabs {
+      display: flex;
+      gap: 7px;
+      padding: 10px 14px;
+      overflow-x: auto;
+      border-bottom: 1px solid rgba(72,99,150,.25);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .interval-tabs::-webkit-scrollbar { width: 0; height: 0; display: none; }
+    .interval-tabs button {
+      min-width: 58px;
+      height: 30px;
+      border: 1px solid rgba(148,163,184,.32);
+      border-radius: 999px;
+      background: #111a2a;
+      color: #cbd5e1;
+      font-size: .76rem;
+      font-weight: 900;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .interval-tabs button.active {
+      color: #07111f;
+      border-color: transparent;
+      background: linear-gradient(135deg, #f59e0b, #22c55e);
+    }
+    .chart-frame {
+      width: 100%;
+      height: 560px;
+      border: 0;
+      background: #050914;
+    }
+
+    .crypto-card { min-height: 372px; }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, .32);
+      background: rgba(15, 23, 42, .72);
+      color: #cbd5e1;
+      font-size: .72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .status-pill.connected { color: #4ade80; border-color: rgba(74,222,128,.45); }
+    .status-pill.connecting, .status-pill.reconnecting { color: #facc15; border-color: rgba(250,204,21,.45); }
+    .status-pill.error { color: #f87171; border-color: rgba(248,113,113,.45); }
+    .add-form {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 142px 96px;
+      gap: 9px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .asset-input, .chain-select {
+      width: 100%;
+      height: 38px;
+      border: 1px solid rgba(72,99,150,.75);
+      border-radius: 8px;
+      background: #0a111f;
+      color: #e2e8f0;
+      font-size: .86rem;
+      outline: none;
+      padding: 0 11px;
+    }
+    .asset-input:focus, .chain-select:focus { border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(56,189,248,.14); }
+    .add-btn {
+      height: 38px;
+      border: 0;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f59e0b, #22c55e);
+      color: #07111f;
+      font-size: .84rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .watch-error { color: #fca5a5; font-size: .78rem; margin-bottom: 6px; }
+    .watch-hint { color: #8fa0ba; font-size: .75rem; margin-bottom: 10px; }
+    .watch-table {
+      flex: 1;
+      min-height: 188px;
+      max-height: 330px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #0a111f;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      border: 1px solid rgba(72,99,150,.35);
+      border-radius: 9px;
+    }
+    .watch-table::-webkit-scrollbar { width: 0; height: 0; display: none; }
+    .watch-row {
+      display: grid;
+      grid-template-columns: minmax(128px, 1.3fr) minmax(92px, .78fr) 68px minmax(88px, .65fr) minmax(96px, .72fr) minmax(72px, .52fr) minmax(84px, .56fr) 82px;
+      gap: 7px;
+      align-items: center;
+      min-width: 0;
+      min-height: 50px;
+      padding: 5px 9px;
+      border-bottom: 1px solid rgba(72,99,150,.22);
+      cursor: pointer;
+    }
+    .watch-row:not(.watch-header):hover { background: rgba(15,23,42,.72); }
+    .watch-row:last-child { border-bottom: 0; }
+    .watch-header {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #111a2a;
+      color: #91a4c0;
+      font-size: .72rem;
+      font-weight: 900;
+      min-height: 32px;
+      cursor: default;
+    }
+    .token-main { min-width: 0; display: flex; align-items: center; gap: 8px; }
+    .token-logo, .token-fallback {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .token-logo { object-fit: cover; background: #172538; }
+    .token-fallback {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(148,163,184,.35);
+      background: #172538;
+      color: #facc15;
+      font-size: .82rem;
+      font-weight: 900;
+    }
+    .token-copy { min-width: 0; }
+    .token-symbol { color: #e2e8f0; font-size: .9rem; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .token-copy .muted { font-size: .66rem; font-weight: 500; color: #9fb0c8; }
+    .watch-price { color: #f8fafc; font-size: .95rem; font-weight: 900; white-space: nowrap; }
+    .watch-price.up { color: #22c55e; }
+    .watch-price.down { color: #ef4444; }
+    .metric-cell { color: #cbd5e1; font-size: .76rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .metric-label { display: none; color: #64748b; font-weight: 700; margin-right: 3px; }
+    .market-cap-cell { color: #cbd5e1; font-weight: 800; }
+    .source-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,.28);
+      background: rgba(15,23,42,.74);
+      color: #cbd5e1;
+      font-size: .7rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .source-pill.binance { color: #facc15; border-color: rgba(250,204,21,.38); }
+    .source-pill.okx { color: #93c5fd; border-color: rgba(147,197,253,.4); }
+    .source-pill.coingecko { color: #4ade80; border-color: rgba(74,222,128,.38); }
+    .source-pill.dex { color: #fb7185; border-color: rgba(251,113,133,.38); }
+    .source-pill.error { color: #f87171; border-color: rgba(248,113,113,.42); }
+    .action-cell { display: flex; justify-content: flex-end; gap: 4px; }
+    .sort-btn, .delete-btn {
+      width: 23px;
+      height: 23px;
+      border: 1px solid rgba(148,163,184,.34);
+      border-radius: 6px;
+      background: #111a2a;
+      color: #cbd5e1;
+      font-size: .9rem;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .sort-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .sort-btn:not(:disabled):hover { color: #38bdf8; border-color: rgba(56,189,248,.55); }
+    .delete-btn:hover { color: #f87171; border-color: rgba(248,113,113,.55); }
+    .empty-watch { min-width: 0; padding: 44px 14px; text-align: center; color: #64748b; font-size: .84rem; }
+    .watch-footer { display: flex; justify-content: space-between; gap: 10px; color: #8fa0ba; font-size: .75rem; margin-top: 9px; }
+    .compact-card { min-height: 108px; padding: 8px 10px; }
+    .compact-card h2 { margin-bottom: 4px; padding-bottom: 5px; font-size: .78rem; }
+    .compact-card .fear-body { min-height: 66px; grid-template-columns: minmax(70px, .7fr) minmax(0, 1.3fr); gap: 6px; padding: 5px; }
+    .compact-card .fear-score { min-height: 64px; }
+    .compact-card .fear-value { font-size: 1.28rem; }
+    .compact-card .fear-text { margin-top: 3px; font-size: .66rem; }
+    .compact-card #gaugeChart { height: 52px; }
+    .gauge-card.compact-card { min-height: 136px; padding: 10px; }
+    .gauge-card.compact-card h2 {
+      display: flex;
+      margin-bottom: 7px;
+      padding-bottom: 7px;
+      font-size: .86rem;
+    }
+    .gauge-card.compact-card .fear-body {
+      min-height: 118px;
+      grid-template-columns: minmax(168px, .92fr) minmax(0, 1.08fr);
+      align-items: center;
+      gap: 18px;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .gauge-card.compact-card .fear-meter {
+      order: 1;
+      position: relative;
+      min-height: 116px;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .gauge-card.compact-card #gaugeChart { height: 108px; }
+    .gauge-card.compact-card .fear-scale {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 0;
+      z-index: 1;
+      margin: 0;
+      padding: 0;
+      color: #a9b8cf;
+      font-size: .68rem;
+    }
+    .gauge-card.compact-card .fear-gauge-value {
+      display: none;
+      position: static;
+      transform: none;
+      margin-top: -2px;
+      font-size: 1.35rem;
+      font-weight: 900;
+      line-height: 1;
+      text-align: center;
+    }
+    .gauge-card.compact-card .fear-score {
+      order: 2;
+      min-height: 0;
+      align-items: flex-start;
+      justify-content: center;
+      text-align: left;
+      border: 0 !important;
+      border-radius: 0;
+      background: transparent;
+    }
+    .gauge-card.compact-card .fear-label { display: none; }
+    .gauge-card.compact-card .fear-text {
+      margin-top: 6px;
+      font-size: 1.62rem;
+      line-height: 1.08;
+    }
+    .fear-inline-value { margin-left: 8px; }
+    .gauge-card.compact-card .fear-note {
+      margin-top: 6px;
+      font-size: .8rem;
+      line-height: 1.35;
+      -webkit-line-clamp: 2;
+    }
+    .title-left { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
+    .btc-title-logo { width: 22px; height: 22px; flex-shrink: 0; }
+    .holder-note { color:#8fa0ba; font-size:.66rem; line-height:1.35; margin: -4px 0 6px; }
+    .holders-list { display: grid; gap: 4px; max-height: 156px; overflow-y: auto; padding-right: 3px; scrollbar-width: none; -ms-overflow-style: none; }
+    .holders-list::-webkit-scrollbar { width: 0; height: 0; display: none; }
+    .holder-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 7px; align-items: center; padding: 4px 0; border-bottom: 1px dashed rgba(72,99,150,.28); }
+    .holder-row:last-child { border-bottom: 0; }
+    .holder-rank { width: 20px; height: 20px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; background: #111a2a; color: #93c5fd; font-size: .7rem; font-weight: 900; }
+    .holder-name { color: #dbeafe; font-size: .74rem; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .holder-address { color: #64748b; font-size: .62rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .holder-balance { text-align: right; color: #e2e8f0; font-size: .76rem; font-weight: 900; }
+    .holder-change { text-align: right; font-size: .64rem; margin-top: 1px; color: #8fa0ba; }
+    .holder-change.up { color: #22c55e; }
+    .holder-change.down { color: #ef4444; }
+    .entity-holders-card .holders-list { max-height: 298px; }
+    .entity-holders-card .holder-row { grid-template-columns: 22px minmax(0, 1fr) auto; padding: 7px 0; }
+    .entity-holders-card .holder-rank { width: 22px; height: 22px; }
+    .entity-holders-card .holder-name { font-size: .8rem; }
+    .entity-holders-card .holder-address { font-size: .66rem; }
+    .entity-holders-card .holder-balance { font-size: .8rem; }
+    .holder-estimate { color: #facc15; font-size: .62rem; margin-right: 3px; }
+    .fear-note { color: #9fb0c8; font-size: .62rem; line-height: 1.2; margin-top: 2px; }
+    .compact-card .fear-note { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .compact-card .fear-scale { font-size: .58rem; padding: 0 4px; margin-top: -2px; }
+    .ahr-compact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin-top: 5px; }
+    .ahr-mini { background:#0a111f; border:1px solid rgba(72,99,150,.35); border-radius:7px; padding:5px; }
+    .ahr-mini span { display:block; color:#8fa0ba; font-size:.62rem; }
+    .ahr-mini strong { display:block; margin-top:2px; font-size:.76rem; color:#4ade80; }
+    .halving-card { min-height: 108px; }
+    .halving-days { font-size: 1.32rem; font-weight: 900; color: #f59e0b; line-height: 1; }
+    .halving-days span { font-size: .76rem; color:#94a3b8; }
+    .halving-line { color:#9fb0c8; font-size:.62rem; margin-top:4px; line-height:1.26; }
+    .ahr-card .ahr-val { font-size: 1.32rem; line-height: 1.04; }
+    .miner-card { min-height: 360px; }
+    .miner-table-wrap { min-width: 0; max-width: 100%; max-height: 300px; overflow: auto; border: 1px solid rgba(72,99,150,.32); border-radius: 8px; background:#0a111f; scrollbar-width: none; -ms-overflow-style: none; }
+    .miner-table-wrap::-webkit-scrollbar { width: 0; height: 0; display: none; }
+    .miner-table { width:100%; border-collapse: collapse; min-width: 680px; }
+    .miner-table th, .miner-table td { padding: 8px 10px; border-bottom: 1px solid rgba(72,99,150,.28); text-align:left; font-size:.76rem; white-space: nowrap; }
+    .miner-table th { position: sticky; top: 0; background:#111a2a; color:#8fa0ba; z-index:1; font-weight:900; }
+    .miner-table td { color:#dbeafe; font-weight:700; }
+    .miner-table tr:last-child td { border-bottom:0; }
+    .shutdown-price { color:#e2e8f0; }
+    .shutdown-price.off { color:#ef4444; }
+    .profit-pill, .loss-pill { display:inline-flex; align-items:center; justify-content:center; min-width: 42px; height: 22px; border-radius:999px; font-size:.72rem; font-weight:900; }
+    .profit-pill { color:#4ade80; background:rgba(34,197,94,.12); }
+    .loss-pill { color:#fb7185; background:rgba(244,63,94,.14); }
+    .miner-summary { display:flex; justify-content:space-between; gap:10px; color:#8fa0ba; font-size:.72rem; margin-top:8px; }
+    .miner-scroll-hint { display:none; color:#8fa0ba; font-size:.66rem; margin: 6px 0 0; }
+
+    @media (max-width: 1280px) {
+      .miner-table-wrap {
+        max-height: none;
+        overflow: visible;
+        border: 0;
+        background: transparent;
+      }
+      .miner-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        border-collapse: separate;
+      }
+      .miner-table thead { display: none; }
+      .miner-table tbody { display: grid; gap: 8px; }
+      .miner-table tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px 10px;
+        padding: 9px;
+        border: 1px solid rgba(72,99,150,.32);
+        border-radius: 8px;
+        background: #0a111f;
+      }
+      .miner-table td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 7px;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        font-size: .7rem;
+        white-space: normal;
+      }
+      .miner-table td::before {
+        flex-shrink: 0;
+        color: #64748b;
+        font-size: .6rem;
+        font-weight: 900;
+      }
+      .miner-table td:nth-child(1) {
+        grid-column: 1 / -1;
+        font-size: .8rem;
+        font-weight: 900;
+      }
+      .miner-table td:nth-child(1)::before { content: ""; display: none; }
+      .miner-table td:nth-child(2)::before { content: "算力"; }
+      .miner-table td:nth-child(3)::before { content: "功耗"; }
+      .miner-table td:nth-child(4)::before { content: "功耗比"; }
+      .miner-table td:nth-child(5)::before { content: "关机价"; }
+      .miner-table td:nth-child(6)::before { content: "状态"; }
+      .miner-scroll-hint { display:block; }
+    }
 
     @media (max-width: 1024px) {
       .grid { grid-template-columns: 1fr; }
-      .span-2, .span-3, .span-4 { grid-column: span 1; }
+      .span-2, .span-3, .span-4, .span-6 { grid-column: span 1; }
       .market-card, .stocks-card, .gauge-card, .ahr-card, .global-card { min-height: auto; }
       .top-layout { grid-template-columns: 1fr; }
       .coin-grid { grid-template-columns: 1fr; }
       .stock-list { grid-template-columns: 1fr; }
-      .stock-row { display: flex; }
-      .stock-row .stable-left { display: flex; }
+      .stock-form { grid-template-columns: 1fr 76px; }
+      .stock-row { grid-template-columns: 54px minmax(0, 1fr) minmax(96px, auto) 84px; min-height: 54px; }
+      .stock-row .stable-left { display: contents; }
       .stock-row .stable-left > div { display: block; }
       .stock-name { max-width: 180px; }
       .stock-time { max-width: 180px; }
       .log-container { min-height: 120px; }
       .news-container { min-height: auto; }
-      .fear-body { grid-template-columns: 1fr; min-height: auto; }
-      .fear-meter { order: 1; }
-      .fear-score { order: 2; min-height: 104px; }
-      #gaugeChart { height: 158px; }
+      .fear-body { grid-template-columns: minmax(70px, .7fr) minmax(0, 1.3fr); min-height: auto; }
+      .fear-meter { order: 2; }
+      .fear-score { order: 1; min-height: 64px; }
+      #gaugeChart { height: 52px; }
       .price { font-size: 2.2rem; }
       h1 { font-size: 1.6rem; }
       .ad { font-size: 1.1rem; padding: 18px; }
       .card h2 { font-size: 0.85rem; }
       .stable-val { font-size: 1.2rem; }
+      .add-form { grid-template-columns: 1fr; }
+      .watch-table { max-height: none; overflow: visible; background: transparent; border: 0; }
+      .watch-header { display: none; }
+      .watch-row {
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr) auto 66px;
+        grid-template-areas:
+          "token price action"
+          "market change action";
+        gap: 2px 7px;
+        min-height: 62px;
+        margin-bottom: 6px;
+        padding: 5px 7px;
+        border: 1px solid rgba(72,99,150,.35);
+        border-radius: 9px;
+        background: #0a111f;
+      }
+      .watch-row > :nth-child(1) { grid-area: token; }
+      .watch-row > :nth-child(2) { grid-area: price; text-align: right; }
+      .watch-row > :nth-child(3) { grid-area: change; text-align: right; }
+      .watch-row > :nth-child(4) { display: none; }
+      .watch-row > :nth-child(5) { grid-area: market; }
+      .watch-row > :nth-child(6) { display: none; }
+      .watch-row > :nth-child(7) { display: none; }
+      .watch-row > :nth-child(8) { grid-area: action; }
+      .metric-label { display: inline; }
+      .metric-cell { font-size: .64rem; color: #8fa0ba; }
+      .token-logo, .token-fallback { width: 22px; height: 22px; }
+      .token-main { gap: 6px; }
+      .token-symbol { font-size: .84rem; }
+      .token-copy .muted { font-size: .6rem; }
+      .watch-price { font-size: .9rem; }
+      .source-pill { min-height: 20px; padding: 1px 6px; font-size: .64rem; }
+      .sort-btn, .delete-btn { width: 21px; height: 21px; font-size: .8rem; }
+      .action-cell { align-self: center; }
+      .compact-card { min-height: 108px; }
+      .compact-card .fear-body { grid-template-columns: minmax(70px, .7fr) minmax(0, 1.3fr); }
+      .compact-card #gaugeChart { height: 52px; }
+      .gauge-card.compact-card { min-height: 146px; }
+      .gauge-card.compact-card .fear-body {
+        min-height: 116px;
+        grid-template-columns: minmax(156px, .95fr) minmax(0, 1.05fr);
+        gap: 12px;
+        padding: 0;
+      }
+      .gauge-card.compact-card #gaugeChart { height: 104px; }
+      .gauge-card.compact-card .fear-meter { min-height: 112px; }
+      .gauge-card.compact-card .fear-text { font-size: 1.42rem; }
+      .gauge-card.compact-card .fear-note { font-size: .74rem; }
+      .watch-footer { flex-direction: column; gap: 4px; }
+      .chart-overlay { padding: 8px; align-items: stretch; }
+      .chart-panel { max-height: calc(100vh - 16px); }
+      .chart-head { padding: 10px; }
+      .chart-frame { height: 470px; }
+      .chart-link { display: none; }
+      .miner-table-wrap {
+        max-height: none;
+        overflow: visible;
+        -webkit-overflow-scrolling: touch;
+      }
+      .miner-table {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        border-collapse: separate;
+      }
+      .miner-table thead { display: none; }
+      .miner-table tbody { display: grid; gap: 8px; }
+      .miner-table tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px 10px;
+        padding: 9px;
+        border: 1px solid rgba(72,99,150,.32);
+        border-radius: 8px;
+        background: #0a111f;
+      }
+      .miner-table td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 7px;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        font-size: .7rem;
+        white-space: normal;
+      }
+      .miner-table td::before {
+        flex-shrink: 0;
+        color: #64748b;
+        font-size: .6rem;
+        font-weight: 900;
+      }
+      .miner-table td:nth-child(1) {
+        grid-column: 1 / -1;
+        font-size: .8rem;
+        font-weight: 900;
+      }
+      .miner-table td:nth-child(1)::before { content: ""; display: none; }
+      .miner-table td:nth-child(2)::before { content: "算力"; }
+      .miner-table td:nth-child(3)::before { content: "功耗"; }
+      .miner-table td:nth-child(4)::before { content: "功耗比"; }
+      .miner-table td:nth-child(5)::before { content: "关机价"; }
+      .miner-table td:nth-child(6)::before { content: "状态"; }
+      .miner-scroll-hint { display:block; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 8px 8px 10px; }
+      .grid { gap: 10px; }
+      .card { padding: 10px; border-radius: 9px; }
+      .gauge-card.compact-card { padding: 8px; }
+      .gauge-card.compact-card h2 { margin-bottom: 7px; padding-bottom: 7px; font-size: .82rem; }
+      .gauge-card.compact-card .fear-body {
+        grid-template-columns: minmax(132px, .88fr) minmax(0, 1.12fr);
+        gap: 9px;
+        padding: 0;
+      }
+      .gauge-card.compact-card #gaugeChart { height: 94px; }
+      .gauge-card.compact-card .fear-meter { min-height: 104px; }
+      .gauge-card.compact-card .fear-scale { left: 5px; right: 5px; font-size: .62rem; }
+      .gauge-card.compact-card .fear-gauge-value { margin-top: -1px; font-size: 1.18rem; }
+      .gauge-card.compact-card .fear-text { font-size: 1.14rem; }
+      .gauge-card.compact-card .fear-note { font-size: .68rem; }
+      .miner-table td { font-size: .66rem; }
+      .miner-table td::before { font-size: .58rem; }
+      .miner-table td:nth-child(1) { font-size: .76rem; }
+      .profit-pill, .loss-pill { min-width: 38px; height: 20px; font-size:.64rem; }
+      .miner-scroll-hint { display:block; }
+    }
+
+    @supports (padding: max(0px)) {
+      @media (max-width: 480px) {
+        body {
+          padding-left: max(8px, env(safe-area-inset-left));
+          padding-right: max(8px, env(safe-area-inset-right));
+        }
+      }
     }
   </style>
 </head>
@@ -155,63 +720,101 @@
     <span>Crypto AI</span>
   </h1>
 
-  <audio id="alarmSound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
-
   <div class="grid">
-    <div class="card span-4 market-card">
+    <div class="card span-6 market-card crypto-card">
       <h2>
-        <span>📈 实时行情 & 2% 波动预警</span>
-        <button class="auth-btn" @click="testAudio">开启声音授权</button>
+        <span>📈 自选币种实时行情</span>
+        <span class="status-pill" :class="wsStatus">{{ wsStatusText }}</span>
       </h2>
-      <div class="top-layout">
-        <div class="coin-grid">
-          <div class="coin-box">
-            <div class="coin-head">
-              <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="16" fill="#F7931A"/>
-                <path fill="#FFF" d="M23.189 14.293c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6.3l-.708 2.84c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.18-.045-1.13 4.532c-.086.212-.303.531-.793.41l-1.256-.313-.716 1.652 2.25.561c.418.105.827.212 1.232.312l-.715 2.866 1.727.43.715-2.868c.472.127.93.245 1.378.357l-.714 2.863 1.728.43.723-2.898c2.948.559 5.168.334 6.1-2.335.752-2.15-.037-3.389-1.59-4.197 1.13-.261 1.98-.1 2.447 1.751zm-3.85 6.419c-.535 2.147-4.151.986-5.32.693l.948-3.8c1.17.292 4.912.872 4.372 3.107zm.535-6.452c-.487 1.953-3.495.961-4.47.718l.86-3.448c.975.243 4.107.696 3.61 2.73z"/>
-              </svg>
-              <span style="font-weight:900; color:#f7931a">BTC / USD</span>
-            </div>
-            <div class="price" :class="btcTrend">
-              {{ btcPrice ? '$ ' + btcPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中 ...' }}
-            </div>
-            <div class="live">基准: ${{ btcBase ? btcBase.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '--' }} | 波动: <span :class="btcTrend">{{ btcChangePct }}%</span></div>
-          </div>
+      <form class="add-form" @submit.prevent="addWatchAsset">
+        <input
+          class="asset-input"
+          v-model.trim="assetInput"
+          placeholder="输入 BTC、ETH、BTCUSDT 或合约地址"
+          autocomplete="off"
+        />
+        <select class="chain-select" v-model="selectedChainId">
+          <option v-for="chain in chainOptions" :key="chain.id" :value="chain.id">{{ chain.label }}</option>
+        </select>
+        <button class="add-btn" type="submit">添加币种</button>
+      </form>
+      <div class="watch-error" v-if="watchError">{{ watchError }}</div>
+      <div class="watch-hint">
+        简称默认匹配 USDT 交易对；链上合约按所选 chainId 查询，页面只展示行情，不涉及钱包授权。
+      </div>
 
-          <div class="coin-box">
-            <div class="coin-head">
-              <svg viewBox="0 0 32 32" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="16" fill="#627EEA"/>
-                <path d="M16 4.3l-7.4 12.3 7.4 4.4 7.4-4.4L16 4.3zm0 17.8l-7.4-4.3L16 27.7l7.4-9.9-7.4 4.3z" fill="#FFF" opacity=".8"/>
-                <path d="M16 4.3v16.7l7.4-4.4L16 4.3z" fill="#FFF" opacity=".4"/>
-                <path d="M16 22.1v5.6l7.4-9.9-7.4 4.3z" fill="#FFF" opacity=".6"/>
-              </svg>
-              <span style="font-weight:900; color:#627eea">ETH / USD</span>
-            </div>
-            <div class="price" :class="ethTrend">
-              {{ ethPrice ? '$ ' + ethPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '加载中 ...' }}
-            </div>
-            <div class="live" :style="cryptoStatus.includes('正常') ? 'color:#4ade80' : 'color:#facc15'">{{ cryptoStatus }}</div>
-          </div>
+      <div class="watch-table">
+        <div class="watch-row watch-header">
+          <div>币种</div>
+          <div>最新价格</div>
+          <div>24h涨跌</div>
+          <div>24h成交量</div>
+          <div>流通市值</div>
+          <div>更新时间</div>
+          <div>数据源</div>
+          <div></div>
         </div>
-
-        <div class="log-panel">
-          <div style="font-size:0.85rem; color:#94a3b8; margin-bottom:8px; font-weight:bold;">报警系统日志</div>
-          <div class="scroll log-container">
-            <div v-for="(log, i) in alertLogs" :key="i" :class="log.type" style="margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.05)">
-              [{{ log.time }}] {{ log.msg }}
+        <div v-if="watchedAssets.length === 0" class="empty-watch">
+          还没有自选币种，输入 BTC 或 BTCUSDT 后点击添加。
+        </div>
+        <div
+          v-for="(asset, index) in watchedAssets"
+          :key="asset.id"
+          class="watch-row"
+          title="点击打开K线图"
+          @click="openChart(asset)"
+        >
+          <div class="token-main">
+            <img
+              v-if="asset.logoUrl && !asset.logoBroken"
+              class="token-logo"
+              :src="asset.logoUrl"
+              :alt="asset.symbol"
+              @error="asset.logoBroken = true"
+            />
+            <div v-else class="token-fallback">{{ asset.symbol.slice(0, 1) || '?' }}</div>
+            <div class="token-copy">
+              <div class="token-symbol">{{ asset.symbol }}</div>
+              <div class="muted">{{ asset.type === 'dex' ? asset.shortAddress : asset.displayName }}</div>
             </div>
-            <div v-if="alertLogs.length === 0" class="empty-log">暂无达到 2% 波动记录</div>
+          </div>
+          <div class="watch-price" :class="asset.trend || (asset.changePct >= 0 ? 'up' : 'down')">{{ formatPrice(asset.price) }}</div>
+          <div :class="asset.changePct >= 0 ? 'up' : 'down'">{{ formatPercent(asset.changePct) }}</div>
+          <div class="metric-cell"><span class="metric-label">成交</span>{{ formatVolume(asset.volume24h) }}</div>
+          <div class="metric-cell market-cap-cell"><span class="metric-label">流通市值</span>{{ formatMarketCap(asset.marketCap) }}</div>
+          <div class="metric-cell time-cell"><span class="metric-label">更新</span>{{ asset.updateTime || '--' }}</div>
+          <div>
+            <span class="source-pill" :class="asset.sourceType">{{ asset.source }}</span>
+            <div class="muted" v-if="asset.status">{{ asset.status }}</div>
+          </div>
+          <div class="action-cell">
+            <button class="sort-btn" type="button" @click.stop="moveWatchAsset(index, -1)" :disabled="index === 0" title="上移">↑</button>
+            <button class="sort-btn" type="button" @click.stop="moveWatchAsset(index, 1)" :disabled="index === watchedAssets.length - 1" title="下移">↓</button>
+            <button class="delete-btn" type="button" @click.stop="removeWatchAsset(asset.id)" title="删除">×</button>
           </div>
         </div>
       </div>
+      <div class="watch-footer">
+        <span>{{ watchedAssets.length }} 个自选</span>
+        <span>{{ fallbackStatus }}</span>
+      </div>
+
     </div>
 
-    <div class="card span-2 stocks-card">
+    <div class="card span-3 stocks-card">
       <h2>🇺🇸 美股</h2>
+      <form class="stock-form" @submit.prevent="addStock">
+        <input class="stock-input" v-model.trim="stockInput" placeholder="添加股票，如 AAPL" autocomplete="off" />
+        <button class="stock-add-btn" type="submit">添加</button>
+      </form>
       <div class="scroll stock-list">
-        <div v-for="stock in stocks" :key="stock.symbol" class="stable-row stock-row">
+        <div
+          v-for="(stock, index) in stocks"
+          :key="stock.symbol"
+          class="stable-row stock-row"
+          title="点击打开美股K线"
+          @click="openStockChart(stock)"
+        >
           <div class="stable-left">
             <span class="stock-symbol">{{ stock.symbol }}</span>
             <div>
@@ -227,6 +830,11 @@
               {{ stock.changePct >= 0 ? '+' : '' }}{{ stock.changePct.toFixed(2) }}%
             </div>
           </div>
+          <div class="stock-actions">
+            <button class="sort-btn" type="button" @click.stop="moveStock(index, -1)" :disabled="index === 0" title="上移">↑</button>
+            <button class="sort-btn" type="button" @click.stop="moveStock(index, 1)" :disabled="index === stocks.length - 1" title="下移">↓</button>
+            <button class="delete-btn" type="button" @click.stop="removeStock(stock.symbol)" title="删除">×</button>
+          </div>
         </div>
       </div>
       <div class="muted stocks-footer">
@@ -235,8 +843,8 @@
       </div>
     </div>
 
-    <div class="card span-2 global-card">
-      <h2>🌍 环球金融 (免跨域直连)</h2>
+    <div class="card span-3 global-card">
+      <h2>🌍 环球金融</h2>
       <div class="scroll news-container">
         <div v-for="item in globalMarkets" :key="item.id" class="global-item">
           <div class="global-name">{{ item.icon }} {{ item.name }}</div>
@@ -250,77 +858,152 @@
       </div>
     </div>
 
-    <div class="card span-2 gauge-card">
-      <h2>😱 恐慌 & 贪婪指数</h2>
-      <div class="fear-body">
-        <div class="fear-score" :style="{ borderColor: fgColor }">
-          <div class="fear-value" :style="{color: fgColor}">{{ fgValue }}</div>
-          <div class="fear-text" :style="{color: fgColor}">{{ fgText }}</div>
-        </div>
-        <div class="fear-meter">
-          <div id="gaugeChart"></div>
-          <div class="fear-scale">
-            <span>恐惧</span>
-            <span>中立</span>
-            <span>贪婪</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card span-2 ahr-card">
-      <h2>🧮 真实 AHR999 (严选公式)</h2>
-      <div class="ahr-val" :style="ahrValue.includes('拦截') ? 'font-size:1.2rem;color:#ef4444' : ''">{{ ahrValue }}</div>
-      <ul class="mini-list">
-        <li><span class="up">当 &lt; 0.45</span> 抄底区间</li>
-        <li><span style="color:#facc15">当 0.45 - 1.2</span> 定投区间</li>
-        <li><span style="color:#fb923c">当 1.2 - 5.0</span> 持有观察</li>
-        <li><span class="down">当 &gt; 5.0</span> 追高区间</li>
-      </ul>
-    </div>
-
-    <div class="card span-3">
-      <h2>🥽 主流矿机关机监控 (0.4元/度电)</h2>
-      <div style="display:flex; justify-content:space-between; gap:10px;">
-        <div style="flex:1;">
-          <div style="color:#22c55e; font-weight:800; font-size:0.9rem;">运行中:</div>
-          <ul class="mini-list">
-            <li :style="isShutdown(32500) ? 'color:#ef4444' : ''">蚂蚁 S21: ~$32,500 <b v-if="isShutdown(32500)">(关机)</b></li>
-            <li :style="isShutdown(42100) ? 'color:#ef4444' : ''">蚂蚁 S19 XP: ~$42,100 <b v-if="isShutdown(42100)">(关机)</b></li>
-            <li :style="isShutdown(51000) ? 'color:#ef4444' : ''">神马 M50S: ~$51,000 <b v-if="isShutdown(51000)">(关机)</b></li>
-          </ul>
-        </div>
-        <div style="flex:1;">
-          <div style="color:#ef4444; font-weight:800; font-size:0.9rem;">高成本/已淘汰:</div>
-          <ul class="mini-list" style="color:#ef4444">
-            <li>蚂蚁 S19 Pro: ~$58,500 (关机)</li>
-            <li>神马 M30S: ~$74,000 (关机)</li>
-            <li>蚂蚁 S19: ~$85,000 (关机)</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="card span-3">
-      <h2>⏳ 比特币减半倒计时 (目标 1,050,000 块)</h2>
-      <div style="font-size:2.2rem; font-weight:900; color:#f59e0b; line-height:1;">
+    <div class="card span-2 compact-card halving-card">
+      <h2>⏳ 比特币减半倒计时</h2>
+      <div class="halving-days">
         {{ halvingDaysRemaining !== null ? halvingDaysRemaining : '--' }}
-        <span style="font-size:1.2rem; color:#94a3b8;">天</span>
+        <span>天</span>
       </div>
-      <div style="margin-top:8px; font-size:0.9rem; color:#9fb0c8;">
-        当前区块 <strong style="color:#e2e8f0;">{{ halvingCurrentHeight !== null ? halvingCurrentHeight.toLocaleString() : '--' }}</strong>
-        / 目标 <strong style="color:#e2e8f0;">{{ halvingTargetHeight.toLocaleString() }}</strong><br />
-        预计日期 <strong style="color:#e2e8f0;" :style="halvingEtaText.includes('失败') ? 'color:#ef4444' : ''">{{ halvingEtaText }}</strong>
-        <span style="color:#64748b;">（按 10 分钟/块估算）</span>
+      <div class="halving-line">
+        区块 <strong style="color:#e2e8f0;">{{ halvingCurrentHeight !== null ? halvingCurrentHeight.toLocaleString() : '--' }}</strong> / <strong style="color:#e2e8f0;">{{ halvingTargetHeight.toLocaleString() }}</strong><br />
+        奖励 3.125 → <strong style="color:#e2e8f0;">1.5625 BTC</strong> · 预计 <strong style="color:#e2e8f0;" :style="halvingEtaText.includes('失败') ? 'color:#ef4444' : ''">{{ halvingEtaText }}</strong>
       </div>
       <div class="bar">
         <div :style="{ width: halvingProgressPct + '%' }"></div>
       </div>
     </div>
+
+    <div class="card span-2 gauge-card compact-card">
+      <h2>😱 恐慌 & 贪婪指数</h2>
+      <div class="fear-body">
+        <div class="fear-meter">
+          <div class="fear-scale">
+            <span>0</span>
+            <span>100</span>
+          </div>
+          <div id="gaugeChart"></div>
+          <div class="fear-gauge-value" :style="{color: fgColor}">{{ fgValue }}</div>
+        </div>
+        <div class="fear-score" :style="{ borderColor: fgColor }">
+          <div class="fear-text" :style="{color: fgColor}">{{ fgText }} <span class="fear-inline-value">{{ fgValue }}</span></div>
+          <div class="fear-note">{{ fearNote }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card span-2 ahr-card compact-card">
+      <h2>🧮 AHR999指数</h2>
+      <div class="ahr-val" :style="ahrValue.includes('拦截') ? 'font-size:1.2rem;color:#ef4444' : ''">{{ ahrValue }}</div>
+      <div class="fear-note">当前价格 / 200WMA 与拟合价格组合，越低越接近周期底部。</div>
+      <div class="ahr-compact-grid">
+        <div class="ahr-mini"><span>&lt; 0.45</span><strong>抄底区间</strong></div>
+        <div class="ahr-mini"><span>0.45 - 1.2</span><strong>定投区间</strong></div>
+      </div>
+    </div>
+
+    <div class="card span-3 miner-card">
+      <h2>⛏️ 矿机详情 (电费 0.4 元/度)</h2>
+      <div class="miner-table-wrap">
+        <table class="miner-table">
+          <thead>
+            <tr>
+              <th>矿机型号</th>
+              <th>算力</th>
+              <th>功耗</th>
+              <th>功耗比</th>
+              <th>关机价</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="miner in miners" :key="miner.model">
+              <td>{{ miner.model }}</td>
+              <td>{{ miner.hashrate }}</td>
+              <td>{{ miner.power }}</td>
+              <td>{{ miner.efficiency }}</td>
+              <td class="shutdown-price" :class="{ off: minerIsShutdown(miner) }">{{ formatUsd(miner.shutdownPrice) }}</td>
+              <td>
+                <span :class="minerIsProfitable(miner) ? 'profit-pill' : 'loss-pill'">
+                  {{ minerIsProfitable(miner) ? '盈利' : '已关机' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="miner-summary">
+        <span>当前 BTC: {{ btcPrice ? formatUsd(btcPrice) : '--' }}</span>
+        <span>{{ profitableMinerCount }} 台盈利 / {{ miners.length }} 台</span>
+      </div>
+      <div class="miner-scroll-hint">小屏幕已展开显示关机价和状态</div>
+    </div>
+
+    <div class="card span-3 holders-card entity-holders-card">
+      <h2>
+        <span class="title-left">
+          <svg viewBox="0 0 32 32" class="btc-title-logo" xmlns="http://www.w3.org/2000/svg" aria-label="Bitcoin">
+            <circle cx="16" cy="16" r="16" fill="#F7931A"/>
+            <path fill="#FFF" d="M23.189 14.293c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6.3l-.708 2.84c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.18-.045-1.13 4.532c-.086.212-.303.531-.793.41l-1.256-.313-.716 1.652 2.25.561c.418.105.827.212 1.232.312l-.715 2.866 1.727.43.715-2.868c.472.127.93.245 1.378.357l-.714 2.863 1.728.43.723-2.898c2.948.559 5.168.334 6.1-2.335.752-2.15-.037-3.389-1.59-4.197 1.13-.261 1.98-.1 2.447 1.751zm-3.85 6.419c-.535 2.147-4.151.986-5.32.693l.948-3.8c1.17.292 4.912.872 4.372 3.107zm.535-6.452c-.487 1.953-3.495.961-4.47.718l.86-3.448c.975.243 4.107.696 3.61 2.73z"/>
+          </svg>
+          <span>比特币实体持仓前十</span>
+        </span>
+      </h2>
+      <div class="holder-note">按实体/机构或类别合并口径展示；ETF合计与单只ETF会有包含关系，估算项已标注。</div>
+      <div class="holders-list">
+        <div v-for="holder in btcHolders" :key="holder.id" class="holder-row">
+          <span class="holder-rank">{{ holder.rank }}</span>
+          <div>
+            <div class="holder-name">{{ holder.name }}</div>
+            <div class="holder-address">{{ holder.type }}</div>
+          </div>
+          <div>
+            <div class="holder-balance">
+              <span v-if="holder.approx" class="holder-estimate">约</span>{{ formatBtc(holder.balance) }}
+            </div>
+            <div class="holder-change" :class="holder.delta > 0 ? 'up' : holder.delta < 0 ? 'down' : ''">{{ holder.changeText }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="muted stocks-footer">
+        <span>{{ holdersStatus }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-overlay" v-if="chartOpen" @click.self="closeChart">
+    <div class="chart-panel">
+      <div class="chart-head">
+        <div class="chart-title">
+          <strong>{{ chartTitle }}</strong>
+          <span>{{ chartSubTitle }}</span>
+        </div>
+        <div class="chart-actions">
+          <a class="chart-link" :href="chartExternalUrl" target="_blank">外部打开</a>
+          <button class="chart-close" type="button" @click="closeChart">×</button>
+        </div>
+      </div>
+      <div class="interval-tabs">
+        <button
+          v-for="item in chartIntervals"
+          :key="item.value"
+          type="button"
+          :class="{ active: chartInterval === item.value }"
+          @click="setChartInterval(item.value)"
+        >
+          {{ item.label }}
+        </button>
+      </div>
+      <iframe
+        class="chart-frame"
+        :src="chartUrl"
+        title="K线图"
+        allowfullscreen
+      ></iframe>
+    </div>
   </div>
 
   <div class="ad">
-    <strong class="ad-title">🧠 提示：访问以下网页及下载安装，请务必全程开启科学上网环境。</strong>
+    <strong class="ad-title">🔗 下载与访问提示：访问以下网页及下载安装，请务必全程开启科学上网环境。</strong>
     <div style="margin-bottom:6px;">
       1. Bitget Wallet 免费注册，零手续费，开卡成功返 5 美金。
       <a class="ad-link" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">📥 下载</a>
@@ -341,9 +1024,131 @@ new Vue({
     btcPrice: 0, btcBase: 0,
     ethPrice: 0, ethBase: 0,
     cryptoStatus: '正在初始化 ...',
+    assetInput: '',
+    selectedChainId: 'ethereum',
+    chainOptions: [
+      { id: 'ethereum', label: 'Ethereum' },
+      { id: 'bsc', label: 'BSC' },
+      { id: 'arbitrum', label: 'Arbitrum' },
+      { id: 'polygon', label: 'Polygon' },
+      { id: 'solana', label: 'Solana' }
+    ],
+    watchedAssets: [],
+    watchError: '',
+    ws: null,
+    wsStatus: 'idle',
+    wsReconnectTimer: null,
+    binanceStaleTimer: null,
+    wsRetryCount: 0,
+    binanceSymbolSet: null,
+    pendingUpdates: {},
+    rafId: null,
+    fallbackTimer: null,
+    marketCapTimer: null,
+    holdersTimer: null,
+    fallbackStatus: '兜底源待命',
+    storageKey: 'crypto_ai_watchlist_v1',
+    stockStorageKey: 'crypto_ai_stocklist_v1',
+    holderStorageKey: 'crypto_ai_entity_holder_snapshot_v1',
+    stockInput: '',
+    chartOpen: false,
+    chartAsset: null,
+    chartInterval: '15',
+    chartIntervals: [
+      { label: '15分钟', value: '15' },
+      { label: '30分钟', value: '30' },
+      { label: '1小时', value: '60' },
+      { label: '4小时', value: '240' },
+      { label: '日线', value: 'D' },
+      { label: '周线', value: 'W' },
+      { label: '年线', value: '12M' },
+      { label: '全部', value: 'ALL' }
+    ],
+    cgIdMap: {
+      btc: 'bitcoin',
+      eth: 'ethereum',
+      usdt: 'tether',
+      usdc: 'usd-coin',
+      dai: 'dai',
+      fdusd: 'first-digital-usd',
+      tusd: 'true-usd',
+      bnb: 'binancecoin',
+      sol: 'solana',
+      hype: 'hyperliquid',
+      xmr: 'monero',
+      doge: 'dogecoin',
+      xrp: 'ripple',
+      ada: 'cardano',
+      avax: 'avalanche-2',
+      dot: 'polkadot',
+      link: 'chainlink',
+      ton: 'the-open-network',
+      trx: 'tron',
+      matic: 'matic-network',
+      pol: 'polygon-ecosystem-token',
+      arb: 'arbitrum',
+      op: 'optimism',
+      pepe: 'pepe',
+      shib: 'shiba-inu',
+      uni: 'uniswap',
+      aave: 'aave',
+      ltc: 'litecoin',
+      bch: 'bitcoin-cash',
+      etc: 'ethereum-classic',
+      atom: 'cosmos',
+      near: 'near',
+      apt: 'aptos',
+      sui: 'sui',
+      fil: 'filecoin',
+      inj: 'injective-protocol',
+      wif: 'dogwifcoin',
+      ena: 'ethena',
+      ondo: 'ondo-finance',
+      render: 'render-token'
+    },
     ahrValue: '计算中 ...',
     fgValue: 50, fgText: '中立', fgColor: '#facc15',
-    alertLogs: [],
+    fearNote: '市场情绪加载中，数值越低代表越恐慌，越高代表越贪婪。',
+    etfProducts: [
+      { symbol: 'IBIT', issuer: 'BlackRock', active: true },
+      { symbol: 'FBTC', issuer: 'Fidelity', active: true },
+      { symbol: 'GBTC', issuer: 'Grayscale', active: true },
+      { symbol: 'BTC', issuer: 'Grayscale Mini', active: true },
+      { symbol: 'BITB', issuer: 'Bitwise', active: true },
+      { symbol: 'ARKB', issuer: 'ARK 21Shares', active: true },
+      { symbol: 'BTCO', issuer: 'Invesco Galaxy', active: true },
+      { symbol: 'HODL', issuer: 'VanEck', active: true },
+      { symbol: 'BRRR', issuer: 'CoinShares Valkyrie', active: true },
+      { symbol: 'EZBC', issuer: 'Franklin Templeton', active: true },
+      { symbol: 'BTCW', issuer: 'WisdomTree', active: true },
+      { symbol: 'DEFI', issuer: 'Hashdex', active: true }
+    ],
+    holdersStatus: '实体/机构口径，公开资料手动整理',
+    btcHolders: [
+      { id: 'us-etf-total', rank: 1, name: '美国现货BTC ETF合计', type: '美国现货BTC ETF共 12 家合计，含IBIT/FBTC/GBTC/BTC等', balance: 1292000, approx: true, changeText: '类别合计，和单只ETF有重叠' },
+      { id: 'satoshi', rank: 2, name: '中本聪', type: '早期挖矿估算，长期未移动', balance: 1100000, approx: true, changeText: 'Patoshi/公开研究估算' },
+      { id: 'strategy', rank: 3, name: 'Strategy / 微策略', type: '上市公司公开披露', balance: 845256, approx: false, changeText: '2026-06-08 披露后' },
+      { id: 'ibit', rank: 4, name: 'BlackRock IBIT', type: '贝莱德现货比特币ETF', balance: 785600, approx: true, changeText: '按官方净资产估算' },
+      { id: 'binance-known', rank: 5, name: 'Binance 公开冷钱包', type: '交易所客户资产，已标记地址下限', balance: 423532, approx: true, changeText: '公开地址合计下限', addresses: ['34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo', '3M219KR5vEneNb47ewrPfWyb5jQ2DjxRP6'] },
+      { id: 'us-gov', rank: 6, name: '美国政府', type: '主权/执法没收持仓估算', balance: 328372, approx: true, changeText: '2026-02 公开估算' },
+      { id: 'blockone', rank: 7, name: 'Block.one', type: '私营公司持仓估算', balance: 164000, approx: true, changeText: '公开资料估算' },
+      { id: 'robinhood', rank: 8, name: 'Robinhood 冷钱包', type: '平台客户资产，公开标记地址', balance: 140063, approx: false, changeText: '公开地址', addresses: ['bc1ql49ydapnjafl5t2cp9zqpjwe6pdgmxy98859v2'] },
+      { id: 'bitfinex', rank: 9, name: 'Bitfinex 冷钱包', type: '交易所客户资产，公开标记地址', balance: 130010, approx: false, changeText: '公开地址', addresses: ['bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97'] },
+      { id: 'tether', rank: 10, name: 'Tether 储备地址', type: '公司储备/公开标记地址', balance: 96936, approx: false, changeText: '公开地址', addresses: ['bc1qjasf9z3h7w3jspkhtgatgpyvvzgpa2wwd2lr0eh5tx44reyn2k7sfc27a4'] }
+    ],
+    holderBalanceCache: {},
+    btcHolderFallback: [
+      { rank: 1, address: '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo', name: 'Binance 冷钱包', balance: 248598, changeText: '公开富豪榜备用', delta: 0 },
+      { rank: 2, address: '3M219KR5vEneNb47ewrPfWyb5jQ2DjxRP6', name: 'Binance 冷钱包', balance: 174934, changeText: '30日 +29868 BTC', delta: 0 },
+      { rank: 3, address: 'bc1ql49ydapnjafl5t2cp9zqpjwe6pdgmxy98859v2', name: 'Robinhood 冷钱包', balance: 140063, changeText: '公开富豪榜备用', delta: 0 },
+      { rank: 4, address: 'bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97', name: 'Bitfinex 冷钱包', balance: 130010, changeText: '公开富豪榜备用', delta: 0 },
+      { rank: 5, address: 'bc1qjasf9z3h7w3jspkhtgatgpyvvzgpa2wwd2lr0eh5tx44reyn2k7sfc27a4', name: 'Tether', balance: 96936, changeText: '30日 -204.3 BTC', delta: 0 },
+      { rank: 6, address: 'bc1qazcm763858nkj2dj986etajv6wquslv8uxwczt', name: 'Bitfinex Hack Recovery', balance: 94643, changeText: '公开富豪榜备用', delta: 0 },
+      { rank: 7, address: 'bc1qd4ysezhmypwty5dnw7c8nqy5h5nxg0xqsvaefd0qn5kq32vwnwqqgv4rzr', name: '未知巨鲸地址', balance: 91850, changeText: '公开富豪榜备用', delta: 0 },
+      { rank: 8, address: '1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF', name: 'MtGox Hack', balance: 79957, changeText: '公开富豪榜备用', delta: 0 },
+      { rank: 9, address: 'bc1q8yj0herd4r4yxszw3nkfvt53433thk0f5qst4g', name: '未知巨鲸地址', balance: 78317, changeText: '公开富豪榜备用', delta: 0 },
+      { rank: 10, address: '1Ay8vMC7R1UbyCCZRVULMV7iQpHSAbguJP', name: 'Mr.100', balance: 72707, changeText: '7日 +389.59 BTC', delta: 0 }
+    ],
     stocks: [
       { symbol: 'NVDA', query: 'usNVDA', name: 'NVIDIA', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'TSLA', query: 'usTSLA', name: 'Tesla', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
@@ -353,12 +1158,28 @@ new Vue({
       { symbol: 'LITE', query: 'usLITE', name: 'Lumentum', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'COHR', query: 'usCOHR', name: 'Coherent', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' }
     ],
+    stockExchangeMap: {
+      NVDA: 'NASDAQ',
+      TSLA: 'NASDAQ',
+      SPCX: 'NYSEARCA',
+      CRCL: 'NYSE',
+      MU: 'NASDAQ',
+      LITE: 'NASDAQ',
+      COHR: 'NYSE',
+      AAPL: 'NASDAQ',
+      MSFT: 'NASDAQ',
+      AMZN: 'NASDAQ',
+      META: 'NASDAQ',
+      GOOGL: 'NASDAQ',
+      AMD: 'NASDAQ'
+    },
     stockStatus: '等待刷新',
     stockRefreshMs: 800,
     stockRequestPending: false,
     globalMarkets: [
       { id: 'gc', name: '黄金 (1oz)', icon: '🟡', price: '--', change: 0, prefix: '$' },
       { id: 'cl', name: '原油 (WTI)', icon: '🛢️', price: '--', change: 0, prefix: '$' },
+      { id: 'spx', name: '标普500', icon: '🇺🇸', price: '--', change: 0 },
       { id: 'dji', name: '道琼斯', icon: '📊', price: '--', change: 0 },
       { id: 'ixic', name: '纳斯达克', icon: '🚀', price: '--', change: 0 },
       { id: 'sh', name: '上证指数', icon: '🇨🇳', price: '--', change: 0 }
@@ -368,6 +1189,27 @@ new Vue({
     halvingDaysRemaining: null,
     halvingEtaText: '--',
     halvingProgressPct: 0,
+    miners: [
+      { model: 'Antminer U3S23 Hyd.', hashrate: '1160 TH/s', power: '11020 W', efficiency: '9.5 W/TH', shutdownPrice: 30238 },
+      { model: 'Antminer S23 Hyd.', hashrate: '380 TH/s', power: '5428 W', efficiency: '14.3 W/TH', shutdownPrice: 45466 },
+      { model: 'Whatsminer M73', hashrate: '512 TH/s', power: '7424 W', efficiency: '14.5 W/TH', shutdownPrice: 46153 },
+      { model: 'SEALMINER A2 Pro Hyd.', hashrate: '500 TH/s', power: '7450 W', efficiency: '14.9 W/TH', shutdownPrice: 47426 },
+      { model: 'Antminer S21 Pro', hashrate: '234 TH/s', power: '3510 W', efficiency: '15.0 W/TH', shutdownPrice: 47745 },
+      { model: 'Antminer S21+ Hyd.', hashrate: '319 TH/s', power: '4785 W', efficiency: '15.0 W/TH', shutdownPrice: 47745 },
+      { model: 'Antminer S21 Hyd.', hashrate: '335 TH/s', power: '5360 W', efficiency: '16.0 W/TH', shutdownPrice: 50928 },
+      { model: 'Whatsminer M70', hashrate: '310 TH/s', power: '5270 W', efficiency: '17.0 W/TH', shutdownPrice: 54111 },
+      { model: 'Whatsminer M66S', hashrate: '298 TH/s', power: '5067 W', efficiency: '17.0 W/TH', shutdownPrice: 54121 },
+      { model: 'Antminer S21', hashrate: '200 TH/s', power: '3500 W', efficiency: '17.5 W/TH', shutdownPrice: 55702 },
+      { model: 'Whatsminer M60S', hashrate: '186 TH/s', power: '3422 W', efficiency: '18.4 W/TH', shutdownPrice: 58560 },
+      { model: 'Whatsminer M63S', hashrate: '390 TH/s', power: '7215 W', efficiency: '18.5 W/TH', shutdownPrice: 58885 },
+      { model: 'Antminer T21', hashrate: '190 TH/s', power: '3610 W', efficiency: '19.0 W/TH', shutdownPrice: 60477 },
+      { model: 'Antminer S19 XP Hyd.', hashrate: '255 TH/s', power: '5304 W', efficiency: '20.8 W/TH', shutdownPrice: 66206 },
+      { model: 'Antminer S19 XP', hashrate: '140 TH/s', power: '3010 W', efficiency: '21.5 W/TH', shutdownPrice: 68434 },
+      { model: 'Whatsminer M50S++', hashrate: '150 TH/s', power: '3276 W', efficiency: '21.8 W/TH', shutdownPrice: 69516 },
+      { model: 'Whatsminer M50S+', hashrate: '140 TH/s', power: '3080 W', efficiency: '22.0 W/TH', shutdownPrice: 70026 },
+      { model: 'Avalon A1466', hashrate: '150 TH/s', power: '3350 W', efficiency: '22.3 W/TH', shutdownPrice: 71087 },
+      { model: 'Whatsminer M56S++', hashrate: '230 TH/s', power: '5290 W', efficiency: '23.0 W/TH', shutdownPrice: 73209 }
+    ],
     gaugeChart: null
   },
   computed: {
@@ -376,24 +1218,875 @@ new Vue({
     btcChangePct() {
       if (!this.btcBase) return '0.00';
       return (((this.btcPrice - this.btcBase) / this.btcBase) * 100).toFixed(2);
+    },
+    wsStatusText() {
+      const count = this.watchedAssets.filter(asset => asset.sourceType === 'binance').length;
+      if (!count) return 'Binance WS 待命';
+      if (this.wsStatus === 'connected') return `Binance WS 已连接 ${count}`;
+      if (this.wsStatus === 'connecting') return `Binance WS 连接中 ${count}`;
+      if (this.wsStatus === 'reconnecting') return `Binance WS 重连中 ${count}`;
+      if (this.wsStatus === 'error') return 'Binance WS 异常';
+      return `Binance WS 待连接 ${count}`;
+    },
+    chartProviderText() {
+      if (!this.chartAsset) return '';
+      if (this.chartAsset.type === 'stock') return 'TradingView 美股K线';
+      if (this.chartAsset.type === 'dex') return 'DEX Screener';
+      return `${this.getChartExchange(this.chartAsset)} K线`;
+    },
+    chartTitle() {
+      if (!this.chartAsset) return '';
+      return `${this.chartAsset.symbol || ''} K线图`;
+    },
+    chartSubTitle() {
+      if (!this.chartAsset) return '';
+      const name = this.chartAsset.type === 'stock'
+        ? (this.chartAsset.name || this.chartAsset.symbol)
+        : (this.chartAsset.pair || '');
+      return `${name} · ${this.chartProviderText}`;
+    },
+    chartExternalUrl() {
+      if (!this.chartAsset) return '#';
+      if (this.chartAsset.type === 'stock') {
+        return `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(this.chartAsset.tvSymbol)}`;
+      }
+      if (this.chartAsset.type === 'dex') {
+        return `https://dexscreener.com/${this.chartAsset.chainId}/${this.chartAsset.tokenAddress}`;
+      }
+      const exchange = this.getChartExchange(this.chartAsset);
+      const symbol = this.chartAsset.pair.replace(/[^A-Z0-9]/g, '');
+      return `https://www.tradingview.com/chart/?symbol=${exchange}%3A${symbol}`;
+    },
+    chartUrl() {
+      if (!this.chartAsset) return 'about:blank';
+      if (this.chartAsset.type === 'stock') {
+        const interval = this.chartInterval === 'ALL' ? 'D' : this.chartInterval;
+        const range = this.chartInterval === 'ALL' ? '&range=ALL' : '';
+        return `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(this.chartAsset.tvSymbol)}&interval=${interval}${range}&theme=dark&style=1&timezone=Asia%2FShanghai&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&hideideas=1`;
+      }
+      if (this.chartAsset.type === 'dex') {
+        return `https://dexscreener.com/${this.chartAsset.chainId}/${this.chartAsset.tokenAddress}?embed=1&theme=dark`;
+      }
+      const exchange = this.getChartExchange(this.chartAsset);
+      const symbol = this.chartAsset.pair.replace(/[^A-Z0-9]/g, '');
+      const interval = this.chartInterval === 'ALL' ? 'D' : this.chartInterval;
+      const range = this.chartInterval === 'ALL' ? '&range=ALL' : '';
+      return `https://s.tradingview.com/widgetembed/?symbol=${exchange}%3A${symbol}&interval=${interval}${range}&theme=dark&style=1&timezone=Asia%2FShanghai&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&hideideas=1`;
+    },
+    profitableMinerCount() {
+      return this.miners.filter(miner => this.minerIsProfitable(miner)).length;
     }
   },
   methods: {
     isShutdown(cost) {
       return this.btcPrice > 0 && this.btcPrice < cost;
     },
-    
-    testAudio() {
-      const audio = document.getElementById('alarmSound');
-      audio.play().then(() => {
-        alert("授权成功！价格波动达到 2% 时将自动报警。");
-      }).catch(() => {
-        alert("浏览器拦截了声音，请检查静音设置。");
+
+    minerIsProfitable(miner) {
+      return Number(this.btcPrice) > Number(miner.shutdownPrice);
+    },
+
+    minerIsShutdown(miner) {
+      const btc = Number(this.btcPrice);
+      return btc > 0 && btc <= Number(miner.shutdownPrice);
+    },
+
+    formatUsd(value) {
+      const num = Number(value);
+      if (!Number.isFinite(num)) return '--';
+      return `$${num.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    },
+
+    getChartExchange(asset) {
+      if (!asset) return 'BINANCE';
+      return asset.sourceType === 'binance' ? 'BINANCE' : 'OKX';
+    },
+
+    openChart(asset) {
+      this.chartAsset = asset;
+      this.chartInterval = this.chartInterval || '15';
+      this.chartOpen = true;
+    },
+
+    closeChart() {
+      this.chartOpen = false;
+    },
+
+    setChartInterval(value) {
+      this.chartInterval = value;
+    },
+
+    getStockTvSymbol(stock) {
+      const exchange = this.stockExchangeMap[stock.symbol] || 'NASDAQ';
+      return `${exchange}:${stock.symbol}`;
+    },
+
+    openStockChart(stock) {
+      this.chartAsset = {
+        type: 'stock',
+        symbol: stock.symbol,
+        name: stock.name,
+        tvSymbol: this.getStockTvSymbol(stock)
+      };
+      this.chartInterval = this.chartInterval || '15';
+      this.chartOpen = true;
+    },
+
+    baseFromPair(symbol) {
+      const quotes = ['FDUSD', 'USDT', 'USDC', 'BUSD', 'TUSD', 'USD', 'BTC', 'ETH', 'BNB'];
+      const quote = quotes.find(item => symbol.endsWith(item) && symbol.length > item.length);
+      return quote ? symbol.slice(0, -quote.length) : symbol;
+    },
+
+    quoteFromPair(symbol) {
+      const quotes = ['FDUSD', 'USDT', 'USDC', 'BUSD', 'TUSD', 'USD', 'BTC', 'ETH', 'BNB'];
+      return quotes.find(item => symbol.endsWith(item) && symbol.length > item.length) || 'USDT';
+    },
+
+    normalizePairInput(raw) {
+      const clean = raw.toUpperCase().replace(/[\s/_-]/g, '');
+      if (!/^[A-Z0-9]{2,24}$/.test(clean)) return '';
+      const quotes = ['FDUSD', 'USDT', 'USDC', 'BUSD', 'TUSD', 'USD', 'BTC', 'ETH', 'BNB'];
+      return quotes.some(quote => clean.endsWith(quote) && clean.length > quote.length) ? clean : `${clean}USDT`;
+    },
+
+    isLikelyContract(raw) {
+      const value = raw.trim();
+      const evmAddress = /^0x[a-fA-F0-9]{40}$/.test(value);
+      const solAddress = this.selectedChainId === 'solana' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(value);
+      return evmAddress || solAddress;
+    },
+
+    shortAddress(address) {
+      if (!address) return '';
+      return address.length > 14 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
+    },
+
+    getCoinLogoUrl(symbol) {
+      const aliases = { WBTC: 'btc', WETH: 'eth' };
+      const key = (aliases[symbol] || symbol || '').toLowerCase();
+      if (key === 'hype') {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#031f1d"/><circle cx="32" cy="32" r="28" fill="#102926" stroke="#46e6c4" stroke-width="4"/><path d="M12 32c0-9.2 5.4-15.6 13.2-15.6 5.7 0 8.7 3.4 11.3 7.1 2.4 3.5 4.5 6.1 9.2 6.1 2.7 0 5-.9 7.2-2.6v4.7c0 9.2-5.4 15.6-13.2 15.6-5.7 0-8.7-3.4-11.3-7.1-2.4-3.5-4.5-6.1-9.2-6.1-2.7 0-5 .9-7.2 2.6V32z" fill="#9afbe7"/></svg>`;
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+      }
+      return key ? `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/${key}.png` : '';
+    },
+
+    createEmptyAsset(config) {
+      return Object.assign({
+        id: '',
+        type: 'cex',
+        input: '',
+        symbol: '',
+        displayName: '',
+        pair: '',
+        marketSymbol: '',
+        chainId: '',
+        tokenAddress: '',
+        shortAddress: '',
+        logoUrl: '',
+        logoBroken: false,
+        price: null,
+        previousPrice: null,
+        changePct: null,
+        volume24h: null,
+        circulatingSupply: null,
+        marketCap: null,
+        updateTime: '',
+        source: '识别中',
+        sourceType: 'pending',
+        status: '等待行情'
+      }, config);
+    },
+
+    createPairAsset(pair) {
+      const symbol = pair.toUpperCase();
+      const base = this.baseFromPair(symbol);
+      return this.createEmptyAsset({
+        id: `cex:${symbol}`,
+        type: 'cex',
+        input: symbol,
+        symbol: base,
+        displayName: `${base}/${this.quoteFromPair(symbol)}`,
+        pair: symbol,
+        marketSymbol: symbol,
+        logoUrl: this.getCoinLogoUrl(base)
       });
     },
 
+    createDexAsset(address, chainId) {
+      const normalized = chainId === 'solana' ? address.trim() : address.trim().toLowerCase();
+      return this.createEmptyAsset({
+        id: `dex:${chainId}:${normalized.toLowerCase()}`,
+        type: 'dex',
+        input: normalized,
+        symbol: 'TOKEN',
+        displayName: chainId,
+        pair: `${chainId}:${this.shortAddress(normalized)}`,
+        chainId,
+        tokenAddress: normalized,
+        shortAddress: this.shortAddress(normalized),
+        source: 'DEX Screener',
+        sourceType: 'dex',
+        status: '轮询 10s'
+      });
+    },
+
+    loadWatchedAssets() {
+      let saved = [];
+      try {
+        saved = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+      } catch (e) {
+        saved = [];
+      }
+
+      const configs = Array.isArray(saved) && saved.length
+        ? saved
+        : [{ type: 'cex', pair: 'BTCUSDT' }, { type: 'cex', pair: 'ETHUSDT' }];
+
+      this.watchedAssets = configs.slice(0, 60).map(item => {
+        if (item.type === 'dex' && item.tokenAddress && item.chainId) {
+          return this.createDexAsset(item.tokenAddress, item.chainId);
+        }
+        return this.createPairAsset(item.pair || this.normalizePairInput(item.input || ''));
+      }).filter(asset => asset.pair || asset.tokenAddress);
+    },
+
+    saveWatchedAssets() {
+      const payload = this.watchedAssets.map(asset => asset.type === 'dex'
+        ? { type: 'dex', chainId: asset.chainId, tokenAddress: asset.tokenAddress }
+        : { type: 'cex', pair: asset.pair }
+      );
+      localStorage.setItem(this.storageKey, JSON.stringify(payload));
+    },
+
+    loadStocks() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(this.stockStorageKey) || '[]');
+        if (Array.isArray(saved) && saved.length) {
+          this.stocks = saved.map(item => this.createStock(item.symbol, item.name));
+        }
+      } catch (e) {}
+    },
+
+    saveStocks() {
+      const payload = this.stocks.map(stock => ({ symbol: stock.symbol, name: stock.name }));
+      localStorage.setItem(this.stockStorageKey, JSON.stringify(payload));
+    },
+
+    createStock(symbol, name) {
+      const upper = symbol.toUpperCase().replace(/[^A-Z.]/g, '');
+      const knownNames = {
+        NVDA: 'NVIDIA',
+        TSLA: 'Tesla',
+        SPCX: 'SPCX ETF',
+        CRCL: 'Circle',
+        MU: 'Micron',
+        LITE: 'Lumentum',
+        COHR: 'Coherent',
+        AAPL: 'Apple',
+        MSFT: 'Microsoft',
+        AMZN: 'Amazon',
+        META: 'Meta',
+        GOOGL: 'Alphabet',
+        AMD: 'AMD'
+      };
+      return {
+        symbol: upper,
+        query: `us${upper}`,
+        name: name || knownNames[upper] || upper,
+        price: '--',
+        changePct: 0,
+        lastPrice: null,
+        trend: '',
+        time: '等待刷新'
+      };
+    },
+
+    addStock() {
+      const symbol = this.stockInput.toUpperCase().replace(/[^A-Z.]/g, '');
+      if (!symbol) return;
+      if (this.stocks.some(stock => stock.symbol === symbol)) {
+        this.stockInput = '';
+        return;
+      }
+      this.stocks.unshift(this.createStock(symbol));
+      this.stockInput = '';
+      this.saveStocks();
+      this.fetchUSStocks();
+    },
+
+    removeStock(symbol) {
+      this.stocks = this.stocks.filter(stock => stock.symbol !== symbol);
+      this.saveStocks();
+    },
+
+    moveStock(index, direction) {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= this.stocks.length) return;
+      const reordered = this.stocks.slice();
+      const [stock] = reordered.splice(index, 1);
+      reordered.splice(nextIndex, 0, stock);
+      this.stocks = reordered;
+      this.saveStocks();
+    },
+
+    startBtcHoldersPolling() {
+      this.refreshEntityHolders();
+      if (this.holdersTimer) clearInterval(this.holdersTimer);
+      this.holdersTimer = setInterval(() => this.refreshEntityHolders(), 60000);
+    },
+
+    async refreshEntityHolders() {
+      this.holdersStatus = '链上地址/实体口径刷新中 ...';
+      this.updateEtfHolderLabel();
+      await this.refreshHolderAddressBalances();
+      this.updateHolderDeltas();
+      this.holdersStatus = `链上地址/实体口径已刷新 ${new Date().toLocaleTimeString()}`;
+    },
+
+    updateEtfHolderLabel() {
+      const activeEtfs = this.etfProducts.filter(item => item.active);
+      const preview = activeEtfs.slice(0, 4).map(item => item.symbol).join('/');
+      const holder = this.btcHolders.find(item => item.id === 'us-etf-total');
+      if (!holder) return;
+      holder.type = `美国现货BTC ETF共 ${activeEtfs.length} 家合计，含${preview}等`;
+    },
+
+    async refreshHolderAddressBalances() {
+      const addressHolders = this.btcHolders.filter(holder => Array.isArray(holder.addresses) && holder.addresses.length);
+      if (!addressHolders.length) return;
+
+      await Promise.allSettled(addressHolders.map(async holder => {
+        const balances = await Promise.all(holder.addresses.map(address => this.fetchBtcAddressBalance(address)));
+        const total = balances.reduce((sum, value) => sum + value, 0);
+        if (Number.isFinite(total) && total > 0) {
+          holder.balance = total;
+          holder.approx = holder.addresses.length > 1;
+          holder.type = `${holder.type.replace(/，链上每60秒刷新$/, '')}，链上每60秒刷新`;
+        }
+      }));
+    },
+
+    async fetchBtcAddressBalance(address) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      try {
+        const res = await fetch(`https://blockstream.info/api/address/${address}`, { signal: controller.signal });
+        if (!res.ok) throw new Error('address balance failed');
+        const data = await res.json();
+        const confirmed = (data.chain_stats && data.chain_stats.funded_txo_sum || 0)
+          - (data.chain_stats && data.chain_stats.spent_txo_sum || 0);
+        const mempool = (data.mempool_stats && data.mempool_stats.funded_txo_sum || 0)
+          - (data.mempool_stats && data.mempool_stats.spent_txo_sum || 0);
+        return (confirmed + mempool) / 1e8;
+      } finally {
+        clearTimeout(timer);
+      }
+    },
+
+    updateHolderDeltas() {
+      let previous = {};
+      try {
+        previous = JSON.parse(localStorage.getItem(this.holderStorageKey) || '{}');
+      } catch (e) {
+        previous = {};
+      }
+
+      this.btcHolders = this.btcHolders
+        .sort((a, b) => Number(b.balance) - Number(a.balance))
+        .slice(0, 10)
+        .map((holder, index) => {
+          const current = Number(holder.balance);
+          const previousBalance = Number(previous[holder.id]);
+          const baseText = holder.baseText || holder.changeText || '暂无变动';
+          const delta = Number.isFinite(previousBalance) && Number.isFinite(current)
+            ? current - previousBalance
+            : 0;
+          let changeText = baseText;
+          if (Math.abs(delta) >= 0.00000001) {
+            changeText = delta > 0
+              ? `买入 ${this.formatBtc(Math.abs(delta))}`
+              : `卖出 ${this.formatBtc(Math.abs(delta))}`;
+          }
+          return Object.assign({}, holder, {
+            rank: index + 1,
+            baseText,
+            delta,
+            changeText
+          });
+        });
+
+      const snapshot = this.btcHolders.reduce((acc, holder) => {
+        acc[holder.id] = Number(holder.balance);
+        return acc;
+      }, {});
+      try {
+        localStorage.setItem(this.holderStorageKey, JSON.stringify(snapshot));
+      } catch (e) {}
+    },
+
+    async initWatchlistMarket() {
+      this.loadWatchedAssets();
+      await this.loadBinanceSymbols();
+      this.routeWatchedAssets();
+      this.startFallbackPolling();
+      this.startMarketCapPolling();
+    },
+
+    async loadBinanceSymbols() {
+      try {
+        const res = await fetch('https://data-api.binance.vision/api/v3/exchangeInfo');
+        if (!res.ok) throw new Error('exchangeInfo failed');
+        const data = await res.json();
+        this.binanceSymbolSet = new Set((data.symbols || [])
+          .filter(item => item.status === 'TRADING')
+          .map(item => item.symbol));
+      } catch (e) {
+        this.binanceSymbolSet = null;
+        this.fallbackStatus = 'Binance 列表读取失败，先尝试 WS';
+      }
+    },
+
+    routeWatchedAssets() {
+      this.watchedAssets.forEach(asset => {
+        if (asset.type === 'dex') {
+          asset.source = 'DEX Screener';
+          asset.sourceType = 'dex';
+          asset.status = '轮询 10s';
+          return;
+        }
+
+        if (!this.binanceSymbolSet || this.binanceSymbolSet.has(asset.pair)) {
+          asset.source = 'Binance WS';
+          asset.sourceType = 'binance';
+          asset.status = '实时推送';
+        } else {
+          asset.source = '兜底查询';
+          asset.sourceType = 'pending';
+          asset.status = '尝试 OKX/CoinGecko';
+        }
+      });
+      this.connectBinanceStreams();
+      this.pollFallbackAssets();
+    },
+
+    addWatchAsset() {
+      const raw = this.assetInput.trim();
+      this.watchError = '';
+      if (!raw) {
+        this.watchError = '请输入币种简称、交易对或合约地址。';
+        return;
+      }
+
+      const asset = this.isLikelyContract(raw)
+        ? this.createDexAsset(raw, this.selectedChainId)
+        : this.createPairAsset(this.normalizePairInput(raw));
+
+      if (!asset.id || (!asset.pair && !asset.tokenAddress)) {
+        this.watchError = '格式无法识别，请输入 BTC、BTCUSDT 或有效合约地址。';
+        return;
+      }
+
+      if (this.watchedAssets.some(item => item.id === asset.id)) {
+        this.watchError = `${asset.pair || asset.shortAddress} 已在自选列表中。`;
+        return;
+      }
+
+      this.watchedAssets.unshift(asset);
+      this.assetInput = '';
+      this.saveWatchedAssets();
+      this.routeWatchedAssets();
+      this.startFallbackPolling();
+      this.refreshMarketCaps();
+    },
+
+    removeWatchAsset(id) {
+      this.watchedAssets = this.watchedAssets.filter(asset => asset.id !== id);
+      this.saveWatchedAssets();
+      this.routeWatchedAssets();
+      this.startFallbackPolling();
+      this.refreshMarketCaps();
+    },
+
+    moveWatchAsset(index, direction) {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= this.watchedAssets.length) return;
+      const reordered = this.watchedAssets.slice();
+      const [asset] = reordered.splice(index, 1);
+      reordered.splice(nextIndex, 0, asset);
+      this.watchedAssets = reordered;
+      this.saveWatchedAssets();
+    },
+
+    startMarketCapPolling() {
+      if (this.marketCapTimer) clearInterval(this.marketCapTimer);
+      this.refreshMarketCaps();
+      this.marketCapTimer = setInterval(() => this.refreshMarketCaps(), 60000);
+    },
+
+    async refreshMarketCaps() {
+      const idByAsset = this.watchedAssets.reduce((acc, asset) => {
+        if (asset.type !== 'cex') return acc;
+        const base = this.baseFromPair(asset.pair).toLowerCase();
+        const id = this.cgIdMap[base];
+        if (id) acc[asset.id] = id;
+        return acc;
+      }, {});
+      const ids = [...new Set(Object.values(idByAsset))];
+      if (!ids.length) return;
+
+      try {
+        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids.map(encodeURIComponent).join(',')}&price_change_percentage=24h`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('market cap failed');
+        const list = await res.json();
+        const byId = (Array.isArray(list) ? list : []).reduce((acc, item) => {
+          acc[item.id] = item;
+          return acc;
+        }, {});
+        Object.keys(idByAsset).forEach(assetId => {
+          const item = byId[idByAsset[assetId]];
+          if (item) {
+            const asset = this.watchedAssets.find(row => row.id === assetId);
+            const displayPrice = asset ? Number(asset.price) : NaN;
+            const cgPrice = Number(item.current_price);
+            const circulatingSupply = Number(item.circulating_supply);
+            const priceForMarketCap = Number.isFinite(displayPrice) && displayPrice > 0 ? displayPrice : cgPrice;
+            const patch = {};
+            if (Number.isFinite(circulatingSupply)) patch.circulatingSupply = circulatingSupply;
+            if (Number.isFinite(circulatingSupply) && Number.isFinite(priceForMarketCap)) {
+              patch.marketCap = priceForMarketCap * circulatingSupply;
+            } else if (Number.isFinite(Number(item.market_cap))) {
+              patch.marketCap = Number(item.market_cap);
+            }
+            if (item.image) patch.logoUrl = item.image;
+            if (Object.keys(patch).length) this.queueAssetUpdate(assetId, patch);
+          }
+        });
+      } catch (e) {}
+    },
+
+    formatTimestamp(value) {
+      const date = value ? new Date(value) : new Date();
+      const pad = (num, size = 2) => String(num).padStart(size, '0');
+      return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
+    },
+
+    formatPrice(value) {
+      if (value === null || value === undefined || value === '') return '--';
+      const num = Number(value);
+      if (!Number.isFinite(num)) return '--';
+      const digits = num >= 1000 ? 2 : num >= 1 ? 4 : 8;
+      return `$ ${num.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
+    },
+
+    formatPercent(value) {
+      if (value === null || value === undefined || value === '') return '--';
+      const num = Number(value);
+      if (!Number.isFinite(num)) return '--';
+      return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`;
+    },
+
+    formatVolume(value) {
+      if (value === null || value === undefined || value === '') return '--';
+      const num = Number(value);
+      if (!Number.isFinite(num)) return '--';
+      if (num >= 1e12) return `$ ${(num / 1e12).toFixed(2)}万亿`;
+      if (num >= 1e8) return `$ ${(num / 1e8).toFixed(2)}亿`;
+      if (num >= 1e4) return `$ ${(num / 1e4).toFixed(2)}万`;
+      return `$ ${num.toFixed(2)}`;
+    },
+
+    formatMarketCap(value) {
+      return this.formatVolume(value);
+    },
+
+    formatBtc(value) {
+      const num = Number(value);
+      if (!Number.isFinite(num)) return '-- BTC';
+      return `${num.toLocaleString('en-US', { maximumFractionDigits: 2 })} BTC`;
+    },
+
+    connectBinanceStreams() {
+      if (this.wsReconnectTimer) clearTimeout(this.wsReconnectTimer);
+      if (this.binanceStaleTimer) clearTimeout(this.binanceStaleTimer);
+      if (this.ws) {
+        this.ws.onopen = null;
+        this.ws.onmessage = null;
+        this.ws.onerror = null;
+        this.ws.onclose = null;
+        this.ws.close();
+      }
+
+      const binanceAssets = this.watchedAssets.filter(asset => asset.sourceType === 'binance');
+      if (!binanceAssets.length) {
+        this.ws = null;
+        this.wsStatus = 'idle';
+        return;
+      }
+
+      const streams = binanceAssets.map(asset => `${asset.pair.toLowerCase()}@ticker`).join('/');
+      this.wsStatus = 'connecting';
+      this.ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+
+      this.ws.onopen = () => {
+        this.wsStatus = 'connected';
+        this.wsRetryCount = 0;
+        this.binanceStaleTimer = setTimeout(this.moveStaleBinanceToFallback, 8000);
+      };
+
+      this.ws.onmessage = event => {
+        try {
+          const payload = JSON.parse(event.data);
+          const ticker = payload.data || payload;
+          const asset = this.watchedAssets.find(item => item.sourceType === 'binance' && item.pair === ticker.s);
+          if (!asset) return;
+          this.queueAssetUpdate(asset.id, {
+            price: parseFloat(ticker.c),
+            changePct: parseFloat(ticker.P),
+            volume24h: parseFloat(ticker.q),
+            updateTime: this.formatTimestamp(ticker.E || Date.now()),
+            source: 'Binance WS',
+            sourceType: 'binance',
+            status: '实时推送'
+          });
+        } catch (e) {}
+      };
+
+      this.ws.onerror = () => {
+        this.wsStatus = 'error';
+      };
+
+      this.ws.onclose = () => {
+        if (this.watchedAssets.some(asset => asset.sourceType === 'binance')) {
+          this.wsRetryCount += 1;
+          this.scheduleWsReconnect();
+        }
+      };
+    },
+
+    scheduleWsReconnect() {
+      if (this.wsReconnectTimer) clearTimeout(this.wsReconnectTimer);
+      this.wsStatus = 'reconnecting';
+      const delay = Math.min(12000, 2000 + this.wsRetryCount * 1000);
+      this.wsReconnectTimer = setTimeout(() => this.connectBinanceStreams(), delay);
+    },
+
+    moveStaleBinanceToFallback() {
+      if (this.binanceSymbolSet) return;
+      let changed = false;
+      this.watchedAssets.forEach(asset => {
+        if (asset.sourceType === 'binance' && !asset.price) {
+          asset.source = '兜底查询';
+          asset.sourceType = 'pending';
+          asset.status = 'Binance 暂无推送';
+          changed = true;
+        }
+      });
+      if (changed) {
+        this.connectBinanceStreams();
+        this.pollFallbackAssets();
+      }
+    },
+
+    queueAssetUpdate(id, patch) {
+      this.pendingUpdates[id] = Object.assign(this.pendingUpdates[id] || {}, patch);
+      if (!this.rafId) {
+        this.rafId = requestAnimationFrame(() => this.flushQueuedUpdates());
+      }
+    },
+
+    flushQueuedUpdates() {
+      const updates = this.pendingUpdates;
+      this.pendingUpdates = {};
+      this.rafId = null;
+
+      Object.keys(updates).forEach(id => {
+        const asset = this.watchedAssets.find(item => item.id === id);
+        if (!asset) return;
+        const next = updates[id];
+        const newPrice = Number(next.price);
+
+        if (Number.isFinite(newPrice)) {
+          const oldPrice = Number(asset.price);
+          asset.previousPrice = Number.isFinite(oldPrice) ? oldPrice : null;
+          if (Number.isFinite(oldPrice) && oldPrice > 0 && newPrice !== oldPrice) {
+            next.trend = newPrice > oldPrice ? 'up' : 'down';
+          } else if (!asset.trend) {
+            const changePct = Number(next.changePct);
+            next.trend = Number.isFinite(changePct) && changePct < 0 ? 'down' : 'up';
+          }
+          const supply = Number.isFinite(Number(next.circulatingSupply))
+            ? Number(next.circulatingSupply)
+            : Number(asset.circulatingSupply);
+          if (Number.isFinite(supply) && supply > 0) {
+            next.marketCap = newPrice * supply;
+          }
+          if (asset.pair === 'BTCUSDT') {
+            this.btcBase = this.btcBase || newPrice;
+            this.btcPrice = newPrice;
+          }
+          if (asset.pair === 'ETHUSDT') {
+            this.ethBase = this.ethBase || newPrice;
+            this.ethPrice = newPrice;
+          }
+        }
+
+        Object.assign(asset, next);
+      });
+    },
+
+    startFallbackPolling() {
+      if (this.fallbackTimer) clearInterval(this.fallbackTimer);
+      this.pollFallbackAssets();
+      this.fallbackTimer = setInterval(() => this.pollFallbackAssets(), 10000);
+    },
+
+    async pollFallbackAssets() {
+      const fallbackAssets = this.watchedAssets.filter(asset => asset.type === 'dex' || asset.sourceType !== 'binance');
+      if (!fallbackAssets.length) {
+        this.fallbackStatus = '兜底源待命';
+        return;
+      }
+
+      this.fallbackStatus = `兜底轮询 ${fallbackAssets.length} 个 / 10s`;
+      const dexAssets = fallbackAssets.filter(asset => asset.type === 'dex');
+      const cexAssets = fallbackAssets.filter(asset => asset.type === 'cex');
+
+      await Promise.allSettled([
+        this.pollDexAssets(dexAssets),
+        ...cexAssets.map(asset => this.pollCexFallback(asset))
+      ]);
+      this.fallbackStatus = `兜底已刷新 ${this.formatTimestamp(Date.now())}`;
+    },
+
+    async pollCexFallback(asset) {
+      try {
+        await this.pollOkxAsset(asset);
+      } catch (okxError) {
+        try {
+          await this.pollCoinGeckoAsset(asset);
+        } catch (cgError) {
+          this.queueAssetUpdate(asset.id, {
+            source: '无可用源',
+            sourceType: 'error',
+            status: 'OKX/CoinGecko 暂无数据',
+            updateTime: this.formatTimestamp(Date.now())
+          });
+        }
+      }
+    },
+
+    async pollOkxAsset(asset) {
+      const base = this.baseFromPair(asset.pair);
+      const instId = `${base}-USDT`;
+      const res = await fetch(`https://www.okx.com/api/v5/market/ticker?instId=${instId}`);
+      if (!res.ok) throw new Error('okx failed');
+      const json = await res.json();
+      const ticker = json && json.data && json.data[0];
+      if (!ticker || !ticker.last) throw new Error('okx no data');
+
+      const price = parseFloat(ticker.last);
+      const open24h = parseFloat(ticker.open24h);
+      const volume = parseFloat(ticker.volCcy24h || ticker.vol24h);
+      const changePct = Number.isFinite(open24h) && open24h > 0 ? ((price - open24h) / open24h) * 100 : null;
+      this.queueAssetUpdate(asset.id, {
+        price,
+        changePct,
+        volume24h: volume,
+        updateTime: this.formatTimestamp(parseInt(ticker.ts, 10) || Date.now()),
+        source: 'OKX',
+        sourceType: 'okx',
+        status: '轮询 10s'
+      });
+    },
+
+    async pollCoinGeckoAsset(asset) {
+      const base = this.baseFromPair(asset.pair).toLowerCase();
+      const id = this.cgIdMap[base];
+      if (!id) throw new Error('coingecko id missing');
+
+      const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(id)}&vs_currencies=usd&include_market_cap=true&include_24hr_change=true&include_24hr_vol=true&include_last_updated_at=true`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('coingecko failed');
+      const json = await res.json();
+      const item = json[id];
+      if (!item || !item.usd) throw new Error('coingecko no data');
+
+      this.queueAssetUpdate(asset.id, {
+        price: parseFloat(item.usd),
+        changePct: parseFloat(item.usd_24h_change),
+        volume24h: parseFloat(item.usd_24h_vol),
+        marketCap: parseFloat(item.usd_market_cap),
+        updateTime: this.formatTimestamp(item.last_updated_at ? item.last_updated_at * 1000 : Date.now()),
+        source: 'CoinGecko',
+        sourceType: 'coingecko',
+        status: '轮询 10s'
+      });
+    },
+
+    async pollDexAssets(assets) {
+      if (!assets.length) return;
+      const groups = assets.reduce((acc, asset) => {
+        acc[asset.chainId] = acc[asset.chainId] || [];
+        acc[asset.chainId].push(asset);
+        return acc;
+      }, {});
+
+      await Promise.all(Object.keys(groups).map(async chainId => {
+        const group = groups[chainId];
+        const addresses = group.map(asset => asset.tokenAddress).join(',');
+        const res = await fetch(`https://api.dexscreener.com/tokens/v1/${chainId}/${addresses}`);
+        if (!res.ok) throw new Error('dex failed');
+        const pairs = await res.json();
+
+        group.forEach(asset => {
+          const address = asset.tokenAddress.toLowerCase();
+          const matches = (pairs || []).filter(pair => {
+            const baseAddress = pair.baseToken && pair.baseToken.address ? pair.baseToken.address.toLowerCase() : '';
+            const quoteAddress = pair.quoteToken && pair.quoteToken.address ? pair.quoteToken.address.toLowerCase() : '';
+            return baseAddress === address || quoteAddress === address;
+          });
+
+          const best = matches.sort((a, b) => ((b.liquidity && b.liquidity.usd) || 0) - ((a.liquidity && a.liquidity.usd) || 0))[0];
+          if (!best) {
+            this.queueAssetUpdate(asset.id, {
+              source: 'DEX Screener',
+              sourceType: 'error',
+              status: '未找到交易池',
+              updateTime: this.formatTimestamp(Date.now())
+            });
+            return;
+          }
+
+          const baseToken = best.baseToken || {};
+          const quoteToken = best.quoteToken || {};
+          const isBase = (baseToken.address || '').toLowerCase() === address;
+          const token = isBase ? baseToken : quoteToken;
+          const quote = isBase ? quoteToken : baseToken;
+          const symbol = token.symbol || asset.symbol;
+          this.queueAssetUpdate(asset.id, {
+            symbol,
+            displayName: token.name || asset.displayName,
+            pair: `${symbol}/${quote.symbol || 'USD'}`,
+            logoUrl: (best.info && best.info.imageUrl) || asset.logoUrl || this.getCoinLogoUrl(symbol),
+            price: parseFloat(best.priceUsd),
+            changePct: parseFloat(best.priceChange && best.priceChange.h24),
+            volume24h: parseFloat(best.volume && best.volume.h24),
+            marketCap: parseFloat(best.marketCap || best.fdv),
+            updateTime: this.formatTimestamp(Date.now()),
+            source: 'DEX Screener',
+            sourceType: 'dex',
+            status: '轮询 10s'
+          });
+        });
+      }));
+    },
+
     async fetchCrypto() {
-      const url = 'https://data-api.binance.vision/api/v3/ticker/price';
+      const symbols = encodeURIComponent(JSON.stringify(['BTCUSDT', 'ETHUSDT', 'PAXGUSDT']));
+      const url = `https://data-api.binance.vision/api/v3/ticker/price?symbols=${symbols}`;
       try {
         const res = await fetch(url);
         const data = await res.json();
@@ -408,7 +2101,6 @@ new Vue({
           this.btcPrice = parseFloat(btcData.price);
           this.ethPrice = parseFloat(ethData.price);
           this.cryptoStatus = '直连刷新正常';
-          this.checkAlert();
         }
 
         if (goldData) {
@@ -426,6 +2118,10 @@ new Vue({
     },
 
     fetchUSStocks() {
+      if (!this.stocks.length) {
+        this.stockStatus = '暂无美股自选';
+        return;
+      }
       if (this.stockRequestPending) return;
       this.stockRequestPending = true;
 
@@ -511,12 +2207,14 @@ new Vue({
     async fetchGlobalMarkets() {
       // 腾讯接口支持股指和 WTI 原油，避免新浪接口因 Referer 被 Forbidden。
       const tencentScript = document.createElement('script');
-      tencentScript.src = `https://qt.gtimg.cn/q=s_sh000001,usDJI,usIXIC,hf_CL&_=${Date.now()}`;
+      tencentScript.src = `https://qt.gtimg.cn/q=s_sh000001,usDJI,usIXIC,usINX,usSPX,hf_CL&_=${Date.now()}`;
       tencentScript.onload = () => {
         try {
           if (window.v_s_sh000001) { const arr = window.v_s_sh000001.split('~'); this.updateMarketData('sh', arr[3], arr[5]); }
           if (window.v_usDJI) { const arr = window.v_usDJI.split('~'); this.updateMarketData('dji', arr[3], arr[32]); }
           if (window.v_usIXIC) { const arr = window.v_usIXIC.split('~'); this.updateMarketData('ixic', arr[3], arr[32]); }
+          const spxRaw = window.v_usINX || window.v_usSPX;
+          if (spxRaw) { const arr = spxRaw.split('~'); this.updateMarketData('spx', arr[3], arr[32]); }
           if (window.v_hf_CL) {
             const arr = window.v_hf_CL.split(',');
             const price = parseFloat(arr[0]);
@@ -560,24 +2258,6 @@ new Vue({
       }
     },
 
-    checkAlert() {
-      if (!this.btcBase || !this.btcPrice) return;
-      const ratio = (this.btcPrice - this.btcBase) / this.btcBase;
-      if (ratio >= 0.02) {
-        this.triggerAlert("up", `大涨！$${this.btcPrice.toFixed(2)} (+${(ratio * 100).toFixed(2)}%)`);
-      } else if (ratio <= -0.02) {
-        this.triggerAlert("down", `大跌！$${this.btcPrice.toFixed(2)} (-${(Math.abs(ratio) * 100).toFixed(2)}%)`);
-      }
-    },
-    
-    triggerAlert(type, msg) {
-      this.alertLogs.unshift({ time: new Date().toLocaleTimeString(), type: type, msg: msg });
-      if (this.alertLogs.length > 20) this.alertLogs.pop();
-      this.btcBase = this.btcPrice;
-      const audio = document.getElementById('alarmSound');
-      if (audio) audio.play().catch(() => {});
-    },
-
     async fetchFearGreed() {
       try {
         const res = await fetch("https://api.alternative.me/fng/");
@@ -585,11 +2265,11 @@ new Vue({
         if (d && d.data && d.data.length) {
           const val = parseInt(d.data[0].value, 10);
           this.fgValue = val;
-          if (val <= 25) { this.fgText = "极度恐惧"; this.fgColor = "#ef4444"; }
-          else if (val <= 45) { this.fgText = "恐惧"; this.fgColor = "#fb923c"; }
-          else if (val <= 55) { this.fgText = "中立"; this.fgColor = "#facc15"; }
-          else if (val <= 75) { this.fgText = "贪婪"; this.fgColor = "#4ade80"; }
-          else { this.fgText = "极度贪婪"; this.fgColor = "#22c55e"; }
+          if (val <= 25) { this.fgText = "极度恐慌"; this.fgColor = "#ef4444"; this.fearNote = "市场极度恐慌，可能是买入机会"; }
+          else if (val <= 45) { this.fgText = "恐慌"; this.fgColor = "#fb923c"; this.fearNote = "市场偏恐慌，适合分批观察"; }
+          else if (val <= 55) { this.fgText = "中立"; this.fgColor = "#facc15"; this.fearNote = "情绪中性，等待方向确认"; }
+          else if (val <= 75) { this.fgText = "贪婪"; this.fgColor = "#4ade80"; this.fearNote = "市场偏贪婪，注意追高风险"; }
+          else { this.fgText = "极度贪婪"; this.fgColor = "#22c55e"; this.fearNote = "市场极度贪婪，注意阶段性过热"; }
           if (this.gaugeChart) this.gaugeChart.setOption({ series: [{ data: [{ value: val }] }] });
         }
       } catch (e) {}
@@ -600,8 +2280,10 @@ new Vue({
       const isMobile = window.innerWidth <= 1024;
       this.gaugeChart.setOption({
         series: [{
-          center: ["50%", isMobile ? "72%" : "70%"],
-          radius: isMobile ? "92%" : "90%"
+          center: ["50%", isMobile ? "84%" : "82%"],
+          radius: isMobile ? "126%" : "120%",
+          axisLine: { lineStyle: { width: isMobile ? 9 : 10 } },
+          pointer: { length: "76%", width: 2 }
         }]
       });
       this.gaugeChart.resize();
@@ -614,10 +2296,10 @@ new Vue({
       this.gaugeChart.setOption({
         series: [{
           type: "gauge", startAngle: 180, endAngle: 0, min: 0, max: 100,
-          center: ["50%", isMobile ? "72%" : "70%"], radius: isMobile ? "92%" : "90%", splitNumber: 4,
-          axisLine: { lineStyle: { width: 12, color: [[0.25, "#ef4444"], [0.45, "#fb923c"], [0.55, "#facc15"], [0.75, "#4ade80"], [1, "#22c55e"]] } },
+          center: ["50%", isMobile ? "84%" : "82%"], radius: isMobile ? "126%" : "120%", splitNumber: 4,
+          axisLine: { lineStyle: { width: isMobile ? 9 : 10, color: [[0.25, "#ef4444"], [0.45, "#fb923c"], [0.55, "#facc15"], [0.75, "#4ade80"], [1, "#22c55e"]] } },
           axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
-          pointer: { length: "60%", width: 6, itemStyle: { color: "#e2e8f0" } },
+          pointer: { length: "76%", width: 2, itemStyle: { color: "#e2e8f0" } },
           detail: { show: false },
           data: [{ value: 50 }]
         }]
@@ -625,17 +2307,30 @@ new Vue({
       window.addEventListener('resize', this.resizeGauge);
     }
   },
+  beforeDestroy() {
+    if (this.wsReconnectTimer) clearTimeout(this.wsReconnectTimer);
+    if (this.binanceStaleTimer) clearTimeout(this.binanceStaleTimer);
+    if (this.fallbackTimer) clearInterval(this.fallbackTimer);
+    if (this.marketCapTimer) clearInterval(this.marketCapTimer);
+    if (this.holdersTimer) clearInterval(this.holdersTimer);
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    if (this.ws) this.ws.close();
+    window.removeEventListener('resize', this.resizeGauge);
+  },
   mounted() {
     this.initEcharts();
     this.$nextTick(this.resizeGauge);
+    this.loadStocks();
+    this.initWatchlistMarket();
     this.fetchCrypto();
     this.fetchUSStocks();
     this.fetchRealAHR999();
     this.fetchGlobalMarkets();
     this.fetchFearGreed();
     this.fetchHalvingCountdown();
+    this.startBtcHoldersPolling();
 
-    setInterval(this.fetchCrypto, 3000);
+    setInterval(this.fetchCrypto, 10000);
     setInterval(this.fetchUSStocks, this.stockRefreshMs);
     setInterval(this.fetchGlobalMarkets, 8000);
     setInterval(this.fetchRealAHR999, 60000);
