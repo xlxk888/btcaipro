@@ -420,7 +420,7 @@
     .bar { margin-top: 7px; height: 6px; background: #172538; border-radius: 999px; overflow: hidden; }
     .bar > div { height: 100%; background: linear-gradient(90deg, #f59e0b, #22c55e); transition: width 0.5s; }
 
-    .ad {
+    .bottom-notice {
       margin-top: 18px;
       background: rgba(15, 23, 42, .72);
       border: 1px solid rgba(245,158,11,.34);
@@ -430,9 +430,9 @@
       line-height: 1.55;
       color: #cbd5e1;
     }
-    .ad-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .ad-title { color: #facc15; font-weight: 900; font-size: .9rem; display: inline-flex; align-items:center; gap:6px; }
-    .ad-toggle {
+    .bottom-notice-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .bottom-notice-title { color: #facc15; font-weight: 900; font-size: .9rem; display: inline-flex; align-items:center; gap:6px; }
+    .bottom-notice-toggle {
       min-height: 30px;
       border: 1px solid rgba(245,158,11,.32);
       border-radius: 999px;
@@ -443,9 +443,9 @@
       font-weight: 900;
       cursor: pointer;
     }
-    .ad-body { margin-top: 10px; display:grid; gap:8px; }
-    .ad-desc { color:#8fa0ba; font-size:.74rem; }
-    .ad-link { color: #93c5fd; text-decoration: none; font-weight: 900; border: 1px solid rgba(147,197,253,.42); border-radius: 999px; padding: 2px 8px; font-size: 0.72rem; margin-left: 5px; white-space: nowrap; }
+    .bottom-notice-body { margin-top: 10px; display:grid; gap:8px; }
+    .bottom-notice-desc { color:#8fa0ba; font-size:.74rem; }
+    .bottom-notice-link { color: #93c5fd; text-decoration: none; font-weight: 900; border: 1px solid rgba(147,197,253,.42); border-radius: 999px; padding: 2px 8px; font-size: 0.72rem; margin-left: 5px; white-space: nowrap; }
 
     .chart-overlay {
       position: fixed;
@@ -850,7 +850,11 @@
     .miner-toggle:hover { color:#93c5fd; border-color:rgba(147,197,253,.42); }
 
     @media (max-width: 1024px) {
-      body { padding-left: 10px; padding-right: 10px; }
+      body {
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      }
       #app { overflow-x: hidden; }
       .app-topbar {
         position: sticky;
@@ -862,14 +866,24 @@
         border-radius: 10px;
         background: linear-gradient(180deg, rgba(11,18,32,.96), rgba(11,18,32,.74));
         backdrop-filter: blur(8px);
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 5px 8px;
       }
       .brand-logo { width: 24px; height: 24px; }
-      .brand-wrap { gap: 6px; }
+      .brand-wrap { width: 100%; gap: 6px; }
       .brand-wrap h1 { font-size: 1.12rem; }
-      .topbar-actions { flex: 1; gap: 5px; overflow: hidden; }
+      .topbar-actions {
+        flex: 0 0 100%;
+        width: 100%;
+        gap: 5px;
+        overflow: visible;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
       .desktop-only, .compact-toggle { display: none; }
-      .topbar-button { min-height: 30px; padding: 4px 8px; font-size: .62rem; max-width: 116px; overflow:hidden; text-overflow:ellipsis; }
-      .mobile-top-metric { display: inline-flex; min-width: 0; color:#cbd5e1; font-size: .64rem; font-weight: 900; white-space: nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .topbar-button { min-height: 28px; padding: 4px 8px; font-size: .62rem; max-width: none; overflow: visible; text-overflow: clip; white-space: normal; line-height: 1.2; }
+      .mobile-top-metric { display: inline-flex; min-width: auto; color:#cbd5e1; font-size: .64rem; font-weight: 900; white-space: nowrap; overflow: visible; text-overflow: clip; }
       .top-strip { display: none; }
       .source-strip { gap: 5px; margin-bottom: 10px; }
       .source-chip { min-height: 24px; padding: 3px 7px; font-size: .6rem; }
@@ -925,13 +939,13 @@
       .stock-left-info { grid-area: info; min-width: 0; align-self: center; }
       .stock-meta { grid-area: price; align-self: center; }
       .stock-name { max-width: 180px; }
-      .stock-time { max-width: 180px; }
+      .stock-time { display: none; }
       .stock-actions { display: none; }
       .stock-mobile-meta {
         grid-area: meta;
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 5px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 3px;
         color: #8fa0ba;
         font-size: .63rem;
         line-height: 1.35;
@@ -945,7 +959,7 @@
       #gaugeChart { height: 52px; }
       .price { font-size: 2.2rem; }
       h1 { font-size: 1.6rem; }
-      .ad { font-size: .82rem; padding: 10px; margin-top: 12px; }
+      .bottom-notice { font-size: .82rem; padding: 10px; margin-top: 12px; }
       .card h2 { font-size: 0.85rem; }
       .stable-val { font-size: 1.2rem; }
       .add-form { grid-template-columns: 1fr; }
@@ -1057,7 +1071,7 @@
     }
 
     @media (max-width: 480px) {
-      body { padding: 8px 8px 10px; }
+      body { padding: 8px 8px calc(104px + env(safe-area-inset-bottom)); }
       .grid { gap: 10px; }
       .card { padding: 10px; border-radius: 9px; }
       .top-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1100,6 +1114,7 @@
         body {
           padding-left: max(8px, env(safe-area-inset-left));
           padding-right: max(8px, env(safe-area-inset-right));
+          padding-bottom: max(104px, calc(104px + env(safe-area-inset-bottom)));
         }
       }
     }
@@ -1395,10 +1410,8 @@
             <button class="delete-btn" type="button" @click.stop="removeStock(stock.symbol)" title="删除">×</button>
           </div>
           <div class="stock-mobile-meta">
-            <span>{{ stockTypeLabel(stock) }}</span>
-            <span>{{ usMarketInfo.desc }}</span>
             <span>美东：{{ usMarketInfo.etTime }}</span>
-            <span>{{ stock.time || stockStatus }}</span>
+            <span>{{ usMarketInfo.desc }}</span>
           </div>
           <div class="mobile-row-actions">
             <button type="button" @click.stop="openStockChart(stock)">K线</button>
@@ -1573,21 +1586,21 @@
     </div>
   </div>
 
-  <div class="ad">
-    <div class="ad-head">
-      <strong class="ad-title">🔗 工具推荐与访问提示</strong>
-      <button class="ad-toggle" type="button" @click="toggleToolsPanel">{{ toolsExpanded ? '收起' : '展开' }}</button>
+  <div class="bottom-notice">
+    <div class="bottom-notice-head">
+      <strong class="bottom-notice-title">🔗 工具推荐与访问提示</strong>
+      <button class="bottom-notice-toggle" type="button" @click="toggleToolsPanel">{{ toolsExpanded ? '收起' : '展开' }}</button>
     </div>
-    <div class="ad-body" v-if="toolsExpanded">
-      <div class="ad-desc">工具推荐与访问提示：部分网页或下载入口可能需要稳定网络环境。</div>
+    <div class="bottom-notice-body" v-if="toolsExpanded">
+      <div class="bottom-notice-desc">工具推荐与访问提示：部分网页或下载入口可能需要稳定网络环境。</div>
       <div>
         1. Bitget Wallet 免费注册，零手续费，开卡成功返 5 美金。
-        <a class="ad-link" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">下载</a>
+        <a class="bottom-notice-link" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">下载</a>
       </div>
       <div>
         2. Binance App 下载。邀请码：<span style="color:#22c55e;font-weight:900;">23017017</span>
-        <a class="ad-link" href="https://www.bsmkweb.cc/register?ref=23017017" target="_blank">安卓</a>
-        <a class="ad-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">苹果</a>
+        <a class="bottom-notice-link" href="https://www.bsmkweb.cc/register?ref=23017017" target="_blank">安卓</a>
+        <a class="bottom-notice-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">苹果</a>
       </div>
     </div>
   </div>
