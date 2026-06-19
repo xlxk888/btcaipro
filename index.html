@@ -357,20 +357,9 @@
     .market-state-item span { display:block; color:#8fa0ba; font-size:.62rem; font-weight:800; }
     .market-state-item strong { display:block; margin-top:2px; color:#e2e8f0; font-size:.76rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .stock-type { color:#93c5fd; font-size:.62rem; font-weight:900; margin-top:2px; }
-    .mobile-card-meta, .mobile-row-actions, .stock-mobile-meta { display:none; }
-    .mobile-row-actions button {
-      height: 30px;
-      border-radius: 8px;
-      border: 1px solid rgba(148,163,184,.34);
-      background: #111a2a;
-      color: #cbd5e1;
-      padding: 0 10px;
-      font-size: .72rem;
-      font-weight: 900;
-      cursor: pointer;
-    }
-    .mobile-row-actions button.warn { color:#facc15; border-color: rgba(250,204,21,.36); }
-    .mobile-row-actions button.danger { color:#f87171; border-color: rgba(248,113,113,.4); }
+    .mobile-card-meta, .stock-mobile-meta { display:none; }
+    .gesture-row-shell { display: contents; }
+    .swipe-delete-reveal { display: none; }
 
     .global-item { display: flex; justify-content: space-between; align-items: center; min-height: 43px; padding: 8px 0; border-bottom: 1px dashed rgba(72,99,150,0.3); }
     .global-item:last-child { border: none; }
@@ -381,6 +370,24 @@
     .global-price.placeholder { color:#64748b; font-size:.8rem; }
     .global-change.placeholder { color:#64748b; font-weight:700; }
     .global-price.stale, .global-change.stale { color:#facc15; }
+    .global-meta { margin-top: 2px; color:#64748b; font-size:.6rem; font-weight:700; }
+    .global-card-head { gap: 10px; }
+    .global-card-head > span:first-child { min-width: 0; }
+    .global-toggle {
+      min-height: 26px;
+      border: 1px solid rgba(148,163,184,.32);
+      border-radius: 999px;
+      background: rgba(15,23,42,.72);
+      color: #cbd5e1;
+      padding: 3px 9px;
+      font-size: .66rem;
+      font-weight: 900;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .global-toggle:hover { color:#93c5fd; border-color:rgba(147,197,253,.42); }
+
+    .mobile-action-backdrop, .mobile-action-menu { display: none; }
 
     .gauge-card, .ahr-card, .global-card { min-height: 286px; }
     .gauge-card { display: flex; flex-direction: column; }
@@ -612,7 +619,8 @@
       cursor: pointer;
     }
     .watch-row:not(.watch-header):hover { background: rgba(15,23,42,.72); }
-    .watch-row:last-child { border-bottom: 0; }
+    .watch-table > .watch-row:last-child,
+    .watch-table > .gesture-row-shell:last-child .watch-row { border-bottom: 0; }
     .watch-header {
       position: sticky;
       top: 0;
@@ -928,11 +936,15 @@
         grid-template-columns: 54px minmax(0, 1fr) minmax(96px, auto);
         grid-template-areas:
           "symbol info price"
-          "meta meta meta"
-          "mobileActions mobileActions mobileActions";
+          "meta meta meta";
         min-height: 72px;
         touch-action: pan-y;
-        transition: transform .16s ease, border-color .16s ease, background .16s ease;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        will-change: transform;
+        transform: translate3d(0, 0, 0);
+        transition: transform .2s cubic-bezier(.2,.78,.2,1), border-color .16s ease, background .16s ease, box-shadow .16s ease;
       }
       .stock-row .stable-left { display: contents; }
       .stock-symbol { grid-area: symbol; align-self: center; }
@@ -950,9 +962,19 @@
         font-size: .63rem;
         line-height: 1.35;
       }
-      .stock-row .mobile-row-actions { grid-area: mobileActions; }
       .log-container { min-height: 120px; }
-      .news-container { min-height: auto; }
+      .global-card { width: 100%; max-width: 100%; min-width: 0; }
+      .global-card .news-container {
+        min-height: auto;
+        max-height: min(52vh, 430px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        padding-right: 5px;
+        box-shadow: inset 0 -18px 18px -22px rgba(148,163,184,.45);
+      }
       .fear-body { grid-template-columns: minmax(70px, .7fr) minmax(0, 1.3fr); min-height: auto; }
       .fear-meter { order: 2; }
       .fear-score { order: 1; min-height: 64px; }
@@ -971,8 +993,7 @@
         grid-template-areas:
           "token price"
           "market change"
-          "mobileMeta mobileMeta"
-          "mobileActions mobileActions";
+          "mobileMeta mobileMeta";
         gap: 2px 7px;
         min-height: 78px;
         margin-bottom: 6px;
@@ -981,7 +1002,12 @@
         border-radius: 9px;
         background: #0a111f;
         touch-action: pan-y;
-        transition: transform .16s ease, border-color .16s ease, background .16s ease;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        will-change: transform;
+        transform: translate3d(0, 0, 0);
+        transition: transform .2s cubic-bezier(.2,.78,.2,1), border-color .16s ease, background .16s ease, box-shadow .16s ease;
       }
       .watch-row > :nth-child(1) { grid-area: token; }
       .watch-row > :nth-child(2) { grid-area: price; text-align: right; }
@@ -1001,21 +1027,101 @@
         line-height: 1.32;
         padding-top: 2px;
       }
-      .watch-row .mobile-row-actions, .stock-row .mobile-row-actions {
+      .gesture-row-shell {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        border-radius: 9px;
+      }
+      .gesture-row-shell.gesture-shell-dragging {
+        overflow: visible;
+        z-index: 4;
+      }
+      .watch-table .gesture-row-shell { margin-bottom: 6px; }
+      .watch-table .gesture-row-shell .watch-row { margin-bottom: 0; }
+      .swipe-delete-reveal {
+        position: absolute;
+        inset: 0 0 0 auto;
+        width: 92px;
         display: flex;
-        grid-area: mobileActions;
-        gap: 7px;
-        padding-top: 5px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #b91c1c, #ef4444);
+        color: #fff;
+        font-size: .76rem;
+        font-weight: 950;
+        letter-spacing: .04em;
+        pointer-events: none;
       }
       .mobile-gesture-dragging {
+        position: relative;
         border-color: rgba(56,189,248,.7) !important;
         background: rgba(14, 25, 43, .96) !important;
-        transform: scale(.992);
+        box-shadow: 0 12px 28px rgba(2,6,23,.36);
+        z-index: 3;
       }
       .mobile-swipe-delete {
         border-color: rgba(239,68,68,.72) !important;
         background: rgba(127,29,29,.22) !important;
-        transform: translateX(-44px);
+      }
+      .mobile-action-active {
+        border-color: rgba(56,189,248,.56) !important;
+      }
+      .mobile-action-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 31;
+        display: block;
+        background: rgba(2,6,23,.42);
+        backdrop-filter: blur(2px);
+      }
+      .mobile-action-menu {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        z-index: 32;
+        display: block;
+        padding: 12px;
+        border: 1px solid rgba(72,99,150,.65);
+        border-radius: 14px;
+        background: rgba(10,17,31,.98);
+        box-shadow: 0 22px 60px rgba(0,0,0,.5);
+      }
+      .mobile-action-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 9px;
+      }
+      .mobile-action-head strong { color:#e2e8f0; font-size:.86rem; }
+      .mobile-action-close {
+        width: 30px;
+        height: 30px;
+        border: 1px solid rgba(148,163,184,.3);
+        border-radius: 999px;
+        background: #111a2a;
+        color:#cbd5e1;
+        font-size:1rem;
+      }
+      .mobile-action-hint { margin-bottom: 9px; color:#8fa0ba; font-size:.68rem; line-height:1.4; }
+      .mobile-action-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .mobile-action-grid button {
+        min-height: 42px;
+        border: 1px solid rgba(148,163,184,.32);
+        border-radius: 9px;
+        background: #111a2a;
+        color:#dbeafe;
+        font-size:.72rem;
+        font-weight:900;
       }
       .watch-hint, .stock-hint { font-size: .68rem; }
       .metric-label { display: inline; }
@@ -1051,6 +1157,21 @@
       .chart-link { display: none; }
       .chart-refresh, .chart-close { min-width: 40px; height: 38px; font-size: .9rem; }
       .miner-list { max-height: 360px; padding: 0 8px; }
+      .grid > *, .card, .compact-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .miner-card.expanded {
+        grid-column: 1 / -1;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .miner-card.expanded .miner-list {
+        max-height: none;
+        overflow: visible;
+      }
       .miner-row {
         grid-template-columns: minmax(0, 1fr) auto;
         grid-template-areas:
@@ -1100,7 +1221,8 @@
       .stock-symbol { min-width: 42px; font-size: .72rem; }
       .stock-row { grid-template-columns: 48px minmax(0, 1fr) minmax(86px, auto); }
       .stock-mobile-meta, .watch-row .mobile-card-meta { grid-template-columns: 1fr; }
-      .mobile-row-actions button { flex: 1; padding: 0 6px; }
+      .mobile-action-menu { left: 8px; right: 8px; }
+      .mobile-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .chart-frame { min-height: 330px; height: 56vh; }
       .miner-list { max-height: 350px; }
       .miner-row { min-height: 90px; }
@@ -1274,7 +1396,7 @@
       </form>
       <div class="watch-error" v-if="watchError">{{ watchError }}</div>
       <div class="watch-hint">
-        简称默认匹配 USDT 交易对；手机端长按上下拖动调整位置，左滑删除；电脑端可用右侧按钮。
+        简称默认匹配 USDT 交易对；手机端长按进入操作/拖动模式，左滑删除；电脑端可用右侧按钮。
       </div>
 
       <div class="watch-table">
@@ -1291,56 +1413,53 @@
         <div v-if="watchedAssets.length === 0" class="empty-watch">
           还没有自选币种，输入 BTC 或 BTCUSDT 后点击添加。
         </div>
-        <div
-          v-for="(asset, index) in watchedAssets"
-          :key="asset.id"
-          class="watch-row"
-          :class="mobileGestureClass('crypto', index)"
-          title="点击打开K线图"
-          @click="handleAssetClick(asset)"
-          @touchstart="startMobileGesture($event, 'crypto', index)"
-          @touchmove="moveMobileGesture($event, 'crypto')"
-          @touchend="endMobileGesture($event, 'crypto', asset.id)"
-          @touchcancel="cancelMobileGesture"
-        >
-          <div class="token-main">
-            <img
-              v-if="asset.logoUrl && !asset.logoBroken"
-              class="token-logo"
-              :src="asset.logoUrl"
-              :alt="asset.symbol"
-              @error="asset.logoBroken = true"
-            />
-            <div v-else class="token-fallback">{{ asset.symbol.slice(0, 1) || '?' }}</div>
-            <div class="token-copy">
-              <div class="token-symbol">{{ asset.symbol }}</div>
-              <div class="muted">{{ asset.type === 'dex' ? asset.shortAddress : asset.displayName }}</div>
+        <div v-for="(asset, index) in watchedAssets" :key="asset.id" class="gesture-row-shell" :class="mobileGestureShellClass('crypto', index)">
+          <div class="swipe-delete-reveal">左滑删除</div>
+          <div
+            class="watch-row"
+            :class="mobileGestureClass('crypto', index, asset.id)"
+            :style="mobileGestureStyle('crypto', index)"
+            title="点击打开K线图"
+            @click="handleAssetClick(asset)"
+            @touchstart="startMobileGesture($event, 'crypto', index, asset.id)"
+            @touchmove="moveMobileGesture($event, 'crypto')"
+            @touchend="endMobileGesture($event, 'crypto', asset.id)"
+            @touchcancel="cancelMobileGesture"
+          >
+            <div class="token-main">
+              <img
+                v-if="asset.logoUrl && !asset.logoBroken"
+                class="token-logo"
+                :src="asset.logoUrl"
+                :alt="asset.symbol"
+                @error="asset.logoBroken = true"
+              />
+              <div v-else class="token-fallback">{{ asset.symbol.slice(0, 1) || '?' }}</div>
+              <div class="token-copy">
+                <div class="token-symbol">{{ asset.symbol }}</div>
+                <div class="muted">{{ asset.type === 'dex' ? asset.shortAddress : asset.displayName }}</div>
+              </div>
             </div>
-          </div>
-          <div class="watch-price" :class="asset.trend || (asset.changePct >= 0 ? 'up' : 'down')">{{ formatPrice(asset.price) }}</div>
-          <div :class="asset.changePct >= 0 ? 'up' : 'down'">{{ formatPercent(asset.changePct) }}</div>
-          <div class="metric-cell"><span class="metric-label">成交</span>{{ formatVolume(asset.volume24h) }}</div>
-          <div class="metric-cell market-cap-cell"><span class="metric-label">流通市值</span>{{ formatMarketCap(asset.marketCap) }}</div>
-          <div class="metric-cell time-cell"><span class="metric-label">更新</span>{{ asset.updateTime || '--' }}</div>
-          <div>
-            <span class="source-pill" :class="asset.sourceType">{{ asset.source }}</span>
-            <div class="muted" v-if="asset.status">{{ asset.status }}</div>
-          </div>
-          <div class="action-cell">
-            <button class="sort-btn" type="button" @click.stop="moveWatchAsset(index, -1)" :disabled="index === 0" title="上移">↑</button>
-            <button class="sort-btn" type="button" @click.stop="moveWatchAsset(index, 1)" :disabled="index === watchedAssets.length - 1" title="下移">↓</button>
-            <button class="delete-btn" type="button" @click.stop="removeWatchAsset(asset.id)" title="删除">×</button>
-          </div>
-          <div class="mobile-card-meta">
-            <span>24H成交量：{{ formatVolume(asset.volume24h) }}</span>
-            <span>来源：{{ asset.source || '暂无' }}</span>
-            <span>更新时间：{{ asset.updateTime || '--' }}</span>
-            <span>{{ asset.status || '等待行情' }}</span>
-          </div>
-          <div class="mobile-row-actions">
-            <button type="button" @click.stop="openChart(asset)">K线</button>
-            <button class="warn" type="button" @click.stop="prefillAlertFromAsset(asset)">提醒</button>
-            <button class="danger" type="button" @click.stop="removeWatchAsset(asset.id)">删除</button>
+            <div class="watch-price" :class="asset.trend || (asset.changePct >= 0 ? 'up' : 'down')">{{ formatPrice(asset.price) }}</div>
+            <div :class="asset.changePct >= 0 ? 'up' : 'down'">{{ formatPercent(asset.changePct) }}</div>
+            <div class="metric-cell"><span class="metric-label">成交</span>{{ formatVolume(asset.volume24h) }}</div>
+            <div class="metric-cell market-cap-cell"><span class="metric-label">流通市值</span>{{ formatMarketCap(asset.marketCap) }}</div>
+            <div class="metric-cell time-cell"><span class="metric-label">更新</span>{{ asset.updateTime || '--' }}</div>
+            <div>
+              <span class="source-pill" :class="asset.sourceType">{{ asset.source }}</span>
+              <div class="muted" v-if="asset.status">{{ asset.status }}</div>
+            </div>
+            <div class="action-cell">
+              <button class="sort-btn" type="button" @click.stop="moveWatchAsset(index, -1)" :disabled="index === 0" title="上移">↑</button>
+              <button class="sort-btn" type="button" @click.stop="moveWatchAsset(index, 1)" :disabled="index === watchedAssets.length - 1" title="下移">↓</button>
+              <button class="delete-btn" type="button" @click.stop="removeWatchAsset(asset.id)" title="删除">×</button>
+            </div>
+            <div class="mobile-card-meta">
+              <span>24H成交量：{{ formatVolume(asset.volume24h) }}</span>
+              <span>来源：{{ asset.source || '暂无' }}</span>
+              <span>更新时间：{{ asset.updateTime || '--' }}</span>
+              <span>{{ asset.status || '等待行情' }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1374,49 +1493,46 @@
         <input class="stock-input" v-model.trim="stockInput" placeholder="添加股票，如 AAPL" autocomplete="off" />
         <button class="stock-add-btn" type="submit">添加</button>
       </form>
-      <div class="stock-hint">手机端长按上下拖动调整位置，左滑删除；电脑端可用右侧按钮。</div>
+      <div class="stock-hint">手机端长按进入操作/拖动模式，左滑删除；电脑端可用右侧按钮。</div>
       <div class="scroll stock-list">
-        <div
-          v-for="(stock, index) in stocks"
-          :key="stock.symbol"
-          class="stable-row stock-row"
-          :class="mobileGestureClass('stock', index)"
-          title="点击打开美股K线"
-          @click="handleStockClick(stock)"
-          @touchstart="startMobileGesture($event, 'stock', index)"
-          @touchmove="moveMobileGesture($event, 'stock')"
-          @touchend="endMobileGesture($event, 'stock', stock.symbol)"
-          @touchcancel="cancelMobileGesture"
-        >
-          <div class="stable-left">
-            <span class="stock-symbol">{{ stock.symbol }}</span>
-            <div class="stock-left-info">
-              <div class="stock-name">{{ stock.name }}</div>
-              <div class="muted stock-time">{{ stock.time || stockStatus }}</div>
-              <div class="stock-type">{{ stockTypeLabel(stock) }}</div>
+        <div v-for="(stock, index) in stocks" :key="stock.symbol" class="gesture-row-shell" :class="mobileGestureShellClass('stock', index)">
+          <div class="swipe-delete-reveal">左滑删除</div>
+          <div
+            class="stable-row stock-row"
+            :class="mobileGestureClass('stock', index, stock.symbol)"
+            :style="mobileGestureStyle('stock', index)"
+            title="点击打开美股K线"
+            @click="handleStockClick(stock)"
+            @touchstart="startMobileGesture($event, 'stock', index, stock.symbol)"
+            @touchmove="moveMobileGesture($event, 'stock')"
+            @touchend="endMobileGesture($event, 'stock', stock.symbol)"
+            @touchcancel="cancelMobileGesture"
+          >
+            <div class="stable-left">
+              <span class="stock-symbol">{{ stock.symbol }}</span>
+              <div class="stock-left-info">
+                <div class="stock-name">{{ stock.name }}</div>
+                <div class="muted stock-time">{{ stock.time || stockStatus }}</div>
+                <div class="stock-type">{{ stockTypeLabel(stock) }}</div>
+              </div>
             </div>
-          </div>
-          <div class="stock-meta">
-            <div class="stock-val" :class="stock.trend || (stock.changePct >= 0 ? 'up' : 'down')">
-              {{ stock.price === '--' ? '获取中 ...' : '$ ' + stock.price }}
+            <div class="stock-meta">
+              <div class="stock-val" :class="stock.trend || (stock.changePct >= 0 ? 'up' : 'down')">
+                {{ stock.price === '--' ? '获取中 ...' : '$ ' + stock.price }}
+              </div>
+              <div class="stock-change" :class="stock.changePct >= 0 ? 'up' : 'down'">
+                {{ stock.changePct >= 0 ? '+' : '' }}{{ stock.changePct.toFixed(2) }}%
+              </div>
             </div>
-            <div class="stock-change" :class="stock.changePct >= 0 ? 'up' : 'down'">
-              {{ stock.changePct >= 0 ? '+' : '' }}{{ stock.changePct.toFixed(2) }}%
+            <div class="stock-actions">
+              <button class="sort-btn" type="button" @click.stop="moveStock(index, -1)" :disabled="index === 0" title="上移">↑</button>
+              <button class="sort-btn" type="button" @click.stop="moveStock(index, 1)" :disabled="index === stocks.length - 1" title="下移">↓</button>
+              <button class="delete-btn" type="button" @click.stop="removeStock(stock.symbol)" title="删除">×</button>
             </div>
-          </div>
-          <div class="stock-actions">
-            <button class="sort-btn" type="button" @click.stop="moveStock(index, -1)" :disabled="index === 0" title="上移">↑</button>
-            <button class="sort-btn" type="button" @click.stop="moveStock(index, 1)" :disabled="index === stocks.length - 1" title="下移">↓</button>
-            <button class="delete-btn" type="button" @click.stop="removeStock(stock.symbol)" title="删除">×</button>
-          </div>
-          <div class="stock-mobile-meta">
-            <span>美东：{{ usMarketInfo.etTime }}</span>
-            <span>{{ usMarketInfo.desc }}</span>
-          </div>
-          <div class="mobile-row-actions">
-            <button type="button" @click.stop="openStockChart(stock)">K线</button>
-            <button class="warn" type="button" @click.stop="prefillAlertFromStock(stock)">提醒</button>
-            <button class="danger" type="button" @click.stop="removeStock(stock.symbol)">删除</button>
+            <div class="stock-mobile-meta">
+              <span>美东：{{ usMarketInfo.etTime }}</span>
+              <span>{{ usMarketInfo.desc }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1428,17 +1544,21 @@
     </div>
 
     <div class="card span-3 global-card">
-      <h2>🌍 环球金融</h2>
+      <h2 class="global-card-head">
+        <span>🌍 环球金融</span>
+        <button class="global-toggle" type="button" @click="globalExpanded = !globalExpanded">{{ globalExpanded ? '收起' : '展开全部' }}</button>
+      </h2>
       <div class="scroll news-container">
-        <div v-for="item in globalMarkets" :key="item.id" class="global-item" :class="{ placeholder: item.placeholder, stale: item.stale }">
+        <div v-for="item in visibleGlobalMarkets" :key="item.id" class="global-item" :class="{ placeholder: item.placeholder, stale: item.stale }">
           <div class="global-name">{{ item.icon }} {{ item.name }}</div>
           <div style="text-align:right">
             <div class="global-price" :class="globalTrendClass(item)" :style="globalErrorStyle(item)">{{ globalPriceText(item) }}</div>
             <div class="global-change" :class="globalTrendClass(item)" v-if="!isGlobalError(item)">{{ globalChangeText(item) }}</div>
+            <div class="global-meta" v-if="item.source || item.updatedAt">{{ item.source || item.status }}<span v-if="item.updatedAt"> · {{ item.updatedAt }}</span></div>
           </div>
         </div>
       </div>
-      <div class="list-scroll-hint">列表内可上下滚动查看更多</div>
+      <div class="list-scroll-hint">{{ globalExpanded ? '已展开全部，手机端可在框内上下滑动' : '显示主要项目，点击展开全部查看更多' }}</div>
     </div>
 
     <div class="card span-2 compact-card halving-card">
@@ -1605,6 +1725,21 @@
     </div>
   </div>
 
+  <div class="mobile-action-backdrop" v-if="mobileActionMenu" @click="closeMobileActionMenu"></div>
+  <div class="mobile-action-menu" v-if="mobileActionMenu">
+    <div class="mobile-action-head">
+      <strong>{{ mobileActionTitle }}</strong>
+      <button class="mobile-action-close" type="button" @click="closeMobileActionMenu">×</button>
+    </div>
+    <div class="mobile-action-hint">已进入长按操作模式；按住项目上下拖动可排序，删除仅通过左滑完成。</div>
+    <div class="mobile-action-grid">
+      <button type="button" @click="runMobileAction('chart')">K线</button>
+      <button type="button" @click="runMobileAction('alert')">提醒</button>
+      <button type="button" @click="runMobileAction('top')">置顶</button>
+      <button type="button" @click="runMobileAction('bottom')">置底</button>
+    </div>
+  </div>
+
   <div class="toast" v-if="toastText">{{ toastText }}</div>
 
 </div>
@@ -1648,6 +1783,7 @@ new Vue({
     stockInput: '',
     touchGesture: null,
     touchSuppressClick: false,
+    mobileActionMenu: null,
     chartOpen: false,
     chartAsset: null,
     chartInterval: '15',
@@ -1660,6 +1796,7 @@ new Vue({
     sourcePanelOpen: false,
     compactMode: false,
     minersExpanded: false,
+    globalExpanded: false,
     notificationStatus: '浏览器通知未开启，仍会在页面内提示',
     alertSoundEnabled: false,
     alertForm: {
@@ -1679,11 +1816,11 @@ new Vue({
       fearGreed: { name: '恐惧贪婪', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1h', staleMs: 2 * 60 * 60 * 1000, expireMs: 6 * 60 * 60 * 1000 },
       ahr999: { name: 'AHR999', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1m', staleMs: 5 * 60 * 1000, expireMs: 30 * 60 * 1000 },
       mempool: { name: '减半数据', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 20 * 60 * 1000, expireMs: 60 * 60 * 1000 },
-      dxy: { name: 'DXY 美元指数', status: '待接入', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '未启用', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, disabled: true, optional: true },
-      us10y: { name: 'US10Y 美债10年', status: '待接入', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '未启用', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, disabled: true, optional: true },
-      vix: { name: 'VIX 恐慌指数', status: '待接入', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '未启用', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, disabled: true, optional: true },
-      usdcny: { name: '美元/人民币', status: '待接入', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '未启用', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, disabled: true, optional: true },
-      usdjpy: { name: '美元/日元', status: '待接入', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '未启用', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, disabled: true, optional: true }
+      dxy: { name: 'DXY 美元指数', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
+      us10y: { name: 'US10Y 美债10年', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
+      vix: { name: 'VIX 恐慌指数', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
+      usdcny: { name: '美元/人民币', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
+      usdjpy: { name: '美元/日元', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true }
     },
     chartIntervals: [
       { label: '15分钟', value: '15' },
@@ -1814,11 +1951,11 @@ new Vue({
       { id: 'dji', name: '道琼斯', icon: '📊', price: '--', change: 0 },
       { id: 'ixic', name: '纳斯达克', icon: '🚀', price: '--', change: 0 },
       { id: 'sh', name: '上证指数', icon: '🇨🇳', price: '--', change: 0 },
-      { id: 'dxy', name: 'DXY 美元指数', icon: '💵', price: '待接入', change: null, placeholder: true, stale: false, status: '预留稳定源' },
-      { id: 'us10y', name: 'US10Y 美债10年', icon: '🏦', price: '待接入', change: null, placeholder: true, stale: false, status: '预留稳定源', suffix: '%' },
-      { id: 'vix', name: 'VIX 恐慌指数', icon: '⚠️', price: '待接入', change: null, placeholder: true, stale: false, status: '预留稳定源' },
-      { id: 'usdcny', name: '美元 / 人民币', icon: '🇨🇳', price: '待接入', change: null, placeholder: true, stale: false, status: '预留稳定源' },
-      { id: 'usdjpy', name: '美元 / 日元', icon: '🇯🇵', price: '待接入', change: null, placeholder: true, stale: false, status: '预留稳定源' }
+      { id: 'dxy', name: 'DXY 美元指数', icon: '💵', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
+      { id: 'us10y', name: 'US10Y 美债10年', icon: '🏦', price: '--', change: null, placeholder: true, stale: false, status: '等待数据', suffix: '%' },
+      { id: 'vix', name: 'VIX 恐慌指数', icon: '⚠️', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
+      { id: 'usdcny', name: '美元 / 人民币', icon: '🇨🇳', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
+      { id: 'usdjpy', name: '美元 / 日元', icon: '🇯🇵', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' }
     ],
     halvingTargetHeight: 1050000,
     halvingCurrentHeight: null,
@@ -2058,6 +2195,22 @@ new Vue({
       const interval = this.chartInterval === 'ALL' ? 'D' : this.chartInterval;
       const range = this.chartInterval === 'ALL' ? '&range=ALL' : '';
       return `https://s.tradingview.com/widgetembed/?symbol=${exchange}%3A${symbol}&interval=${interval}${range}&theme=dark&style=1&timezone=Asia%2FShanghai&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&hideideas=1${nonce}`;
+    },
+    visibleGlobalMarkets() {
+      return this.globalExpanded ? this.globalMarkets : this.globalMarkets.slice(0, 6);
+    },
+    mobileActionItem() {
+      if (!this.mobileActionMenu) return null;
+      return this.mobileActionMenu.type === 'crypto'
+        ? this.watchedAssets.find(item => item.id === this.mobileActionMenu.key)
+        : this.stocks.find(item => item.symbol === this.mobileActionMenu.key);
+    },
+    mobileActionTitle() {
+      const item = this.mobileActionItem;
+      if (!item) return '自选操作';
+      return this.mobileActionMenu.type === 'crypto'
+        ? `${item.symbol || item.pair} 操作`
+        : `${item.symbol} · ${item.name}`;
     },
     profitableMinerCount() {
       return this.miners.filter(miner => this.minerIsProfitable(miner)).length;
@@ -2516,29 +2669,46 @@ new Vue({
       return window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
     },
 
-    startMobileGesture(event, type, index) {
+    vibrateMobile(duration = 10) {
+      try {
+        if (navigator.vibrate) navigator.vibrate(duration);
+      } catch (e) {}
+    },
+
+    startMobileGesture(event, type, index, key) {
       if (!this.isMobileGestureEnabled() || !event.touches || event.touches.length !== 1) return;
       const touch = event.touches[0];
       this.clearTouchTimer();
+      this.closeMobileActionMenu();
       this.touchSuppressClick = false;
       this.touchGesture = {
         type,
         index,
+        key,
         startX: touch.clientX,
         startY: touch.clientY,
-        lastY: touch.clientY,
+        dragAnchorY: touch.clientY,
         dx: 0,
         dy: 0,
+        dragOffset: 0,
+        swipeOffset: 0,
+        itemHeight: Math.max(56, event.currentTarget.getBoundingClientRect().height || 72),
+        axis: '',
         dragging: false,
         swiping: false,
         deleteReady: false,
+        thresholdVibrated: false,
+        settling: false,
         timer: null
       };
       this.touchGesture.timer = setTimeout(() => {
-        if (!this.touchGesture || this.touchGesture.type !== type) return;
+        if (!this.touchGesture || this.touchGesture.type !== type || this.touchGesture.key !== key || this.touchGesture.axis) return;
         this.touchGesture.dragging = true;
+        this.touchGesture.axis = 'drag';
         this.touchSuppressClick = true;
-      }, 360);
+        this.mobileActionMenu = { type, key };
+        this.vibrateMobile(12);
+      }, 380);
     },
 
     moveMobileGesture(event, type) {
@@ -2550,22 +2720,54 @@ new Vue({
 
       const absX = Math.abs(gesture.dx);
       const absY = Math.abs(gesture.dy);
-      if (!gesture.dragging && absX > 18 && absX > absY * 1.15) {
-        this.clearTouchTimer();
-        gesture.swiping = true;
-        gesture.deleteReady = gesture.dx < -72;
+
+      if (gesture.swiping) {
+        event.preventDefault();
+        const rawOffset = Math.min(0, gesture.dx);
+        gesture.swipeOffset = rawOffset < -92 ? -92 + (rawOffset + 92) * .22 : rawOffset;
+        gesture.swipeOffset = Math.max(-118, gesture.swipeOffset);
+        const ready = gesture.swipeOffset <= -68 && absX > absY * 1.35;
+        if (ready && !gesture.thresholdVibrated) {
+          gesture.thresholdVibrated = true;
+          this.vibrateMobile(10);
+        } else if (!ready && gesture.swipeOffset > -54) {
+          gesture.thresholdVibrated = false;
+        }
+        gesture.deleteReady = ready;
         this.touchSuppressClick = true;
         return;
       }
 
-      if (!gesture.dragging) return;
-      event.preventDefault();
-      const deltaY = touch.clientY - gesture.lastY;
-      if (Math.abs(deltaY) < 46) return;
-      const direction = deltaY > 0 ? 1 : -1;
-      if (this.reorderMobileItem(type, gesture.index, direction)) {
-        gesture.index += direction;
-        gesture.lastY = touch.clientY;
+      if (gesture.dragging) {
+        event.preventDefault();
+        gesture.dragOffset = touch.clientY - gesture.dragAnchorY;
+        const threshold = Math.max(34, gesture.itemHeight * .46);
+        if (Math.abs(gesture.dragOffset) >= threshold) {
+          const direction = gesture.dragOffset > 0 ? 1 : -1;
+          if (this.reorderMobileItem(type, gesture.index, direction)) {
+            gesture.index += direction;
+            gesture.dragAnchorY += direction * gesture.itemHeight;
+            gesture.dragOffset = touch.clientY - gesture.dragAnchorY;
+          } else {
+            gesture.dragOffset *= .28;
+          }
+        }
+        return;
+      }
+
+      if (!gesture.axis && absX > 10 && gesture.dx < 0 && absX > absY * 1.35) {
+        this.clearTouchTimer();
+        gesture.axis = 'swipe';
+        gesture.swiping = true;
+        this.touchSuppressClick = true;
+        event.preventDefault();
+        gesture.swipeOffset = Math.max(-118, gesture.dx);
+        return;
+      }
+
+      if (!gesture.axis && absY > 9) {
+        this.clearTouchTimer();
+        gesture.axis = 'scroll';
       }
     },
 
@@ -2577,18 +2779,36 @@ new Vue({
         return;
       }
 
-      const shouldDelete = gesture.swiping
-        && gesture.dx < -72
-        && Math.abs(gesture.dx) > Math.abs(gesture.dy);
+      const shouldDelete = gesture.swiping && gesture.deleteReady
+        && gesture.swipeOffset <= -68
+        && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.25;
 
       if (shouldDelete) {
-        if (type === 'crypto') this.removeWatchAsset(key);
-        if (type === 'stock') this.removeStock(key);
+        gesture.settling = true;
+        gesture.swipeOffset = -Math.max(160, window.innerWidth);
+        this.touchSuppressClick = true;
+        setTimeout(() => {
+          if (type === 'crypto') this.removeWatchAsset(key);
+          if (type === 'stock') this.removeStock(key);
+          if (this.touchGesture === gesture) this.touchGesture = null;
+        }, 190);
+        return;
       }
 
-      if (gesture.dragging || gesture.swiping || Math.abs(gesture.dx) > 8 || Math.abs(gesture.dy) > 8) {
+      if (gesture.swiping) {
+        gesture.settling = true;
+        gesture.swipeOffset = 0;
         this.touchSuppressClick = true;
-        setTimeout(() => { this.touchSuppressClick = false; }, 120);
+        setTimeout(() => {
+          if (this.touchGesture === gesture) this.touchGesture = null;
+          this.touchSuppressClick = false;
+        }, 210);
+        return;
+      }
+
+      if (gesture.dragging || Math.abs(gesture.dx) > 8 || Math.abs(gesture.dy) > 8) {
+        this.touchSuppressClick = true;
+        setTimeout(() => { this.touchSuppressClick = false; }, 260);
       }
       this.touchGesture = null;
     },
@@ -2616,13 +2836,80 @@ new Vue({
       return true;
     },
 
-    mobileGestureClass(type, index) {
+    mobileGestureClass(type, index, key) {
+      const gesture = this.touchGesture;
+      const activeGesture = gesture && gesture.type === type && gesture.index === index;
+      return {
+        'mobile-gesture-dragging': !!(activeGesture && gesture.dragging),
+        'mobile-swipe-delete': !!(activeGesture && gesture.swiping && gesture.deleteReady),
+        'mobile-action-active': !!(this.mobileActionMenu && this.mobileActionMenu.type === type && this.mobileActionMenu.key === key)
+      };
+    },
+
+    mobileGestureShellClass(type, index) {
+      const gesture = this.touchGesture;
+      return {
+        'gesture-shell-dragging': !!(gesture && gesture.type === type && gesture.index === index && gesture.dragging)
+      };
+    },
+
+    mobileGestureStyle(type, index) {
       const gesture = this.touchGesture;
       if (!gesture || gesture.type !== type || gesture.index !== index) return {};
-      return {
-        'mobile-gesture-dragging': gesture.dragging,
-        'mobile-swipe-delete': gesture.swiping && gesture.deleteReady
-      };
+      if (gesture.dragging) {
+        return {
+          transform: `translate3d(0, ${gesture.dragOffset || 0}px, 0) scale(.992)`,
+          transition: gesture.settling ? undefined : 'none'
+        };
+      }
+      if (gesture.swiping) {
+        return {
+          transform: `translate3d(${gesture.swipeOffset || 0}px, 0, 0)`,
+          transition: gesture.settling ? undefined : 'none'
+        };
+      }
+      return {};
+    },
+
+    closeMobileActionMenu() {
+      this.mobileActionMenu = null;
+    },
+
+    moveMobileItemTo(type, key, targetIndex) {
+      const list = type === 'crypto' ? this.watchedAssets : this.stocks;
+      const index = list.findIndex(item => (type === 'crypto' ? item.id : item.symbol) === key);
+      if (index < 0 || index === targetIndex) return;
+      const reordered = list.slice();
+      const [item] = reordered.splice(index, 1);
+      reordered.splice(targetIndex, 0, item);
+      if (type === 'crypto') {
+        this.watchedAssets = reordered;
+        this.saveWatchedAssets();
+      } else {
+        this.stocks = reordered;
+        this.saveStocks();
+      }
+      this.showToast(targetIndex === 0 ? '已置顶' : '已置底');
+    },
+
+    runMobileAction(action) {
+      const item = this.mobileActionItem;
+      const menu = this.mobileActionMenu;
+      if (!item || !menu) {
+        this.closeMobileActionMenu();
+        return;
+      }
+      if (action === 'chart') {
+        menu.type === 'crypto' ? this.openChart(item) : this.openStockChart(item);
+      } else if (action === 'alert') {
+        menu.type === 'crypto' ? this.prefillAlertFromAsset(item) : this.prefillAlertFromStock(item);
+      } else if (action === 'top') {
+        this.moveMobileItemTo(menu.type, menu.key, 0);
+      } else if (action === 'bottom') {
+        const length = menu.type === 'crypto' ? this.watchedAssets.length : this.stocks.length;
+        this.moveMobileItemTo(menu.type, menu.key, Math.max(0, length - 1));
+      }
+      this.closeMobileActionMenu();
     },
 
     baseFromPair(symbol) {
@@ -3436,6 +3723,8 @@ new Vue({
             const prevPrice = goldItem.price === '--' ? currentPrice : parseFloat(goldItem.price);
             goldItem.price = currentPrice.toFixed(2);
             goldItem.change = (((currentPrice - prevPrice) / prevPrice) * 100).toFixed(2);
+            goldItem.source = 'Binance PAXG';
+            goldItem.updatedAt = this.formatClock(Date.now());
           }
         }
       } catch (e) {
@@ -3538,34 +3827,38 @@ new Vue({
         this.$set(item, 'placeholder', false);
         this.$set(item, 'stale', false);
         this.$set(item, 'status', '已刷新');
+        this.$set(item, 'source', '腾讯行情');
+        this.$set(item, 'updatedAt', this.formatClock(Date.now()));
       }
     },
 
     optionalGlobalConfigs() {
       return [
-        { id: 'dxy', sourceKey: 'dxy', enabled: false, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'stooq', symbol: 'dx.f', label: 'Stooq DXY' }] },
-        { id: 'vix', sourceKey: 'vix', enabled: false, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'stooq', symbol: 'vix.us', label: 'Stooq VIX' }, { type: 'fred', series: 'VIXCLS', label: 'FRED VIXCLS' }] },
-        { id: 'us10y', sourceKey: 'us10y', enabled: false, refreshMs: 10 * 60 * 1000, decimals: 3, suffix: '%', sources: [{ type: 'stooq', symbol: '10usy.b', label: 'Stooq US10Y' }, { type: 'fred', series: 'DGS10', label: 'FRED DGS10' }] },
-        { id: 'usdcny', sourceKey: 'usdcny', enabled: false, refreshMs: 10 * 60 * 1000, decimals: 4, sources: [{ type: 'frankfurter', currency: 'CNY', label: 'Frankfurter USD/CNY' }] },
-        { id: 'usdjpy', sourceKey: 'usdjpy', enabled: false, refreshMs: 10 * 60 * 1000, decimals: 3, sources: [{ type: 'frankfurter', currency: 'JPY', label: 'Frankfurter USD/JPY' }] }
+        { id: 'dxy', sourceKey: 'dxy', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'frankfurterDxy', label: 'Frankfurter 汇率篮子' }] },
+        { id: 'us10y', sourceKey: 'us10y', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 3, suffix: '%', sources: [{ type: 'treasury', label: '美国财政部' }] },
+        { id: 'usdcny', sourceKey: 'usdcny', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 4, sources: [{ type: 'frankfurter', currency: 'CNY', label: 'Frankfurter USD/CNY' }] },
+        { id: 'usdjpy', sourceKey: 'usdjpy', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 3, sources: [{ type: 'frankfurter', currency: 'JPY', label: 'Frankfurter USD/JPY' }] },
+        { id: 'vix', sourceKey: 'vix', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'cboe', label: 'Cboe 延迟行情' }, { type: 'tencentVix', label: '腾讯 VIX 兜底' }] }
       ];
     },
 
     setOptionalGlobalPlaceholder(config) {
       const item = this.globalMarkets.find(m => m.id === config.id);
       if (item && item.placeholder !== false) {
-        this.$set(item, 'price', '待接入');
+        this.$set(item, 'price', '--');
         this.$set(item, 'change', null);
         this.$set(item, 'placeholder', true);
         this.$set(item, 'stale', false);
-        this.$set(item, 'status', '预留稳定源');
+        this.$set(item, 'status', '数据源暂不可用');
+        this.$set(item, 'source', '');
+        this.$set(item, 'updatedAt', '');
         if (config.suffix) this.$set(item, 'suffix', config.suffix);
       }
       const source = this.dataSources[config.sourceKey];
-      if (source && !source.enabled) {
-        source.disabled = true;
-        source.status = '待接入';
-        source.interval = '未启用';
+      if (source && !source.lastUpdate) {
+        source.disabled = false;
+        source.enabled = true;
+        source.status = '等待数据';
       }
     },
 
@@ -3582,11 +3875,12 @@ new Vue({
       this.$set(item, 'placeholder', false);
       this.$set(item, 'stale', false);
       this.$set(item, 'status', quote.label || '已刷新');
+      this.$set(item, 'source', quote.label || '已刷新');
+      this.$set(item, 'updatedAt', quote.updatedAt || this.formatClock(Date.now()));
       this.$set(item, 'suffix', config.suffix || '');
 
       source.disabled = false;
       source.enabled = true;
-      source.interval = source.interval === '未启用' ? '正式启用' : source.interval;
       this.markSource(config.sourceKey, '已刷新');
     },
 
@@ -3607,6 +3901,11 @@ new Vue({
       }
 
       this.setOptionalGlobalPlaceholder(config);
+      source.status = '异常';
+      source.lastAttempt = Date.now();
+      source.lastErrorAt = Date.now();
+      source.lastErrorMessage = error && error.message ? error.message : String(error || '请求失败');
+      source.errorCount = (source.errorCount || 0) + 1;
     },
 
     async fetchWithSoftTimeout(url, timeoutMs = 7000) {
@@ -3686,30 +3985,154 @@ new Vue({
     },
 
     async fetchFrankfurterQuote(source) {
-      const currentUrl = `https://api.frankfurter.app/latest?from=USD&to=${encodeURIComponent(source.currency)}`;
-      const currentRes = await this.fetchWithSoftTimeout(currentUrl);
-      if (!currentRes.ok) throw new Error(`Frankfurter ${currentRes.status}`);
-      const current = await currentRes.json();
+      const current = await this.fetchFrankfurterSnapshot();
       const price = Number(current && current.rates && current.rates[source.currency]);
       if (!Number.isFinite(price)) throw new Error('Frankfurter no price');
 
       let changePct = null;
       try {
         const prevDate = this.previousBusinessDate(current.date);
-        const prevUrl = `https://api.frankfurter.app/${prevDate}?from=USD&to=${encodeURIComponent(source.currency)}`;
-        const prevRes = await this.fetchWithSoftTimeout(prevUrl);
-        const prev = prevRes.ok ? await prevRes.json() : null;
+        const prev = await this.fetchFrankfurterSnapshot(prevDate);
         const prevPrice = Number(prev && prev.rates && prev.rates[source.currency]);
         if (Number.isFinite(prevPrice) && prevPrice > 0) changePct = ((price - prevPrice) / prevPrice) * 100;
       } catch (e) {}
 
-      return { price, changePct, label: source.label };
+      return { price, changePct, label: source.label, updatedAt: current.date };
+    },
+
+    fetchFrankfurterSnapshot(dateText) {
+      if (!this._frankfurterSnapshotCache) this._frankfurterSnapshotCache = {};
+      const cacheKey = dateText || 'latest';
+      if (this._frankfurterSnapshotCache[cacheKey]) return this._frankfurterSnapshotCache[cacheKey];
+      const currencies = 'EUR,JPY,GBP,CAD,SEK,CHF,CNY';
+      const url = `https://api.frankfurter.dev/v1/${dateText || 'latest'}?from=USD&to=${currencies}`;
+      const request = this.fetchWithSoftTimeout(url)
+        .then(res => {
+          if (!res.ok) throw new Error(`Frankfurter ${res.status}`);
+          return res.json();
+        })
+        .catch(error => {
+          delete this._frankfurterSnapshotCache[cacheKey];
+          throw error;
+        });
+      this._frankfurterSnapshotCache[cacheKey] = request;
+      return request;
+    },
+
+    calculateDxy(rates) {
+      const eurusd = 1 / Number(rates.EUR);
+      const usdjpy = Number(rates.JPY);
+      const gbpusd = 1 / Number(rates.GBP);
+      const usdcad = Number(rates.CAD);
+      const usdsek = Number(rates.SEK);
+      const usdchf = Number(rates.CHF);
+      const values = [eurusd, usdjpy, gbpusd, usdcad, usdsek, usdchf];
+      if (!values.every(value => Number.isFinite(value) && value > 0)) throw new Error('DXY basket incomplete');
+      return 50.14348112
+        * Math.pow(eurusd, -0.576)
+        * Math.pow(usdjpy, 0.136)
+        * Math.pow(gbpusd, -0.119)
+        * Math.pow(usdcad, 0.091)
+        * Math.pow(usdsek, 0.042)
+        * Math.pow(usdchf, 0.036);
+    },
+
+    async fetchFrankfurterDxyQuote(source) {
+      const current = await this.fetchFrankfurterSnapshot();
+      const previous = await this.fetchFrankfurterSnapshot(this.previousBusinessDate(current.date));
+      const price = this.calculateDxy(current.rates || {});
+      const prevPrice = this.calculateDxy(previous.rates || {});
+      return {
+        price,
+        changePct: prevPrice > 0 ? ((price - prevPrice) / prevPrice) * 100 : null,
+        label: source.label,
+        updatedAt: current.date
+      };
+    },
+
+    async fetchTreasuryQuote(source) {
+      const year = new Date().getFullYear();
+      const url = `https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=${year}`;
+      const res = await this.fetchWithSoftTimeout(url, 12000);
+      if (!res.ok) throw new Error(`Treasury ${res.status}`);
+      const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+      const entries = Array.from(xml.getElementsByTagName('entry')).map(entry => {
+        const yieldNode = entry.getElementsByTagNameNS('*', 'BC_10YEAR')[0];
+        const dateNode = entry.getElementsByTagNameNS('*', 'NEW_DATE')[0];
+        return {
+          price: Number(yieldNode && yieldNode.textContent),
+          date: dateNode ? dateNode.textContent.slice(0, 10) : ''
+        };
+      }).filter(row => Number.isFinite(row.price) && row.date).sort((a, b) => a.date.localeCompare(b.date));
+      if (!entries.length) throw new Error('Treasury no 10Y data');
+      const latest = entries[entries.length - 1];
+      const previous = entries.length > 1 ? entries[entries.length - 2] : null;
+      return {
+        price: latest.price,
+        changePct: previous && previous.price > 0 ? ((latest.price - previous.price) / previous.price) * 100 : null,
+        label: source.label,
+        updatedAt: latest.date
+      };
+    },
+
+    async fetchCboeVixQuote(source) {
+      const url = `https://cdn.cboe.com/api/global/delayed_quotes/quotes/_VIX.json?_=${Date.now()}`;
+      const res = await this.fetchWithSoftTimeout(url, 6000);
+      if (!res.ok) throw new Error(`Cboe ${res.status}`);
+      const payload = await res.json();
+      const data = payload && payload.data;
+      const price = Number(data && (data.current_price || data.close));
+      const changePct = Number(data && data.price_change_percent);
+      if (!Number.isFinite(price)) throw new Error('Cboe VIX no price');
+      return {
+        price,
+        changePct: Number.isFinite(changePct) ? changePct : null,
+        label: source.label,
+        updatedAt: data.last_trade_time || payload.timestamp || ''
+      };
+    },
+
+    fetchTencentVixQuote(source) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        const cleanup = () => {
+          if (script.parentNode) document.head.removeChild(script);
+        };
+        script.src = `https://qt.gtimg.cn/q=usVIX&_=${Date.now()}`;
+        script.onload = () => {
+          try {
+            const raw = window.v_usVIX;
+            const arr = raw ? raw.split('~') : [];
+            const price = Number(arr[3]);
+            const changePct = Number(arr[32]);
+            const updatedAt = arr[30] || '';
+            const age = updatedAt ? Date.now() - new Date(updatedAt.replace(/-/g, '/')).getTime() : Infinity;
+            if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(age) || age > 3 * 24 * 60 * 60 * 1000) {
+              throw new Error('Tencent VIX stale');
+            }
+            resolve({ price, changePct, label: source.label, updatedAt });
+          } catch (error) {
+            reject(error);
+          } finally {
+            cleanup();
+          }
+        };
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('Tencent VIX failed'));
+        };
+        document.head.appendChild(script);
+      });
     },
 
     async fetchOptionalGlobalSource(source) {
       if (source.type === 'stooq') return this.fetchStooqQuote(source);
       if (source.type === 'fred') return this.fetchFredQuote(source);
       if (source.type === 'frankfurter') return this.fetchFrankfurterQuote(source);
+      if (source.type === 'frankfurterDxy') return this.fetchFrankfurterDxyQuote(source);
+      if (source.type === 'treasury') return this.fetchTreasuryQuote(source);
+      if (source.type === 'cboe') return this.fetchCboeVixQuote(source);
+      if (source.type === 'tencentVix') return this.fetchTencentVixQuote(source);
       throw new Error('unknown optional source');
     },
 
@@ -3742,9 +4165,7 @@ new Vue({
       if (this.optionalGlobalPending) return;
       this.optionalGlobalPending = true;
       try {
-        for (const config of this.optionalGlobalConfigs()) {
-          await this.fetchOptionalGlobalIndicator(config);
-        }
+        await Promise.allSettled(this.optionalGlobalConfigs().map(config => this.fetchOptionalGlobalIndicator(config)));
       } finally {
         this.optionalGlobalPending = false;
       }
