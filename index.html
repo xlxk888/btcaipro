@@ -387,7 +387,7 @@
     }
     .global-toggle:hover { color:#93c5fd; border-color:rgba(147,197,253,.42); }
 
-    .mobile-action-backdrop, .mobile-action-menu { display: none; }
+    .mobile-action-menu { display: none; }
 
     .gauge-card, .ahr-card, .global-card { min-height: 286px; }
     .gauge-card { display: flex; flex-direction: column; }
@@ -457,23 +457,25 @@
     .chart-overlay {
       position: fixed;
       inset: 0;
-      z-index: 20;
+      z-index: 50;
       display: flex;
-      align-items: center;
+      align-items: stretch;
       justify-content: center;
-      padding: 18px;
-      background: rgba(2, 6, 23, .78);
-      backdrop-filter: blur(6px);
+      padding: 0;
+      background: #050914;
     }
     .chart-panel {
-      width: min(1040px, 100%);
-      max-height: min(760px, calc(100vh - 36px));
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-width: none;
+      max-height: none;
       display: flex;
       flex-direction: column;
       background: #0a111f;
-      border: 1px solid rgba(72,99,150,.62);
-      border-radius: 10px;
-      box-shadow: 0 22px 60px rgba(0,0,0,.45);
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
       overflow: hidden;
     }
     .chart-head {
@@ -539,10 +541,32 @@
       background: linear-gradient(135deg, #f59e0b, #22c55e);
     }
     .chart-frame {
+      display: block;
       width: 100%;
-      height: 560px;
+      height: 100%;
+      min-height: 0;
       border: 0;
       background: #050914;
+    }
+    .chart-frame-shell {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      background: #050914;
+    }
+    .chart-frame-shell.dex-frame-shell .chart-frame {
+      height: calc(100% + 112px);
+      transform: translateY(-78px);
+    }
+    .chart-frame-shell.dex-frame-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      z-index: 2;
+      height: 30px;
+      background: #111827;
+      pointer-events: none;
     }
 
     .crypto-card { min-height: 372px; }
@@ -964,7 +988,7 @@
       }
       .log-container { min-height: 120px; }
       .global-card { width: 100%; max-width: 100%; min-width: 0; }
-      .global-card .news-container {
+      .global-card.expanded .news-container {
         min-height: auto;
         max-height: min(52vh, 430px);
         overflow-y: auto;
@@ -974,6 +998,14 @@
         touch-action: pan-y;
         padding-right: 5px;
         box-shadow: inset 0 -18px 18px -22px rgba(148,163,184,.45);
+      }
+      .global-card:not(.expanded) .news-container {
+        max-height: none;
+        overflow-y: hidden;
+        overscroll-behavior: auto;
+        touch-action: pan-y;
+        padding-right: 10px;
+        box-shadow: none;
       }
       .fear-body { grid-template-columns: minmax(70px, .7fr) minmax(0, 1.3fr); min-height: auto; }
       .fear-meter { order: 2; }
@@ -1039,6 +1071,10 @@
         overflow: visible;
         z-index: 4;
       }
+      .gesture-row-shell.action-menu-open {
+        overflow: visible;
+        z-index: 18;
+      }
       .watch-table .gesture-row-shell { margin-bottom: 6px; }
       .watch-table .gesture-row-shell .watch-row { margin-bottom: 0; }
       .swipe-delete-reveal {
@@ -1070,57 +1106,49 @@
       .mobile-action-active {
         border-color: rgba(56,189,248,.56) !important;
       }
-      .mobile-action-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 31;
-        display: block;
-        background: rgba(2,6,23,.42);
-        backdrop-filter: blur(2px);
-      }
       .mobile-action-menu {
-        position: fixed;
-        left: 10px;
-        right: 10px;
-        bottom: calc(12px + env(safe-area-inset-bottom));
-        z-index: 32;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 19;
         display: block;
-        padding: 12px;
+        width: min(320px, calc(100% - 16px));
+        padding: 9px;
         border: 1px solid rgba(72,99,150,.65);
-        border-radius: 14px;
-        background: rgba(10,17,31,.98);
-        box-shadow: 0 22px 60px rgba(0,0,0,.5);
+        border-radius: 10px;
+        background: #111a2a;
+        box-shadow: 0 14px 34px rgba(0,0,0,.46);
       }
       .mobile-action-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 10px;
-        margin-bottom: 9px;
+        margin-bottom: 6px;
       }
-      .mobile-action-head strong { color:#e2e8f0; font-size:.86rem; }
+      .mobile-action-head strong { color:#e2e8f0; font-size:.78rem; }
       .mobile-action-close {
-        width: 30px;
-        height: 30px;
+        width: 25px;
+        height: 25px;
         border: 1px solid rgba(148,163,184,.3);
         border-radius: 999px;
         background: #111a2a;
         color:#cbd5e1;
-        font-size:1rem;
+        font-size:.86rem;
       }
-      .mobile-action-hint { margin-bottom: 9px; color:#8fa0ba; font-size:.68rem; line-height:1.4; }
+      .mobile-action-hint { margin-top: 6px; color:#8fa0ba; font-size:.6rem; line-height:1.3; }
       .mobile-action-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 8px;
+        gap: 5px;
       }
       .mobile-action-grid button {
-        min-height: 42px;
+        min-height: 34px;
         border: 1px solid rgba(148,163,184,.32);
         border-radius: 9px;
         background: #111a2a;
         color:#dbeafe;
-        font-size:.72rem;
+        font-size:.66rem;
         font-weight:900;
       }
       .watch-hint, .stock-hint { font-size: .68rem; }
@@ -1149,11 +1177,15 @@
       .gauge-card.compact-card .fear-text { font-size: 1.42rem; }
       .gauge-card.compact-card .fear-note { font-size: .74rem; }
       .watch-footer { flex-direction: column; gap: 4px; }
-      .chart-overlay { padding: 8px; align-items: stretch; }
-      .chart-overlay { align-items: flex-end; padding: 0; }
-      .chart-panel { width: 100%; max-height: 84vh; border-radius: 14px 14px 0 0; }
-      .chart-head { padding: 10px; }
-      .chart-frame { height: 58vh; min-height: 360px; }
+      .chart-overlay { align-items: stretch; padding: 0; }
+      .chart-panel { width: 100vw; height: 100vh; height: 100dvh; max-height: none; border-radius: 0; }
+      .chart-head {
+        padding: max(8px, env(safe-area-inset-top)) 10px 8px;
+        flex-shrink: 0;
+      }
+      .chart-notice, .interval-tabs { flex-shrink: 0; }
+      .chart-frame-shell { flex: 1; min-height: 0; }
+      .chart-frame { width: 100%; height: 100%; min-height: 0; }
       .chart-link { display: none; }
       .chart-refresh, .chart-close { min-width: 40px; height: 38px; font-size: .9rem; }
       .miner-list { max-height: 360px; padding: 0 8px; }
@@ -1221,9 +1253,8 @@
       .stock-symbol { min-width: 42px; font-size: .72rem; }
       .stock-row { grid-template-columns: 48px minmax(0, 1fr) minmax(86px, auto); }
       .stock-mobile-meta, .watch-row .mobile-card-meta { grid-template-columns: 1fr; }
-      .mobile-action-menu { left: 8px; right: 8px; }
-      .mobile-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .chart-frame { min-height: 330px; height: 56vh; }
+      .mobile-action-menu { right: 6px; width: min(320px, calc(100% - 12px)); }
+      .mobile-action-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .miner-list { max-height: 350px; }
       .miner-row { min-height: 90px; }
       .miner-spec strong { font-size: .68rem; }
@@ -1413,7 +1444,7 @@
         <div v-if="watchedAssets.length === 0" class="empty-watch">
           还没有自选币种，输入 BTC 或 BTCUSDT 后点击添加。
         </div>
-        <div v-for="(asset, index) in watchedAssets" :key="asset.id" class="gesture-row-shell" :class="mobileGestureShellClass('crypto', index)">
+        <div v-for="(asset, index) in watchedAssets" :key="asset.id" class="gesture-row-shell" :class="mobileGestureShellClass('crypto', index, asset.id)">
           <div class="swipe-delete-reveal">左滑删除</div>
           <div
             class="watch-row"
@@ -1461,6 +1492,26 @@
               <span>{{ asset.status || '等待行情' }}</span>
             </div>
           </div>
+          <div
+            class="mobile-action-menu"
+            v-if="isMobileActionMenu('crypto', asset.id)"
+            @click.stop
+            @touchstart.stop
+            @touchmove.stop
+            @touchend.stop
+          >
+            <div class="mobile-action-head">
+              <strong>{{ mobileActionTitle }}</strong>
+              <button class="mobile-action-close" type="button" @click.stop="closeMobileActionMenu">×</button>
+            </div>
+            <div class="mobile-action-grid">
+              <button type="button" @click.stop="runMobileAction('chart')">K线</button>
+              <button type="button" @click.stop="runMobileAction('alert')">提醒</button>
+              <button type="button" @click.stop="runMobileAction('top')">置顶</button>
+              <button type="button" @click.stop="runMobileAction('bottom')">置底</button>
+            </div>
+            <div class="mobile-action-hint">上下拖动排序；删除仅通过左滑完成。</div>
+          </div>
         </div>
       </div>
       <div class="watch-footer">
@@ -1495,7 +1546,7 @@
       </form>
       <div class="stock-hint">手机端长按进入操作/拖动模式，左滑删除；电脑端可用右侧按钮。</div>
       <div class="scroll stock-list">
-        <div v-for="(stock, index) in stocks" :key="stock.symbol" class="gesture-row-shell" :class="mobileGestureShellClass('stock', index)">
+        <div v-for="(stock, index) in stocks" :key="stock.symbol" class="gesture-row-shell" :class="mobileGestureShellClass('stock', index, stock.symbol)">
           <div class="swipe-delete-reveal">左滑删除</div>
           <div
             class="stable-row stock-row"
@@ -1534,6 +1585,26 @@
               <span>{{ usMarketInfo.desc }}</span>
             </div>
           </div>
+          <div
+            class="mobile-action-menu"
+            v-if="isMobileActionMenu('stock', stock.symbol)"
+            @click.stop
+            @touchstart.stop
+            @touchmove.stop
+            @touchend.stop
+          >
+            <div class="mobile-action-head">
+              <strong>{{ mobileActionTitle }}</strong>
+              <button class="mobile-action-close" type="button" @click.stop="closeMobileActionMenu">×</button>
+            </div>
+            <div class="mobile-action-grid">
+              <button type="button" @click.stop="runMobileAction('chart')">K线</button>
+              <button type="button" @click.stop="runMobileAction('alert')">提醒</button>
+              <button type="button" @click.stop="runMobileAction('top')">置顶</button>
+              <button type="button" @click.stop="runMobileAction('bottom')">置底</button>
+            </div>
+            <div class="mobile-action-hint">上下拖动排序；删除仅通过左滑完成。</div>
+          </div>
         </div>
       </div>
       <div class="muted stocks-footer">
@@ -1543,7 +1614,7 @@
       <div class="list-scroll-hint">列表内可上下滚动查看更多</div>
     </div>
 
-    <div class="card span-3 global-card">
+    <div class="card span-3 global-card" :class="{ expanded: globalExpanded }">
       <h2 class="global-card-head">
         <span>🌍 环球金融</span>
         <button class="global-toggle" type="button" @click="globalExpanded = !globalExpanded">{{ globalExpanded ? '收起' : '展开全部' }}</button>
@@ -1697,12 +1768,14 @@
           {{ item.label }}
         </button>
       </div>
-      <iframe
-        class="chart-frame"
-        :src="chartUrl"
-        title="K线图"
-        allowfullscreen
-      ></iframe>
+      <div class="chart-frame-shell" :class="{ 'dex-frame-shell': chartAsset && chartAsset.type === 'dex' }">
+        <iframe
+          class="chart-frame"
+          :src="chartUrl"
+          title="K线图"
+          allowfullscreen
+        ></iframe>
+      </div>
     </div>
   </div>
 
@@ -1722,21 +1795,6 @@
         <a class="bottom-notice-link" href="https://www.bsmkweb.cc/register?ref=23017017" target="_blank">安卓</a>
         <a class="bottom-notice-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">苹果</a>
       </div>
-    </div>
-  </div>
-
-  <div class="mobile-action-backdrop" v-if="mobileActionMenu" @click="closeMobileActionMenu"></div>
-  <div class="mobile-action-menu" v-if="mobileActionMenu">
-    <div class="mobile-action-head">
-      <strong>{{ mobileActionTitle }}</strong>
-      <button class="mobile-action-close" type="button" @click="closeMobileActionMenu">×</button>
-    </div>
-    <div class="mobile-action-hint">已进入长按操作模式；按住项目上下拖动可排序，删除仅通过左滑完成。</div>
-    <div class="mobile-action-grid">
-      <button type="button" @click="runMobileAction('chart')">K线</button>
-      <button type="button" @click="runMobileAction('alert')">提醒</button>
-      <button type="button" @click="runMobileAction('top')">置顶</button>
-      <button type="button" @click="runMobileAction('bottom')">置底</button>
     </div>
   </div>
 
@@ -1810,7 +1868,7 @@ new Vue({
       binance: { name: 'Binance WS', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '实时', staleMs: 30000, expireMs: 120000 },
       okx: { name: 'OKX', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 45000, expireMs: 180000 },
       coingecko: { name: 'CoinGecko', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '60s', staleMs: 180000, expireMs: 600000 },
-      dex: { name: 'DEX Screener', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 45000, expireMs: 180000 },
+      dex: { name: '链上行情', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 45000, expireMs: 180000 },
       tencentStocks: { name: '美股行情', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '60s', staleMs: 180000, expireMs: 900000 },
       tencentGlobal: { name: '环球金融', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '30s', staleMs: 120000, expireMs: 600000 },
       fearGreed: { name: '恐惧贪婪', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1h', staleMs: 2 * 60 * 60 * 1000, expireMs: 6 * 60 * 60 * 1000 },
@@ -1920,7 +1978,7 @@ new Vue({
     stocks: [
       { symbol: 'NVDA', query: 'usNVDA', name: 'NVIDIA', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'TSLA', query: 'usTSLA', name: 'Tesla', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
-      { symbol: 'SPCX', query: 'usSPCX', name: 'SPCX ETF', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
+      { symbol: 'SPCX', query: 'usSPCX', name: 'SpaceX', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'CRCL', query: 'usCRCL', name: 'Circle', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'MU', query: 'usMU', name: 'Micron', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'LITE', query: 'usLITE', name: 'Lumentum', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
@@ -1929,7 +1987,7 @@ new Vue({
     stockExchangeMap: {
       NVDA: 'NASDAQ',
       TSLA: 'NASDAQ',
-      SPCX: 'NYSEARCA',
+      SPCX: 'NASDAQ',
       CRCL: 'NYSE',
       MU: 'NASDAQ',
       LITE: 'NASDAQ',
@@ -2147,7 +2205,7 @@ new Vue({
     chartProviderText() {
       if (!this.chartAsset) return '';
       if (this.chartAsset.type === 'stock') return 'TradingView 美股K线';
-      if (this.chartAsset.type === 'dex') return 'DEX Screener';
+      if (this.chartAsset.type === 'dex') return '链上行情';
       return `${this.getChartExchange(this.chartAsset)} K线`;
     },
     chartTitle() {
@@ -2164,7 +2222,7 @@ new Vue({
     chartNotice() {
       if (!this.chartAsset) return '';
       if (this.chartAsset.type === 'stock') return this.usMarketInfo.footer;
-      if (this.chartAsset.type === 'dex') return '链上代币 K 线来自 DEX Screener；如果数据源暂不支持，会显示为空或提示稍后重试。';
+      if (this.chartAsset.type === 'dex') return '链上代币使用纯图表模式，周期与操作均使用上方中文栏；如果暂无数据，请稍后刷新。';
       return 'K 线沿用现有弹窗数据源；如果某个交易对暂不支持，请稍后重试或切换数据源。';
     },
     chartExternalUrl() {
@@ -2188,7 +2246,9 @@ new Vue({
         return `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(this.chartAsset.tvSymbol)}&interval=${interval}${range}&theme=dark&style=1&timezone=Asia%2FShanghai&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&hideideas=1${nonce}`;
       }
       if (this.chartAsset.type === 'dex') {
-        return `https://dexscreener.com/${this.chartAsset.chainId}/${this.chartAsset.tokenAddress}?embed=1&theme=dark${nonce}`;
+        const intervalMap = { D: '1D', W: '1W', '12M': '1M', ALL: '1D' };
+        const interval = intervalMap[this.chartInterval] || this.chartInterval || '15';
+        return `https://dexscreener.com/${this.chartAsset.chainId}/${this.chartAsset.tokenAddress}?embed=1&theme=dark&chart=1&trades=0&info=0&nav=0&tabs=0&branding=0&chartLeftToolbar=0&chartStudyTemplates=0&chartSaveDrawings=0&chartComparePairs=0&chartTimeframesToolbar=0&loadChartSettings=0&interval=${encodeURIComponent(interval)}${nonce}`;
       }
       const exchange = this.getChartExchange(this.chartAsset);
       const symbol = this.chartAsset.pair.replace(/[^A-Z0-9]/g, '');
@@ -2342,7 +2402,7 @@ new Vue({
 
     stockTypeLabel(stock) {
       const symbol = stock && stock.symbol;
-      const etfs = ['SPCX', 'SPY', 'QQQ', 'IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB'];
+      const etfs = ['SPY', 'QQQ', 'IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB'];
       const tokenized = ['TSLAX', 'NVDAX'];
       if (etfs.includes(symbol)) return 'ETF';
       if (tokenized.includes(symbol)) return '代币化股票';
@@ -2617,6 +2677,7 @@ new Vue({
       this.chartInterval = this.chartInterval || '15';
       this.chartFrameNonce = Date.now();
       this.chartOpen = true;
+      this.lockPageScroll();
     },
 
     handleAssetClick(asset) {
@@ -2629,6 +2690,7 @@ new Vue({
 
     closeChart() {
       this.chartOpen = false;
+      this.unlockPageScroll();
     },
 
     setChartInterval(value) {
@@ -2655,6 +2717,7 @@ new Vue({
       this.chartInterval = this.chartInterval || '15';
       this.chartFrameNonce = Date.now();
       this.chartOpen = true;
+      this.lockPageScroll();
     },
 
     handleStockClick(stock) {
@@ -2667,6 +2730,23 @@ new Vue({
 
     isMobileGestureEnabled() {
       return window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+    },
+
+    lockPageScroll() {
+      if (this._pageScrollLock) return;
+      this._pageScrollLock = {
+        htmlOverflow: document.documentElement.style.overflow,
+        bodyOverflow: document.body.style.overflow
+      };
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    },
+
+    unlockPageScroll() {
+      if (!this._pageScrollLock) return;
+      document.documentElement.style.overflow = this._pageScrollLock.htmlOverflow || '';
+      document.body.style.overflow = this._pageScrollLock.bodyOverflow || '';
+      this._pageScrollLock = null;
     },
 
     vibrateMobile(duration = 10) {
@@ -2846,10 +2926,11 @@ new Vue({
       };
     },
 
-    mobileGestureShellClass(type, index) {
+    mobileGestureShellClass(type, index, key) {
       const gesture = this.touchGesture;
       return {
-        'gesture-shell-dragging': !!(gesture && gesture.type === type && gesture.index === index && gesture.dragging)
+        'gesture-shell-dragging': !!(gesture && gesture.type === type && gesture.index === index && gesture.dragging),
+        'action-menu-open': this.isMobileActionMenu(type, key)
       };
     },
 
@@ -2873,6 +2954,10 @@ new Vue({
 
     closeMobileActionMenu() {
       this.mobileActionMenu = null;
+    },
+
+    isMobileActionMenu(type, key) {
+      return !!(this.mobileActionMenu && this.mobileActionMenu.type === type && this.mobileActionMenu.key === key);
     },
 
     moveMobileItemTo(type, key, targetIndex) {
@@ -3006,7 +3091,7 @@ new Vue({
         chainId,
         tokenAddress: normalized,
         shortAddress: this.shortAddress(normalized),
-        source: 'DEX Screener',
+        source: '链上行情',
         sourceType: 'dex',
         status: '轮询 10s'
       });
@@ -3059,7 +3144,7 @@ new Vue({
       const knownNames = {
         NVDA: 'NVIDIA',
         TSLA: 'Tesla',
-        SPCX: 'SPCX ETF',
+        SPCX: 'SpaceX',
         CRCL: 'Circle',
         MU: 'Micron',
         LITE: 'Lumentum',
@@ -3237,7 +3322,7 @@ new Vue({
     routeWatchedAssets() {
       this.watchedAssets.forEach(asset => {
         if (asset.type === 'dex') {
-          asset.source = 'DEX Screener';
+          asset.source = '链上行情';
           asset.sourceType = 'dex';
           asset.status = '轮询 10s';
           return;
@@ -3661,7 +3746,7 @@ new Vue({
             const best = matches.sort((a, b) => ((b.liquidity && b.liquidity.usd) || 0) - ((a.liquidity && a.liquidity.usd) || 0))[0];
             if (!best) {
               this.queueAssetUpdate(asset.id, {
-                source: 'DEX Screener',
+                source: '链上行情',
                 sourceType: 'error',
                 status: '未找到交易池',
                 updateTime: this.formatTimestamp(Date.now())
@@ -3685,7 +3770,7 @@ new Vue({
               volume24h: parseFloat(best.volume && best.volume.h24),
               marketCap: parseFloat(best.marketCap || best.fdv),
               updateTime: this.formatTimestamp(Date.now()),
-              source: 'DEX Screener',
+              source: '链上行情',
               sourceType: 'dex',
               status: '轮询 10s'
             });
@@ -4289,6 +4374,7 @@ new Vue({
     }
   },
   beforeDestroy() {
+    this.unlockPageScroll();
     if (this.wsReconnectTimer) clearTimeout(this.wsReconnectTimer);
     if (this.binanceStaleTimer) clearTimeout(this.binanceStaleTimer);
     if (this.fallbackTimer) clearInterval(this.fallbackTimer);
