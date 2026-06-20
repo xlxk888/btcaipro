@@ -386,6 +386,12 @@
       cursor: pointer;
     }
     .global-toggle:hover { color:#93c5fd; border-color:rgba(147,197,253,.42); }
+    .global-card.expanded { grid-column: span 6; }
+    .global-card.expanded .news-container {
+      max-height: none;
+      overflow: visible;
+      box-shadow: none;
+    }
 
     .mobile-action-menu { display: none; }
 
@@ -988,9 +994,9 @@
       }
       .log-container { min-height: 120px; }
       .global-card { width: 100%; max-width: 100%; min-width: 0; }
-      .global-card.expanded .news-container {
-        min-height: auto;
-        max-height: min(52vh, 430px);
+      .global-card:not(.expanded) .news-container {
+        min-height: 0;
+        max-height: 360px;
         overflow-y: auto;
         overflow-x: hidden;
         overscroll-behavior: contain;
@@ -999,9 +1005,15 @@
         padding-right: 5px;
         box-shadow: inset 0 -18px 18px -22px rgba(148,163,184,.45);
       }
-      .global-card:not(.expanded) .news-container {
+      .global-card.expanded {
+        grid-column: 1 / -1;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .global-card.expanded .news-container {
         max-height: none;
-        overflow-y: hidden;
+        overflow: visible;
         overscroll-behavior: auto;
         touch-action: pan-y;
         padding-right: 10px;
@@ -1090,7 +1102,17 @@
         font-size: .76rem;
         font-weight: 950;
         letter-spacing: .04em;
+        visibility: hidden;
+        opacity: 0;
+        transform: translate3d(10px, 0, 0);
+        transition: opacity .12s ease, transform .16s ease;
+        will-change: opacity, transform;
         pointer-events: none;
+      }
+      .gesture-row-shell.gesture-shell-swiping .swipe-delete-reveal {
+        visibility: visible;
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
       }
       .mobile-gesture-dragging {
         position: relative;
@@ -1255,6 +1277,7 @@
       .stock-mobile-meta, .watch-row .mobile-card-meta { grid-template-columns: 1fr; }
       .mobile-action-menu { right: 6px; width: min(320px, calc(100% - 12px)); }
       .mobile-action-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .global-card:not(.expanded) .news-container { max-height: 350px; }
       .miner-list { max-height: 350px; }
       .miner-row { min-height: 90px; }
       .miner-spec strong { font-size: .68rem; }
@@ -1629,7 +1652,7 @@
           </div>
         </div>
       </div>
-      <div class="list-scroll-hint">{{ globalExpanded ? '已展开全部，手机端可在框内上下滑动' : '显示主要项目，点击展开全部查看更多' }}</div>
+      <div class="list-scroll-hint">{{ globalExpanded ? '已展开全部项目' : '框内可上下滑动，点击展开全部平铺查看' }}</div>
     </div>
 
     <div class="card span-2 compact-card halving-card">
@@ -2257,7 +2280,7 @@ new Vue({
       return `https://s.tradingview.com/widgetembed/?symbol=${exchange}%3A${symbol}&interval=${interval}${range}&theme=dark&style=1&timezone=Asia%2FShanghai&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&hideideas=1${nonce}`;
     },
     visibleGlobalMarkets() {
-      return this.globalExpanded ? this.globalMarkets : this.globalMarkets.slice(0, 6);
+      return this.globalMarkets;
     },
     mobileActionItem() {
       if (!this.mobileActionMenu) return null;
@@ -2821,6 +2844,9 @@ new Vue({
       if (gesture.dragging) {
         event.preventDefault();
         gesture.dragOffset = touch.clientY - gesture.dragAnchorY;
+        if (Math.abs(gesture.dragOffset) > 6 && this.mobileActionMenu) {
+          this.closeMobileActionMenu();
+        }
         const threshold = Math.max(34, gesture.itemHeight * .46);
         if (Math.abs(gesture.dragOffset) >= threshold) {
           const direction = gesture.dragOffset > 0 ? 1 : -1;
@@ -2877,6 +2903,8 @@ new Vue({
 
       if (gesture.swiping) {
         gesture.settling = true;
+        gesture.deleteReady = false;
+        gesture.thresholdVibrated = false;
         gesture.swipeOffset = 0;
         this.touchSuppressClick = true;
         setTimeout(() => {
@@ -2896,6 +2924,7 @@ new Vue({
     cancelMobileGesture() {
       this.clearTouchTimer();
       this.touchGesture = null;
+      this.closeMobileActionMenu();
       this.touchSuppressClick = true;
       setTimeout(() => { this.touchSuppressClick = false; }, 120);
     },
@@ -2928,8 +2957,10 @@ new Vue({
 
     mobileGestureShellClass(type, index, key) {
       const gesture = this.touchGesture;
+      const activeGesture = gesture && gesture.type === type && gesture.index === index;
       return {
-        'gesture-shell-dragging': !!(gesture && gesture.type === type && gesture.index === index && gesture.dragging),
+        'gesture-shell-dragging': !!(activeGesture && gesture.dragging),
+        'gesture-shell-swiping': !!(activeGesture && gesture.swiping && gesture.swipeOffset < -1),
         'action-menu-open': this.isMobileActionMenu(type, key)
       };
     },
