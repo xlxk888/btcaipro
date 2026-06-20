@@ -929,6 +929,22 @@
     .holder-change { text-align: right; font-size: .64rem; margin-top: 1px; color: #8fa0ba; }
     .holder-change.up { color: #22c55e; }
     .holder-change.down { color: #ef4444; }
+    .holder-sync {
+      display: inline-flex;
+      align-items: center;
+      min-height: 18px;
+      margin-left: 5px;
+      padding: 1px 5px;
+      border: 1px solid rgba(148,163,184,.28);
+      border-radius: 999px;
+      color:#8fa0ba;
+      font-size:.54rem;
+      font-weight:900;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
+    .holder-sync.live { color:#4ade80; border-color:rgba(74,222,128,.35); }
+    .holder-sync.disclosure { color:#facc15; border-color:rgba(250,204,21,.32); }
     .entity-holders-card .holders-list { max-height: 298px; }
     .entity-holders-card .holder-row { grid-template-columns: 22px minmax(0, 1fr) auto; padding: 7px 0; }
     .entity-holders-card .holder-rank { width: 22px; height: 22px; }
@@ -1829,15 +1845,15 @@
           <div class="miner-model">{{ miner.model }}</div>
           <div class="miner-spec">
             <span>算力</span>
-            <strong>{{ miner.hashrate }}</strong>
+            <strong>{{ minerHashrateText(miner) }}</strong>
           </div>
           <div class="miner-spec">
             <span>功耗</span>
-            <strong>{{ miner.power }}</strong>
+            <strong>{{ minerPowerText(miner) }}</strong>
           </div>
           <div class="miner-spec">
             <span>功耗比</span>
-            <strong>{{ miner.efficiency }}</strong>
+            <strong>{{ minerEfficiencyText(miner) }}</strong>
           </div>
           <div class="miner-spec">
             <span>关机价</span>
@@ -1852,6 +1868,7 @@
         <span>当前 BTC: {{ btcPrice ? formatUsd(btcPrice) : '--' }}</span>
         <span>{{ profitableMinerCount }} 台盈利 / {{ miners.length }} 台</span>
       </div>
+      <div class="miner-scroll-hint">{{ minerDataStatus }}<span v-if="minerHashrateEh"> · 全网算力 {{ minerHashrateEh }} EH/s</span></div>
       <div class="miner-scroll-hint">{{ minersExpanded ? '已展开全部矿机' : '框内可上下滑动查看全部矿机' }}</div>
     </div>
 
@@ -1865,12 +1882,15 @@
           <span>比特币实体持仓前十</span>
         </span>
       </h2>
-      <div class="holder-note">按实体/机构或类别合并口径展示；ETF合计与单只ETF会有包含关系，估算项已标注。</div>
+      <div class="holder-note">公开地址每 30 秒同步链上余额；机构、ETF 和估算项目按公开披露更新。地址流入/流出不一定等同实际买卖。</div>
       <div class="holders-list">
         <div v-for="holder in btcHolders" :key="holder.id" class="holder-row">
           <span class="holder-rank">{{ holder.rank }}</span>
           <div>
-            <div class="holder-name">{{ holder.name }}</div>
+            <div class="holder-name">
+              {{ holder.name }}
+              <span class="holder-sync" :class="holderSyncClass(holder)">{{ holderSyncLabel(holder) }}</span>
+            </div>
             <div class="holder-address">{{ holder.type }}</div>
           </div>
           <div>
@@ -1883,6 +1903,7 @@
       </div>
       <div class="muted stocks-footer">
         <span>{{ holdersStatus }}</span>
+        <span>链上变动保留最近一次记录</span>
       </div>
     </div>
   </div>
@@ -2021,6 +2042,8 @@ new Vue({
     fallbackTimer: null,
     marketCapTimer: null,
     holdersTimer: null,
+    holdersRefreshing: false,
+    holderDisclosureLastAttempt: 0,
     fallbackStatus: '兜底源待命',
     storageKey: 'crypto_ai_watchlist_v1',
     stockStorageKey: 'crypto_ai_stocklist_v1',
@@ -2028,6 +2051,8 @@ new Vue({
     toolPanelStorageKey: 'crypto_ai_tool_panel_v1',
     uiStorageKey: 'crypto_ai_ui_settings_v1',
     holderStorageKey: 'crypto_ai_entity_holder_snapshot_v1',
+    holderHistoryStorageKey: 'crypto_ai_entity_holder_history_v2',
+    minerStorageKey: 'crypto_ai_miner_network_v1',
     stockInput: '',
     touchGesture: null,
     touchSuppressClick: false,
@@ -2145,7 +2170,7 @@ new Vue({
     btcHolders: [
       { id: 'us-etf-total', rank: 1, name: '美国现货BTC ETF合计', type: '美国现货BTC ETF共 12 家合计，含IBIT/FBTC/GBTC/BTC等', balance: 1292000, approx: true, changeText: '类别合计，和单只ETF有重叠' },
       { id: 'satoshi', rank: 2, name: '中本聪', type: '早期挖矿估算，长期未移动', balance: 1100000, approx: true, changeText: 'Patoshi/公开研究估算' },
-      { id: 'strategy', rank: 3, name: 'Strategy / 微策略', type: '上市公司公开披露', balance: 845256, approx: false, changeText: '2026-06-08 披露后' },
+      { id: 'strategy', rank: 3, name: 'Strategy / 微策略', type: '上市公司公开披露，自动检查最新值', balance: 846842, approx: false, autoDisclosure: true, changeText: '参考站披露接口同步' },
       { id: 'ibit', rank: 4, name: 'BlackRock IBIT', type: '贝莱德现货比特币ETF', balance: 785600, approx: true, changeText: '按官方净资产估算' },
       { id: 'binance-known', rank: 5, name: 'Binance 公开冷钱包', type: '交易所客户资产，已标记地址下限', balance: 423532, approx: true, changeText: '公开地址合计下限', addresses: ['34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo', '3M219KR5vEneNb47ewrPfWyb5jQ2DjxRP6'] },
       { id: 'us-gov', rank: 6, name: '美国政府', type: '主权/执法没收持仓估算', balance: 328372, approx: true, changeText: '2026-02 公开估算' },
@@ -2212,26 +2237,35 @@ new Vue({
     halvingDaysRemaining: null,
     halvingEtaText: '--',
     halvingProgressPct: 0,
+    minerDifficulty: 0,
+    minerHashrateEh: '',
+    minerDataStatus: '正在同步全网难度 ...',
+    minerElectricityUsd: 0.06,
+    minerBlockReward: 3.125,
     miners: [
-      { model: 'Antminer U3S23 Hyd.', hashrate: '1160 TH/s', power: '11020 W', efficiency: '9.5 W/TH', shutdownPrice: 30238 },
-      { model: 'Antminer S23 Hyd.', hashrate: '380 TH/s', power: '5428 W', efficiency: '14.3 W/TH', shutdownPrice: 45466 },
-      { model: 'Whatsminer M73', hashrate: '512 TH/s', power: '7424 W', efficiency: '14.5 W/TH', shutdownPrice: 46153 },
-      { model: 'SEALMINER A2 Pro Hyd.', hashrate: '500 TH/s', power: '7450 W', efficiency: '14.9 W/TH', shutdownPrice: 47426 },
-      { model: 'Antminer S21 Pro', hashrate: '234 TH/s', power: '3510 W', efficiency: '15.0 W/TH', shutdownPrice: 47745 },
-      { model: 'Antminer S21+ Hyd.', hashrate: '319 TH/s', power: '4785 W', efficiency: '15.0 W/TH', shutdownPrice: 47745 },
-      { model: 'Antminer S21 Hyd.', hashrate: '335 TH/s', power: '5360 W', efficiency: '16.0 W/TH', shutdownPrice: 50928 },
-      { model: 'Whatsminer M70', hashrate: '310 TH/s', power: '5270 W', efficiency: '17.0 W/TH', shutdownPrice: 54111 },
-      { model: 'Whatsminer M66S', hashrate: '298 TH/s', power: '5067 W', efficiency: '17.0 W/TH', shutdownPrice: 54121 },
-      { model: 'Antminer S21', hashrate: '200 TH/s', power: '3500 W', efficiency: '17.5 W/TH', shutdownPrice: 55702 },
-      { model: 'Whatsminer M60S', hashrate: '186 TH/s', power: '3422 W', efficiency: '18.4 W/TH', shutdownPrice: 58560 },
-      { model: 'Whatsminer M63S', hashrate: '390 TH/s', power: '7215 W', efficiency: '18.5 W/TH', shutdownPrice: 58885 },
-      { model: 'Antminer T21', hashrate: '190 TH/s', power: '3610 W', efficiency: '19.0 W/TH', shutdownPrice: 60477 },
-      { model: 'Antminer S19 XP Hyd.', hashrate: '255 TH/s', power: '5304 W', efficiency: '20.8 W/TH', shutdownPrice: 66206 },
-      { model: 'Antminer S19 XP', hashrate: '140 TH/s', power: '3010 W', efficiency: '21.5 W/TH', shutdownPrice: 68434 },
-      { model: 'Whatsminer M50S++', hashrate: '150 TH/s', power: '3276 W', efficiency: '21.8 W/TH', shutdownPrice: 69516 },
-      { model: 'Whatsminer M50S+', hashrate: '140 TH/s', power: '3080 W', efficiency: '22.0 W/TH', shutdownPrice: 70026 },
-      { model: 'Avalon A1466', hashrate: '150 TH/s', power: '3350 W', efficiency: '22.3 W/TH', shutdownPrice: 71087 },
-      { model: 'Whatsminer M56S++', hashrate: '230 TH/s', power: '5290 W', efficiency: '23.0 W/TH', shutdownPrice: 73209 }
+      { model: 'Antminer U3S23 Hyd.', hashrateTh: 1160, powerW: 11020, shutdownPrice: 27187 },
+      { model: 'Antminer S23 Hyd.', hashrateTh: 380, powerW: 5428, shutdownPrice: 40878 },
+      { model: 'Whatsminer M73', hashrateTh: 512, powerW: 7424, shutdownPrice: 41496 },
+      { model: 'SEALMINER A2 Pro Hyd', hashrateTh: 500, powerW: 7450, shutdownPrice: 42640 },
+      { model: 'Antminer S21+ Hyd.', hashrateTh: 319, powerW: 4785, shutdownPrice: 42927 },
+      { model: 'Antminer S21 Pro', hashrateTh: 234, powerW: 3510, shutdownPrice: 42927 },
+      { model: 'Antminer S21 Hyd.', hashrateTh: 335, powerW: 5360, shutdownPrice: 45788 },
+      { model: 'Whatsminer M70', hashrateTh: 310, powerW: 5270, shutdownPrice: 48650 },
+      { model: 'Whatsminer M66S', hashrateTh: 298, powerW: 5067, shutdownPrice: 48660 },
+      { model: 'Antminer S21', hashrateTh: 200, powerW: 3500, shutdownPrice: 50081 },
+      { model: 'Whatsminer M60S', hashrateTh: 186, powerW: 3422, shutdownPrice: 52650 },
+      { model: 'Whatsminer M63S', hashrateTh: 390, powerW: 7215, shutdownPrice: 52943 },
+      { model: 'Antminer T21', hashrateTh: 190, powerW: 3610, shutdownPrice: 54374 },
+      { model: 'Antminer S19 XP Hyd.', hashrateTh: 255, powerW: 5304, shutdownPrice: 59525 },
+      { model: 'Antminer S19 XP', hashrateTh: 140, powerW: 3010, shutdownPrice: 61528 },
+      { model: 'Whatsminer M50S++', hashrateTh: 150, powerW: 3276, shutdownPrice: 62501 },
+      { model: 'Whatsminer M50S+', hashrateTh: 140, powerW: 3080, shutdownPrice: 62959 },
+      { model: 'Avalon A1466', hashrateTh: 150, powerW: 3350, shutdownPrice: 63913 },
+      { model: 'Whatsminer M56S++', hashrateTh: 230, powerW: 5290, shutdownPrice: 65821 },
+      { model: 'Antminer S19j Pro+', hashrateTh: 122, powerW: 3355, shutdownPrice: 78699 },
+      { model: 'Whatsminer M50', hashrateTh: 118, powerW: 3276, shutdownPrice: 79451 },
+      { model: 'Antminer S19 Pro', hashrateTh: 110, powerW: 3250, shutdownPrice: 84422 },
+      { model: 'Antminer S19j Pro', hashrateTh: 104, powerW: 3068, shutdownPrice: 84422 }
     ],
     gaugeChart: null
   },
@@ -2849,6 +2883,71 @@ new Vue({
       this.minersExpanded = !this.minersExpanded;
     },
 
+    minerHashrateText(miner) {
+      return `${Number(miner.hashrateTh).toLocaleString('en-US')} TH/s`;
+    },
+
+    minerPowerText(miner) {
+      return `${Number(miner.powerW).toLocaleString('en-US')} W`;
+    },
+
+    minerEfficiencyText(miner) {
+      const value = Number(miner.powerW) / Number(miner.hashrateTh);
+      return `${value.toFixed(1)} W/TH`;
+    },
+
+    calculateMinerShutdownPrice(miner, difficulty = this.minerDifficulty) {
+      const hashrate = Number(miner.hashrateTh);
+      const power = Number(miner.powerW);
+      if (!Number.isFinite(hashrate) || !Number.isFinite(power) || !Number.isFinite(difficulty) || difficulty <= 0) {
+        return Number(miner.shutdownPrice) || 0;
+      }
+      const btcPerDay = (86400 * hashrate * 1e12 * this.minerBlockReward) / (difficulty * Math.pow(2, 32));
+      return (power * 24 / 1000 * this.minerElectricityUsd) / btcPerDay;
+    },
+
+    updateMinerShutdownPrices() {
+      if (!this.minerDifficulty) return;
+      this.miners = this.miners.map(miner => Object.assign({}, miner, {
+        shutdownPrice: this.calculateMinerShutdownPrice(miner)
+      })).sort((a, b) => Number(a.shutdownPrice) - Number(b.shutdownPrice));
+    },
+
+    loadMinerNetworkCache() {
+      try {
+        const cache = JSON.parse(localStorage.getItem(this.minerStorageKey) || 'null');
+        if (!cache || !cache.difficulty || Date.now() - Number(cache.savedAt) > 24 * 60 * 60 * 1000) return;
+        this.minerDifficulty = Number(cache.difficulty);
+        this.minerHashrateEh = cache.hashrateEh || '';
+        this.updateMinerShutdownPrices();
+        this.minerDataStatus = '使用缓存难度，正在刷新';
+      } catch (e) {}
+    },
+
+    async fetchMinerNetworkData() {
+      try {
+        const res = await this.fetchWithSoftTimeout('https://mempool.space/api/v1/mining/hashrate/3d', 8000);
+        if (!res.ok) throw new Error(`mempool ${res.status}`);
+        const data = await res.json();
+        const difficulty = Number(data.currentDifficulty);
+        const hashrate = Number(data.currentHashrate);
+        if (!Number.isFinite(difficulty) || difficulty <= 0) throw new Error('mining difficulty unavailable');
+        this.minerDifficulty = difficulty;
+        this.minerHashrateEh = Number.isFinite(hashrate) ? (hashrate / 1e18).toFixed(1) : '';
+        this.updateMinerShutdownPrices();
+        this.minerDataStatus = `关机价已更新 ${this.formatClock(Date.now())}`;
+        try {
+          localStorage.setItem(this.minerStorageKey, JSON.stringify({
+            difficulty,
+            hashrateEh: this.minerHashrateEh,
+            savedAt: Date.now()
+          }));
+        } catch (e) {}
+      } catch (error) {
+        this.minerDataStatus = this.minerDifficulty ? '网络难度刷新失败，保留最近数据' : '网络难度暂不可用';
+      }
+    },
+
     isShutdown(cost) {
       return this.btcPrice > 0 && this.btcPrice < cost;
     },
@@ -3458,15 +3557,50 @@ new Vue({
     startBtcHoldersPolling() {
       this.refreshEntityHolders();
       if (this.holdersTimer) clearInterval(this.holdersTimer);
-      this.holdersTimer = setInterval(() => this.refreshEntityHolders(), 60000);
+      this.holdersTimer = setInterval(() => this.refreshEntityHolders(), 30000);
     },
 
     async refreshEntityHolders() {
+      if (this.holdersRefreshing) return;
+      this.holdersRefreshing = true;
       this.holdersStatus = '链上地址/实体口径刷新中 ...';
-      this.updateEtfHolderLabel();
-      await this.refreshHolderAddressBalances();
-      this.updateHolderDeltas();
-      this.holdersStatus = `链上地址/实体口径已刷新 ${new Date().toLocaleTimeString()}`;
+      try {
+        this.updateEtfHolderLabel();
+        const syncResults = await Promise.allSettled([
+          this.refreshHolderAddressBalances(),
+          this.fetchDisclosedHolderUpdates()
+        ]);
+        this.updateHolderDeltas();
+        const liveCount = this.btcHolders.filter(holder => Array.isArray(holder.addresses) && holder.addresses.length).length;
+        const disclosureSynced = syncResults[1].status === 'fulfilled' && syncResults[1].value !== false;
+        const disclosureStatus = disclosureSynced ? 'Strategy 披露已检查' : 'Strategy 暂用最近披露';
+        this.holdersStatus = `${liveCount} 项公开地址 + ${disclosureStatus} ${this.formatClock(Date.now())}`;
+      } finally {
+        this.holdersRefreshing = false;
+      }
+    },
+
+    async fetchDisclosedHolderUpdates() {
+      const now = Date.now();
+      if (this.holderDisclosureLastAttempt && now - this.holderDisclosureLastAttempt < 30 * 60 * 1000) return true;
+      this.holderDisclosureLastAttempt = now;
+      try {
+        const res = await this.fetchWithSoftTimeout('https://looknode-proxy.corms-cushier-0l.workers.dev/mnav', 10000);
+        if (!res.ok) throw new Error(`holder disclosure ${res.status}`);
+        const data = await res.json();
+        const holdings = Number(data && data.mstr && data.mstr.btc_holdings);
+        const holder = this.btcHolders.find(item => item.id === 'strategy');
+        if (holder && Number.isFinite(holdings) && holdings > 0) {
+          holder.balance = holdings;
+          holder.updatedAt = now;
+          holder.changeText = 'Strategy 最新公开披露';
+          holder.type = '上市公司公开披露，30分钟检查更新';
+          return true;
+        }
+        return false;
+      } catch (e) {
+        return false;
+      }
     },
 
     updateEtfHolderLabel() {
@@ -3482,39 +3616,49 @@ new Vue({
       if (!addressHolders.length) return;
 
       await Promise.allSettled(addressHolders.map(async holder => {
-        const balances = await Promise.all(holder.addresses.map(address => this.fetchBtcAddressBalance(address)));
-        const total = balances.reduce((sum, value) => sum + value, 0);
-        if (Number.isFinite(total) && total > 0) {
+        const snapshots = await Promise.allSettled(holder.addresses.map(address => this.fetchBtcAddressSnapshot(address)));
+        const successful = snapshots.filter(result => result.status === 'fulfilled').map(result => result.value);
+        if (successful.length !== holder.addresses.length) return;
+        const total = successful.reduce((sum, row) => sum + row.balance, 0);
+        if (Number.isFinite(total) && total >= 0) {
           holder.balance = total;
           holder.approx = holder.addresses.length > 1;
-          holder.type = `${holder.type.replace(/，链上每60秒刷新$/, '')}，链上每60秒刷新`;
+          holder.updatedAt = Date.now();
+          holder.chainSource = [...new Set(successful.map(row => row.source))].join('/');
+          holder.type = `${holder.type.replace(/，链上每(?:30|60)秒刷新$/, '')}，链上每30秒刷新`;
         }
       }));
     },
 
-    async fetchBtcAddressBalance(address) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
+    async fetchBtcAddressSnapshot(address) {
+      let source = 'Blockstream';
+      let res;
       try {
-        const res = await fetch(`https://blockstream.info/api/address/${address}`, { signal: controller.signal });
-        if (!res.ok) throw new Error('address balance failed');
-        const data = await res.json();
-        const confirmed = (data.chain_stats && data.chain_stats.funded_txo_sum || 0)
-          - (data.chain_stats && data.chain_stats.spent_txo_sum || 0);
-        const mempool = (data.mempool_stats && data.mempool_stats.funded_txo_sum || 0)
-          - (data.mempool_stats && data.mempool_stats.spent_txo_sum || 0);
-        return (confirmed + mempool) / 1e8;
-      } finally {
-        clearTimeout(timer);
+        res = await this.fetchWithSoftTimeout(`https://blockstream.info/api/address/${address}`, 6000);
+        if (!res.ok) throw new Error(`Blockstream ${res.status}`);
+      } catch (error) {
+        source = 'mempool.space';
+        res = await this.fetchWithSoftTimeout(`https://mempool.space/api/address/${address}`, 6000);
       }
+      if (!res.ok) throw new Error('address balance failed');
+      const data = await res.json();
+      const confirmed = (data.chain_stats && data.chain_stats.funded_txo_sum || 0)
+        - (data.chain_stats && data.chain_stats.spent_txo_sum || 0);
+      const mempool = (data.mempool_stats && data.mempool_stats.funded_txo_sum || 0)
+        - (data.mempool_stats && data.mempool_stats.spent_txo_sum || 0);
+      return {
+        balance: (confirmed + mempool) / 1e8,
+        txCount: Number(data.chain_stats && data.chain_stats.tx_count) || 0,
+        source
+      };
     },
 
     updateHolderDeltas() {
-      let previous = {};
+      let history = {};
       try {
-        previous = JSON.parse(localStorage.getItem(this.holderStorageKey) || '{}');
+        history = JSON.parse(localStorage.getItem(this.holderHistoryStorageKey) || '{}');
       } catch (e) {
-        previous = {};
+        history = {};
       }
 
       this.btcHolders = this.btcHolders
@@ -3522,32 +3666,73 @@ new Vue({
         .slice(0, 10)
         .map((holder, index) => {
           const current = Number(holder.balance);
-          const previousBalance = Number(previous[holder.id]);
+          const previousState = history[holder.id] || {};
+          const previousBalance = Number(previousState.balance);
           const baseText = holder.baseText || holder.changeText || '暂无变动';
-          const delta = Number.isFinite(previousBalance) && Number.isFinite(current)
+          const live = Array.isArray(holder.addresses) && holder.addresses.length > 0;
+          const tracked = live || !!holder.autoDisclosure;
+          const newDelta = tracked && Number.isFinite(previousBalance) && Number.isFinite(current)
             ? current - previousBalance
             : 0;
+          let lastDelta = Number(previousState.lastDelta) || 0;
+          let lastChangedAt = Number(previousState.lastChangedAt) || 0;
+          if (Math.abs(newDelta) >= 0.00000001) {
+            lastDelta = newDelta;
+            lastChangedAt = Date.now();
+          }
           let changeText = baseText;
-          if (Math.abs(delta) >= 0.00000001) {
-            changeText = delta > 0
-              ? `买入 ${this.formatBtc(Math.abs(delta))}`
-              : `卖出 ${this.formatBtc(Math.abs(delta))}`;
+          if (live) {
+            changeText = Math.abs(lastDelta) >= 0.00000001
+              ? `${lastDelta > 0 ? '链上增加' : '链上减少'} ${this.formatBtc(Math.abs(lastDelta))} · ${this.formatHolderEventTime(lastChangedAt)}`
+              : '本次同步无余额变动';
+          } else if (holder.autoDisclosure) {
+            changeText = Math.abs(lastDelta) >= 0.00000001
+              ? `${lastDelta > 0 ? '披露增持' : '披露减持'} ${this.formatBtc(Math.abs(lastDelta))} · ${this.formatHolderEventTime(lastChangedAt)}`
+              : '最新披露持仓无变化';
           }
           return Object.assign({}, holder, {
             rank: index + 1,
             baseText,
-            delta,
+            delta: tracked ? lastDelta : 0,
+            lastChangedAt,
             changeText
           });
         });
 
       const snapshot = this.btcHolders.reduce((acc, holder) => {
-        acc[holder.id] = Number(holder.balance);
+        const previousState = history[holder.id] || {};
+        acc[holder.id] = {
+          balance: Number(holder.balance),
+          lastDelta: Number(holder.delta) || Number(previousState.lastDelta) || 0,
+          lastChangedAt: Number(holder.lastChangedAt) || Number(previousState.lastChangedAt) || 0
+        };
         return acc;
       }, {});
       try {
-        localStorage.setItem(this.holderStorageKey, JSON.stringify(snapshot));
+        localStorage.setItem(this.holderHistoryStorageKey, JSON.stringify(snapshot));
       } catch (e) {}
+    },
+
+    formatHolderEventTime(value) {
+      const date = new Date(Number(value));
+      if (!Number.isFinite(date.getTime())) return '--';
+      return date.toLocaleString('zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    },
+
+    holderSyncLabel(holder) {
+      if (Array.isArray(holder.addresses) && holder.addresses.length) return '链上实时';
+      if (holder.autoDisclosure) return '披露同步';
+      return '披露/估算';
+    },
+
+    holderSyncClass(holder) {
+      return Array.isArray(holder.addresses) && holder.addresses.length ? 'live' : 'disclosure';
     },
 
     async initWatchlistMarket() {
@@ -4681,6 +4866,8 @@ new Vue({
     this.fetchGlobalMarkets();
     this.fetchFearGreed();
     this.fetchHalvingCountdown();
+    this.loadMinerNetworkCache();
+    this.fetchMinerNetworkData();
     this.startBtcHoldersPolling();
 
     this.registerInterval(() => {
@@ -4693,6 +4880,7 @@ new Vue({
     this.registerInterval(this.fetchRealAHR999, 60000);
     this.registerInterval(this.fetchFearGreed, 60 * 60 * 1000);
     this.registerInterval(this.fetchHalvingCountdown, 10 * 60 * 1000);
+    this.registerInterval(this.fetchMinerNetworkData, 15000);
   }
 });
 </script>
