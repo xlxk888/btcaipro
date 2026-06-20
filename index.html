@@ -519,6 +519,66 @@
       line-height: 1.35;
       background: rgba(15,23,42,.58);
     }
+    .dex-data-panel {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border-bottom: 1px solid rgba(72,99,150,.25);
+      background: #0d1626;
+    }
+    .dex-contract-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .dex-contract-label { color:#8fa0ba; font-size:.68rem; font-weight:900; white-space:nowrap; }
+    .dex-contract-address {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color:#dbeafe;
+      font-size:.7rem;
+    }
+    .dex-copy-button, .dex-data-toggle {
+      min-height: 28px;
+      border: 1px solid rgba(148,163,184,.32);
+      border-radius: 7px;
+      background:#111a2a;
+      color:#cbd5e1;
+      padding: 3px 9px;
+      font-size:.66rem;
+      font-weight:900;
+      white-space:nowrap;
+      cursor:pointer;
+    }
+    .dex-trade-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 7px;
+    }
+    .dex-trade-item {
+      min-width: 0;
+      padding: 6px 7px;
+      border: 1px solid rgba(72,99,150,.28);
+      border-radius: 7px;
+      background:#080f1d;
+    }
+    .dex-trade-item span { display:block; color:#8fa0ba; font-size:.6rem; font-weight:900; }
+    .dex-trade-item strong { display:block; margin-top:2px; color:#dbeafe; font-size:.68rem; white-space:nowrap; }
+    .dex-buy { color:#22c55e !important; }
+    .dex-sell { color:#ef4444 !important; }
+    .dex-market-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 6px;
+      color:#8fa0ba;
+      font-size:.62rem;
+    }
+    .dex-market-grid strong { color:#e2e8f0; margin-left:3px; }
     .interval-tabs {
       display: flex;
       gap: 7px;
@@ -574,6 +634,59 @@
       background: #111827;
       pointer-events: none;
     }
+    .chart-frame-shell.dex-frame-shell::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 2;
+      height: 40px;
+      background: #050914;
+      pointer-events: none;
+    }
+    .dex-settings-trigger {
+      position: absolute;
+      right: 8px;
+      bottom: 7px;
+      z-index: 5;
+      min-width: 52px;
+      height: 34px;
+      border: 1px solid rgba(148,163,184,.5);
+      border-radius: 8px;
+      background:#111a2a;
+      color:#dbeafe;
+      font-size:.7rem;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .dex-settings-panel {
+      position: absolute;
+      right: 8px;
+      bottom: 48px;
+      z-index: 6;
+      width: min(310px, calc(100% - 16px));
+      padding: 11px;
+      border: 1px solid rgba(72,99,150,.72);
+      border-radius: 10px;
+      background:#111a2a;
+      box-shadow:0 18px 42px rgba(0,0,0,.52);
+    }
+    .dex-settings-head { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#e2e8f0; font-size:.78rem; font-weight:900; }
+    .dex-settings-close { width:26px; height:26px; border:1px solid rgba(148,163,184,.32); border-radius:999px; background:#0a111f; color:#cbd5e1; cursor:pointer; }
+    .dex-settings-info { display:grid; gap:5px; margin-top:8px; color:#8fa0ba; font-size:.66rem; }
+    .dex-settings-info strong { color:#dbeafe; }
+    .dex-settings-periods { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:5px; margin-top:9px; }
+    .dex-settings-periods button, .dex-settings-refresh {
+      min-height:31px;
+      border:1px solid rgba(148,163,184,.3);
+      border-radius:7px;
+      background:#0a111f;
+      color:#cbd5e1;
+      font-size:.64rem;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .dex-settings-periods button.active { color:#07111f; border-color:transparent; background:linear-gradient(135deg,#f59e0b,#22c55e); }
+    .dex-settings-refresh { width:100%; margin-top:7px; color:#93c5fd; }
 
     .crypto-card { min-height: 372px; }
     .status-pill {
@@ -1206,6 +1319,14 @@
         flex-shrink: 0;
       }
       .chart-notice, .interval-tabs { flex-shrink: 0; }
+      .dex-data-panel { padding: 7px 10px; }
+      .dex-contract-row { gap: 5px; }
+      .dex-contract-label { display:none; }
+      .dex-contract-address { font-size:.62rem; }
+      .dex-copy-button, .dex-data-toggle { min-height:26px; padding:2px 7px; font-size:.62rem; }
+      .dex-trade-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; margin-top:5px; }
+      .dex-trade-item { padding:4px 6px; }
+      .dex-market-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; margin-top:5px; }
       .chart-frame-shell { flex: 1; min-height: 0; }
       .chart-frame { width: 100%; height: 100%; min-height: 0; }
       .chart-link { display: none; }
@@ -1780,6 +1901,28 @@
         </div>
       </div>
       <div class="chart-notice" v-if="chartNotice">{{ chartNotice }}</div>
+      <div class="dex-data-panel" v-if="chartAsset && chartAsset.type === 'dex'">
+        <div class="dex-contract-row">
+          <span class="dex-contract-label">合约地址</span>
+          <code class="dex-contract-address">{{ chartAsset.tokenAddress }}</code>
+          <button class="dex-copy-button" type="button" @click="copyDexContract">复制合约</button>
+          <button class="dex-data-toggle" type="button" @click="chartDexDetailsOpen = !chartDexDetailsOpen">{{ chartDexDetailsOpen ? '收起数据' : '交易数据' }}</button>
+        </div>
+        <template v-if="chartDexDetailsOpen">
+          <div class="dex-trade-grid">
+            <div class="dex-trade-item" v-for="row in chartDexTradeRows" :key="row.key">
+              <span>{{ row.label }}交易</span>
+              <strong><b class="dex-buy">买 {{ row.buys }}</b> · <b class="dex-sell">卖 {{ row.sells }}</b></strong>
+            </div>
+          </div>
+          <div class="dex-market-grid">
+            <span>24H成交<strong>{{ formatVolume(chartAsset.volume24h) }}</strong></span>
+            <span>流动性<strong>{{ formatVolume(chartAsset.dexLiquidityUsd) }}</strong></span>
+            <span>市值<strong>{{ formatMarketCap(chartAsset.marketCap) }}</strong></span>
+            <span>交易所<strong>{{ chartAsset.dexId || '--' }}</strong></span>
+          </div>
+        </template>
+      </div>
       <div class="interval-tabs">
         <button
           v-for="item in chartIntervals"
@@ -1798,6 +1941,30 @@
           title="K线图"
           allowfullscreen
         ></iframe>
+        <template v-if="chartAsset && chartAsset.type === 'dex'">
+          <button class="dex-settings-trigger" type="button" @click="chartSettingsOpen = !chartSettingsOpen">设置</button>
+          <div class="dex-settings-panel" v-if="chartSettingsOpen" @click.stop>
+            <div class="dex-settings-head">
+              <span>图表设置</span>
+              <button class="dex-settings-close" type="button" @click="chartSettingsOpen = false">×</button>
+            </div>
+            <div class="dex-settings-info">
+              <span>图表类型：<strong>K 线图</strong></span>
+              <span>主题：<strong>深色</strong></span>
+              <span>数据来源：<strong>DEX Screener 链上行情</strong></span>
+            </div>
+            <div class="dex-settings-periods">
+              <button
+                v-for="item in chartIntervals.slice(0, 8)"
+                :key="'setting-' + item.value"
+                type="button"
+                :class="{ active: chartInterval === item.value }"
+                @click="setChartInterval(item.value)"
+              >{{ item.label }}</button>
+            </div>
+            <button class="dex-settings-refresh" type="button" @click="reloadChart">刷新图表</button>
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -1869,6 +2036,8 @@ new Vue({
     chartAsset: null,
     chartInterval: '15',
     chartFrameNonce: 0,
+    chartDexDetailsOpen: true,
+    chartSettingsOpen: false,
     clockNow: Date.now(),
     intervalTimers: [],
     toastText: '',
@@ -2278,6 +2447,15 @@ new Vue({
       const interval = this.chartInterval === 'ALL' ? 'D' : this.chartInterval;
       const range = this.chartInterval === 'ALL' ? '&range=ALL' : '';
       return `https://s.tradingview.com/widgetembed/?symbol=${exchange}%3A${symbol}&interval=${interval}${range}&theme=dark&style=1&timezone=Asia%2FShanghai&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1&save_image=0&hideideas=1${nonce}`;
+    },
+    chartDexTradeRows() {
+      const txns = this.chartAsset && this.chartAsset.dexTxns ? this.chartAsset.dexTxns : {};
+      return [
+        { key: 'm5', label: '5分钟', buys: this.formatTxnCount(txns.m5 && txns.m5.buys), sells: this.formatTxnCount(txns.m5 && txns.m5.sells) },
+        { key: 'h1', label: '1小时', buys: this.formatTxnCount(txns.h1 && txns.h1.buys), sells: this.formatTxnCount(txns.h1 && txns.h1.sells) },
+        { key: 'h6', label: '6小时', buys: this.formatTxnCount(txns.h6 && txns.h6.buys), sells: this.formatTxnCount(txns.h6 && txns.h6.sells) },
+        { key: 'h24', label: '24小时', buys: this.formatTxnCount(txns.h24 && txns.h24.buys), sells: this.formatTxnCount(txns.h24 && txns.h24.sells) }
+      ];
     },
     visibleGlobalMarkets() {
       return this.globalMarkets;
@@ -2699,8 +2877,11 @@ new Vue({
       this.chartAsset = asset;
       this.chartInterval = this.chartInterval || '15';
       this.chartFrameNonce = Date.now();
+      this.chartDexDetailsOpen = true;
+      this.chartSettingsOpen = false;
       this.chartOpen = true;
       this.lockPageScroll();
+      if (asset && asset.type === 'dex') this.pollDexAssets([asset]);
     },
 
     handleAssetClick(asset) {
@@ -2713,6 +2894,7 @@ new Vue({
 
     closeChart() {
       this.chartOpen = false;
+      this.chartSettingsOpen = false;
       this.unlockPageScroll();
     },
 
@@ -2723,6 +2905,43 @@ new Vue({
 
     reloadChart() {
       this.chartFrameNonce = Date.now();
+    },
+
+    formatTxnCount(value) {
+      const num = Number(value);
+      if (!Number.isFinite(num)) return '--';
+      return Math.max(0, Math.round(num)).toLocaleString('zh-CN');
+    },
+
+    async copyDexContract() {
+      const address = this.chartAsset && this.chartAsset.tokenAddress;
+      if (!address) return;
+      let copied = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(address);
+          copied = true;
+        }
+      } catch (e) {}
+      if (!copied) {
+        try {
+          const input = document.createElement('textarea');
+          input.value = address;
+          input.style.position = 'fixed';
+          input.style.left = '-9999px';
+          input.style.opacity = '0';
+          document.body.appendChild(input);
+          input.focus();
+          input.select();
+          copied = document.execCommand('copy');
+          document.body.removeChild(input);
+        } catch (e) {}
+      }
+      if (copied) {
+        this.showToast('合约地址已复制');
+      } else {
+        this.showToast('复制失败，请长按合约地址复制');
+      }
     },
 
     getStockTvSymbol(stock) {
@@ -3088,6 +3307,11 @@ new Vue({
         volume24h: null,
         circulatingSupply: null,
         marketCap: null,
+        dexTxns: {},
+        dexLiquidityUsd: null,
+        dexPairAddress: '',
+        dexId: '',
+        dexUrl: '',
         updateTime: '',
         source: '识别中',
         sourceType: 'pending',
@@ -3800,6 +4024,11 @@ new Vue({
               changePct: parseFloat(best.priceChange && best.priceChange.h24),
               volume24h: parseFloat(best.volume && best.volume.h24),
               marketCap: parseFloat(best.marketCap || best.fdv),
+              dexTxns: best.txns || {},
+              dexLiquidityUsd: parseFloat(best.liquidity && best.liquidity.usd),
+              dexPairAddress: best.pairAddress || '',
+              dexId: best.dexId || '',
+              dexUrl: best.url || '',
               updateTime: this.formatTimestamp(Date.now()),
               source: '链上行情',
               sourceType: 'dex',
@@ -3954,7 +4183,7 @@ new Vue({
         { id: 'us10y', sourceKey: 'us10y', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 3, suffix: '%', sources: [{ type: 'treasury', label: '美国财政部' }] },
         { id: 'usdcny', sourceKey: 'usdcny', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 4, sources: [{ type: 'frankfurter', currency: 'CNY', label: 'Frankfurter USD/CNY' }] },
         { id: 'usdjpy', sourceKey: 'usdjpy', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 3, sources: [{ type: 'frankfurter', currency: 'JPY', label: 'Frankfurter USD/JPY' }] },
-        { id: 'vix', sourceKey: 'vix', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'cboe', label: 'Cboe 延迟行情' }, { type: 'tencentVix', label: '腾讯 VIX 兜底' }] }
+        { id: 'vix', sourceKey: 'vix', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'cboeMirror', label: 'Cboe 官方行情' }, { type: 'cboe', label: 'Cboe 延迟行情' }, { type: 'fred', series: 'VIXCLS', label: 'FRED / Cboe 日线' }, { type: 'tencentVix', label: '腾讯 VIX 兜底' }] }
       ];
     },
 
@@ -4208,6 +4437,27 @@ new Vue({
       };
     },
 
+    async fetchCboeVixMirrorQuote(source) {
+      const officialUrl = 'https://cdn.cboe.com/api/global/delayed_quotes/quotes/_VIX.json';
+      const mirrorUrl = `https://r.jina.ai/http://${officialUrl}`;
+      const res = await this.fetchWithSoftTimeout(mirrorUrl, 9000);
+      if (!res.ok) throw new Error(`Cboe mirror ${res.status}`);
+      const text = await res.text();
+      const jsonStart = text.indexOf('{"timestamp"');
+      if (jsonStart < 0) throw new Error('Cboe mirror invalid');
+      const payload = JSON.parse(text.slice(jsonStart).trim());
+      const data = payload && payload.data;
+      const price = Number(data && (data.current_price || data.close));
+      const changePct = Number(data && data.price_change_percent);
+      if (!Number.isFinite(price) || price <= 0) throw new Error('Cboe mirror no price');
+      return {
+        price,
+        changePct: Number.isFinite(changePct) ? changePct : null,
+        label: source.label,
+        updatedAt: data.last_trade_time || payload.timestamp || ''
+      };
+    },
+
     fetchTencentVixQuote(source) {
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
@@ -4247,6 +4497,7 @@ new Vue({
       if (source.type === 'frankfurter') return this.fetchFrankfurterQuote(source);
       if (source.type === 'frankfurterDxy') return this.fetchFrankfurterDxyQuote(source);
       if (source.type === 'treasury') return this.fetchTreasuryQuote(source);
+      if (source.type === 'cboeMirror') return this.fetchCboeVixMirrorQuote(source);
       if (source.type === 'cboe') return this.fetchCboeVixQuote(source);
       if (source.type === 'tencentVix') return this.fetchTencentVixQuote(source);
       throw new Error('unknown optional source');
