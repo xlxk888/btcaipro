@@ -193,6 +193,26 @@
       outline: none;
       font-size: .76rem;
     }
+    .alert-value-input {
+      display: flex;
+      align-items: center;
+      height: 34px;
+      border: 1px solid rgba(72,99,150,.7);
+      border-radius: 8px;
+      background: #0a111f;
+      overflow: hidden;
+    }
+    .alert-value-input span {
+      padding-left: 9px;
+      color: #8fa0ba;
+      font-size: .76rem;
+      font-weight: 900;
+    }
+    .alert-value-input input {
+      height: 32px;
+      border: 0;
+      padding-left: 5px;
+    }
     .alert-form button, .small-action {
       border: 0;
       border-radius: 8px;
@@ -201,6 +221,10 @@
       font-size: .74rem;
       font-weight: 900;
       cursor: pointer;
+    }
+    .alert-form button:disabled, .alert-value-input input:disabled {
+      cursor: not-allowed;
+      opacity: .55;
     }
     .alert-toolbar {
       display: flex;
@@ -1055,6 +1079,16 @@
       .source-strip { gap: 5px; margin-bottom: 10px; }
       .source-chip { min-height: 24px; padding: 3px 7px; font-size: .6rem; }
       .grid { grid-template-columns: 1fr; }
+      .market-card { order: 1; }
+      .radar-card { order: 2; }
+      .alerts-card { order: 3; }
+      .stocks-card { order: 4; }
+      .global-card { order: 5; }
+      .halving-card { order: 6; }
+      .gauge-card { order: 7; }
+      .ahr-card { order: 8; }
+      .miner-card { order: 9; }
+      .entity-holders-card { order: 10; }
       .span-2, .span-3, .span-4, .span-6 { grid-column: span 1; }
       .radar-body { grid-template-columns: 1fr; }
       .radar-focus { grid-template-columns: 1fr 1fr; }
@@ -1546,8 +1580,11 @@
           <option value="tenMinMove">10分钟异动(预留)</option>
           <option value="volumeSpike">成交量异动(预留)</option>
         </select>
-        <input v-model.trim="alertForm.value" type="number" step="any" placeholder="目标值" />
-        <button type="submit">添加</button>
+        <div class="alert-value-input">
+          <span>{{ alertFormUnit }}</span>
+          <input v-model.trim="alertForm.value" type="number" min="0" step="any" :placeholder="alertFormPlaceholder" :disabled="alertFormReserved" />
+        </div>
+        <button type="submit" :disabled="alertFormReserved">{{ alertFormReserved ? '暂未启用' : '添加' }}</button>
       </form>
       <div class="alert-toolbar">
         <span>{{ notificationStatus }}</span>
@@ -1587,7 +1624,7 @@
       </form>
       <div class="watch-error" v-if="watchError">{{ watchError }}</div>
       <div class="watch-hint">
-        简称默认匹配 USDT 交易对；手机端长按进入操作/拖动模式，左滑删除；电脑端可用右侧按钮。
+        简称默认匹配 USDT 交易对；手机端点击打开K线，长按拖动排序，左滑删除。
       </div>
 
       <div class="watch-table">
@@ -1704,7 +1741,7 @@
         <input class="stock-input" v-model.trim="stockInput" placeholder="添加股票，如 AAPL" autocomplete="off" />
         <button class="stock-add-btn" type="submit">添加</button>
       </form>
-      <div class="stock-hint">手机端长按进入操作/拖动模式，左滑删除；电脑端可用右侧按钮。</div>
+      <div class="stock-hint">手机端点击打开K线，长按拖动排序，左滑删除。</div>
       <div class="scroll stock-list">
         <div v-for="(stock, index) in stocks" :key="stock.symbol" class="gesture-row-shell" :class="mobileGestureShellClass('stock', index, stock.symbol)">
           <div class="swipe-delete-reveal">左滑删除</div>
@@ -1729,10 +1766,10 @@
             </div>
             <div class="stock-meta">
               <div class="stock-val" :class="stock.trend || (stock.changePct >= 0 ? 'up' : 'down')">
-                {{ stock.price === '--' ? '获取中 ...' : '$ ' + stock.price }}
+                {{ stockPriceText(stock) }}
               </div>
               <div class="stock-change" :class="stock.changePct >= 0 ? 'up' : 'down'">
-                {{ stock.changePct >= 0 ? '+' : '' }}{{ stock.changePct.toFixed(2) }}%
+                {{ stock.price === '--' ? '--' : (stock.changePct >= 0 ? '+' : '') + stock.changePct.toFixed(2) + '%' }}
               </div>
             </div>
             <div class="stock-actions">
@@ -1743,6 +1780,7 @@
             <div class="stock-mobile-meta">
               <span>美东：{{ usMarketInfo.etTime }}</span>
               <span>{{ usMarketInfo.desc }}</span>
+              <span>{{ stock.time || stockStatus }}</span>
             </div>
           </div>
           <div
@@ -1826,9 +1864,9 @@
     </div>
 
     <div class="card span-2 ahr-card compact-card">
-      <h2>🧮 AHR999指数</h2>
-      <div class="ahr-val" :style="ahrValue.includes('拦截') ? 'font-size:1.2rem;color:#ef4444' : ''">{{ ahrValue }}</div>
-      <div class="fear-note">当前价格 / 200WMA 与拟合价格组合，越低越接近周期底部。</div>
+      <h2>🧮 AHR999 指数（本地估算）</h2>
+      <div class="ahr-val">{{ ahrValue }}</div>
+      <div class="fear-note">基于 BTC 价格、200日数据与拟合公式估算，仅供参考。</div>
       <div class="ahr-compact-grid">
         <div class="ahr-mini"><span>&lt; 0.45</span><strong>抄底区间</strong></div>
         <div class="ahr-mini"><span>0.45 - 1.2</span><strong>定投区间</strong></div>
@@ -1916,7 +1954,7 @@
           <span>{{ chartSubTitle }}</span>
         </div>
         <div class="chart-actions">
-          <a class="chart-link" :href="chartExternalUrl" target="_blank">外部打开</a>
+          <a class="chart-link" :href="chartExternalUrl" target="_blank" rel="noopener noreferrer">外部打开</a>
           <button class="chart-refresh" type="button" @click="reloadChart">刷新</button>
           <button class="chart-close" type="button" @click="closeChart">×</button>
         </div>
@@ -1999,12 +2037,11 @@
       <div class="bottom-notice-desc">工具推荐与访问提示：部分网页或下载入口可能需要稳定网络环境。</div>
       <div>
         1. Bitget Wallet 免费注册，零手续费，开卡成功返 5 美金。
-        <a class="bottom-notice-link" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" title="点击下载">下载</a>
+        <a class="bottom-notice-link" href="https://web3.bitget.com/share/3O6ABH?inviteCode=mtZwEy" target="_blank" rel="noopener noreferrer" title="点击下载">下载</a>
       </div>
       <div>
-        2. Binance App 下载。邀请码：<span style="color:#22c55e;font-weight:900;">23017017</span>
-        <a class="bottom-notice-link" href="https://www.bsmkweb.cc/register?ref=23017017" target="_blank">安卓</a>
-        <a class="bottom-notice-link" href="https://www.bsmkweb.com/download-guide?hl=zh-CN" target="_blank">苹果</a>
+        2. Binance App 官方下载。
+        <a class="bottom-notice-link" href="https://www.binance.com/en/download" target="_blank" rel="noopener noreferrer">官方入口</a>
       </div>
     </div>
   </div>
@@ -2035,11 +2072,14 @@ new Vue({
     wsStatus: 'idle',
     wsReconnectTimer: null,
     binanceStaleTimer: null,
+    binanceWatchdogTimer: null,
+    wsConnectedAt: 0,
     wsRetryCount: 0,
     binanceSymbolSet: null,
     pendingUpdates: {},
     rafId: null,
     fallbackTimer: null,
+    fallbackPolling: false,
     marketCapTimer: null,
     holdersTimer: null,
     holdersRefreshing: false,
@@ -2056,6 +2096,7 @@ new Vue({
     stockInput: '',
     touchGesture: null,
     touchSuppressClick: false,
+    lastGestureAt: 0,
     mobileActionMenu: null,
     chartOpen: false,
     chartAsset: null,
@@ -2072,7 +2113,7 @@ new Vue({
     compactMode: false,
     minersExpanded: false,
     globalExpanded: false,
-    notificationStatus: '浏览器通知未开启，仍会在页面内提示',
+    notificationStatus: '系统通知需要 HTTPS 或 localhost 并经用户授权；未授权时仅页面内提示',
     alertSoundEnabled: false,
     alertForm: {
       targetKey: '',
@@ -2083,15 +2124,16 @@ new Vue({
     optionalGlobalPending: false,
     dataSources: {
       binance: { name: 'Binance WS', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '实时', staleMs: 30000, expireMs: 120000 },
+      binanceRest: { name: 'Binance REST', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 30000, expireMs: 120000 },
       okx: { name: 'OKX', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 45000, expireMs: 180000 },
       coingecko: { name: 'CoinGecko', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '60s', staleMs: 180000, expireMs: 600000 },
       dex: { name: '链上行情', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 45000, expireMs: 180000 },
       tencentStocks: { name: '美股行情', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '60s', staleMs: 180000, expireMs: 900000 },
       tencentGlobal: { name: '环球金融', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '30s', staleMs: 120000, expireMs: 600000 },
       fearGreed: { name: '恐惧贪婪', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1h', staleMs: 2 * 60 * 60 * 1000, expireMs: 6 * 60 * 60 * 1000 },
-      ahr999: { name: 'AHR999', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1m', staleMs: 5 * 60 * 1000, expireMs: 30 * 60 * 1000 },
+      ahr999: { name: 'AHR999 本地估算', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1m', staleMs: 5 * 60 * 1000, expireMs: 30 * 60 * 1000 },
       mempool: { name: '减半数据', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 20 * 60 * 1000, expireMs: 60 * 60 * 1000 },
-      dxy: { name: 'DXY 美元指数', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
+      dxy: { name: 'DXY 美元指数（估算）', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
       us10y: { name: 'US10Y 美债10年', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
       vix: { name: 'VIX 恐慌指数', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
       usdcny: { name: '美元/人民币', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
@@ -2149,7 +2191,7 @@ new Vue({
       ondo: 'ondo-finance',
       render: 'render-token'
     },
-    ahrValue: '计算中 ...',
+    ahrValue: '--',
     fgValue: 50, fgText: '中立', fgColor: '#facc15',
     fearNote: '市场情绪加载中，数值越低代表越恐慌，越高代表越贪婪。',
     etfProducts: [
@@ -2195,7 +2237,7 @@ new Vue({
     stocks: [
       { symbol: 'NVDA', query: 'usNVDA', name: 'NVIDIA', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'TSLA', query: 'usTSLA', name: 'Tesla', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
-      { symbol: 'SPCX', query: 'usSPCX', name: 'SpaceX', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
+      { symbol: 'SPCX', query: 'usSPCX', name: 'SPCX ETF', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'CRCL', query: 'usCRCL', name: 'Circle', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'MU', query: 'usMU', name: 'Micron', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
       { symbol: 'LITE', query: 'usLITE', name: 'Lumentum', price: '--', changePct: 0, lastPrice: null, trend: '', time: '等待刷新' },
@@ -2219,6 +2261,9 @@ new Vue({
     stockStatus: '等待刷新',
     stockRefreshMs: 60000,
     stockRequestPending: false,
+    stockRequestTimer: null,
+    globalRequestPending: false,
+    globalRequestTimer: null,
     globalMarkets: [
       { id: 'gc', name: '黄金 (1oz)', icon: '🟡', price: '--', change: 0, prefix: '$' },
       { id: 'cl', name: '原油 (WTI)', icon: '🛢️', price: '--', change: 0, prefix: '$' },
@@ -2226,7 +2271,7 @@ new Vue({
       { id: 'dji', name: '道琼斯', icon: '📊', price: '--', change: 0 },
       { id: 'ixic', name: '纳斯达克', icon: '🚀', price: '--', change: 0 },
       { id: 'sh', name: '上证指数', icon: '🇨🇳', price: '--', change: 0 },
-      { id: 'dxy', name: 'DXY 美元指数', icon: '💵', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
+      { id: 'dxy', name: 'DXY 美元指数（估算）', icon: '💵', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
       { id: 'us10y', name: 'US10Y 美债10年', icon: '🏦', price: '--', change: null, placeholder: true, stale: false, status: '等待数据', suffix: '%' },
       { id: 'vix', name: 'VIX 恐慌指数', icon: '⚠️', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
       { id: 'usdcny', name: '美元 / 人民币', icon: '🇨🇳', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
@@ -2285,23 +2330,26 @@ new Vue({
           name: source.name,
           label,
           badge: this.sourceBadge(source),
+          relevant: this.sourceIsRelevant(key),
           detail: this.sourceDetail(source),
           title: `状态：${label}；错误：${source.errorCount || 0}；间隔：${source.interval || '--'}`
         };
       });
     },
     sourceHealthClass() {
-      const list = this.dataSourceList;
+      const list = this.dataSourceList.filter(item => item.relevant);
       if (list.some(item => item.badge === 'bad')) return 'bad';
-      if (list.some(item => item.badge === 'warn')) return 'warn';
+      if (list.some(item => item.badge === 'warn' || item.badge === 'idle')) return 'warn';
       return 'ok';
     },
     sourceHealthText() {
-      const list = this.dataSourceList;
+      const list = this.dataSourceList.filter(item => item.relevant);
       const bad = list.filter(item => item.badge === 'bad').length;
-      const warn = list.filter(item => item.badge === 'warn').length;
       if (bad) return `${bad} 个数据源异常`;
-      if (warn) return `${warn} 个数据源延迟`;
+      const delayed = list.some(item => ['延迟', '旧数据', '日线'].includes(item.label));
+      if (delayed) return '部分数据延迟';
+      const waiting = list.some(item => item.badge === 'idle' || !this.dataSources[item.key].lastUpdate);
+      if (waiting) return '部分数据等待';
       return '数据源正常';
     },
     usMarketInfo() {
@@ -2345,7 +2393,7 @@ new Vue({
         badge,
         etTime,
         footer: label === '休市'
-          ? '当前为美股休市时段，价格可能停留在上一交易日收盘或盘后数据。'
+          ? '当前为美股休市或节假日，价格可能停留在上一交易日收盘或盘后数据。'
           : `当前为美股${label}时段，显示${desc}。`
       };
     },
@@ -2364,6 +2412,17 @@ new Vue({
     },
     activeAlertCount() {
       return this.priceAlerts.filter(alert => alert.enabled && alert.status === 'waiting').length;
+    },
+    alertFormUnit() {
+      if (this.alertFormReserved) return '—';
+      return this.alertForm.condition.includes('change') ? '%' : '$';
+    },
+    alertFormPlaceholder() {
+      if (this.alertFormReserved) return '预留功能，暂未启用';
+      return this.alertForm.condition.includes('change') ? '涨跌幅' : '目标价格';
+    },
+    alertFormReserved() {
+      return ['tenMinMove', 'volumeSpike'].includes(this.alertForm.condition);
     },
     triggeredAlertCount() {
       return this.priceAlerts.filter(alert => alert.status === 'triggered').length;
@@ -2420,8 +2479,12 @@ new Vue({
       };
     },
     wsStatusText() {
-      const count = this.watchedAssets.filter(asset => asset.sourceType === 'binance').length;
+      const eligible = this.watchedAssets.filter(asset => asset.binanceEligible);
+      const count = eligible.length;
+      const fallbackCount = eligible.filter(asset => asset.sourceType !== 'binance').length;
       if (!count) return 'Binance WS 待命';
+      if (fallbackCount && this.wsStatus === 'connected') return 'Binance WS 恢复中，兜底仍启用';
+      if (fallbackCount) return 'Binance WS 异常，已启用 OKX/CoinGecko 兜底';
       if (this.wsStatus === 'connected') return `Binance WS 已连接 ${count}`;
       if (this.wsStatus === 'connecting') return `Binance WS 连接中 ${count}`;
       if (this.wsStatus === 'reconnecting') return `Binance WS 重连中 ${count}`;
@@ -2554,17 +2617,32 @@ new Vue({
       return Number.isFinite(value) && value > 0 ? value : Math.max(this.sourceStaleMs(source) * 3, 5 * 60 * 1000);
     },
 
-    markSource(key, status, error) {
+    sourceIsRelevant(key) {
+      if (key === 'okx') return this.watchedAssets.some(asset => asset.type === 'cex' && asset.sourceType !== 'binance');
+      if (key === 'dex') return this.watchedAssets.some(asset => asset.type === 'dex');
+      if (key === 'tencentStocks') return this.stocks.length > 0;
+      if (key === 'binance') return this.watchedAssets.some(asset => asset.type === 'cex' && asset.binanceEligible);
+      if (key === 'coingecko') {
+        return this.watchedAssets.some(asset => asset.type === 'cex' && (
+          asset.sourceType === 'coingecko' || !!this.cgIdMap[this.baseFromPair(asset.pair).toLowerCase()]
+        ));
+      }
+      return true;
+    },
+
+    markSource(key, status, error, options = {}) {
       const source = this.dataSources[key];
       if (!source) return;
       if (source.disabled && status === '异常') return;
       const now = Date.now();
       source.status = status;
       source.lastAttempt = now;
-      if (['已刷新', '已连接', '列表已刷新'].includes(status)) {
-        source.lastUpdate = now;
+      const success = options.success === true || ['实时', '轮询', '估算', '日线', '延迟', '已刷新'].includes(status);
+      if (success) {
+        source.lastUpdate = Number(options.lastUpdate) || now;
         source.disabled = false;
         source.enabled = true;
+        source.errorCount = 0;
       }
       if (error) source.errorCount = (source.errorCount || 0) + 1;
     },
@@ -2572,22 +2650,27 @@ new Vue({
     sourceDisplayLabel(source) {
       if (!source) return '未知';
       if (source.disabled || source.status === '待接入' || source.status === '未启用') return source.status || '未启用';
-      if (source.status === '暂停' || source.status === '等待') return source.status;
-      if (!source.lastUpdate) return source.status || '等待';
+      if (!source.lastUpdate) {
+        if (source.status === '异常') return '异常';
+        if (['暂停', '等待', '连接中', '重连中', '轮询中', '列表已读取', '等待推送', '等待数据'].includes(source.status)) {
+          return source.status;
+        }
+        return '等待';
+      }
       const age = this.clockNow - source.lastUpdate;
       if (source.status === '异常') return '异常';
-      if (age > this.sourceExpireMs(source)) return '数据过期';
+      if (source.status === '旧数据' || age > this.sourceExpireMs(source)) return '旧数据';
       if (age > this.sourceStaleMs(source)) return '延迟';
       return source.status || '已刷新';
     },
 
     sourceBadge(source) {
       if (!source) return 'idle';
-      if (source.disabled || ['待接入', '未启用', '暂停', '等待'].includes(source.status)) return 'idle';
+      if (source.disabled || ['待接入', '未启用', '暂停', '等待', '连接中', '重连中', '轮询中', '列表已读取', '等待推送', '等待数据'].includes(source.status)) return 'idle';
       const label = this.sourceDisplayLabel(source);
-      if (label === '异常' || label === '数据过期') return 'bad';
-      if (label === '延迟' || label === '等待' || label === '暂停') return 'warn';
-      if (label === '轮询中') return 'idle';
+      if (label === '异常') return 'bad';
+      if (['延迟', '旧数据', '日线'].includes(label)) return 'warn';
+      if (['等待', '暂停', '连接中', '重连中', '轮询中', '列表已读取', '等待推送', '等待数据'].includes(label)) return 'idle';
       return 'ok';
     },
 
@@ -2596,9 +2679,12 @@ new Vue({
       const errors = source.errorCount || 0;
       const age = source.lastUpdate ? Math.max(0, Math.round((this.clockNow - source.lastUpdate) / 1000)) : null;
       if (source.disabled || ['待接入', '未启用'].includes(source.status)) return '未计入异常';
-      if (source.status === '暂停') return '未启用';
-      if (source.status === '等待') return '等待首次刷新';
+      if (source.status === '暂停') return '当前待命';
+      if (['等待', '连接中', '重连中', '轮询中', '列表已读取', '等待推送', '等待数据'].includes(source.status)) return '尚无成功行情';
       if (source.status === '旧数据') return age === null ? '保留旧数据' : `旧数据 ${age}s 前`;
+      if (source === this.dataSources.ahr999 && this.sourceBadge(source) === 'bad') {
+        return 'AHR999估算失败 / K线接口不可用';
+      }
       if (this.sourceBadge(source) === 'bad') return errors ? `错误 ${errors} 次` : '需检查';
       if (this.sourceBadge(source) === 'warn') return age === null ? '等待首次刷新' : `${age}s 前`;
       return age === null ? '' : `${age}s 前`;
@@ -2637,12 +2723,19 @@ new Vue({
 
     stockTypeLabel(stock) {
       const symbol = stock && stock.symbol;
-      const etfs = ['SPY', 'QQQ', 'IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB'];
+      const etfs = ['SPY', 'QQQ', 'SPCX', 'IBIT', 'FBTC', 'GBTC', 'ARKB', 'BITB'];
       const tokenized = ['TSLAX', 'NVDAX'];
       if (etfs.includes(symbol)) return 'ETF';
       if (tokenized.includes(symbol)) return '代币化股票';
       if (symbol === 'CRCL' || symbol === 'COIN') return '币股';
       return '正股';
+    },
+
+    stockPriceText(stock) {
+      if (!stock || stock.price === '--') {
+        return stock && stock.time && stock.time.includes('暂无数据') ? '暂无数据' : '获取中 ...';
+      }
+      return `$ ${stock.price}`;
     },
 
     loadPriceAlerts() {
@@ -2653,9 +2746,9 @@ new Vue({
         this.priceAlerts = [];
       }
       if (window.Notification && Notification.permission === 'granted') {
-        this.notificationStatus = '浏览器通知已开启';
+        this.notificationStatus = '浏览器通知已授权（HTTPS/localhost）；同时保留页面内提示';
       } else if (window.Notification && Notification.permission === 'denied') {
-        this.notificationStatus = '浏览器通知已拒绝，将仅页面内提示';
+        this.notificationStatus = '浏览器通知未授权，将仅页面内提示；需 HTTPS/localhost';
       }
     },
 
@@ -2674,6 +2767,10 @@ new Vue({
         this.showToast('请输入有效目标值');
         return;
       }
+      if ((this.alertForm.condition.includes('change') || this.alertForm.condition.includes('price')) && targetValue < 0) {
+        this.showToast('请输入正数目标值');
+        return;
+      }
       const alert = {
         id: `alert:${Date.now()}:${Math.random().toString(16).slice(2)}`,
         targetKey: target.key,
@@ -2689,7 +2786,7 @@ new Vue({
       this.priceAlerts.unshift(alert);
       this.alertForm.value = '';
       this.savePriceAlerts();
-      this.showToast(alert.status === 'closed' ? '该提醒类型已预留，等待后续数据源启用' : '提醒已添加');
+      this.showToast(alert.status === 'closed' ? '预留功能，暂未启用' : '提醒已添加');
       this.evaluatePriceAlerts();
     },
 
@@ -2714,6 +2811,14 @@ new Vue({
     },
 
     togglePriceAlert(alert) {
+      if (['tenMinMove', 'volumeSpike'].includes(alert.condition)) {
+        alert.enabled = false;
+        alert.status = 'closed';
+        alert.triggeredAt = null;
+        this.savePriceAlerts();
+        this.showToast('预留功能，暂未启用');
+        return;
+      }
       alert.enabled = !alert.enabled;
       alert.status = alert.enabled ? 'waiting' : 'closed';
       if (alert.enabled) alert.triggeredAt = null;
@@ -2723,7 +2828,6 @@ new Vue({
     },
 
     alertConditionText(alert) {
-      const unit = alert.condition.includes('change') ? '%' : '$';
       const names = {
         priceAbove: '价格高于',
         priceBelow: '价格低于',
@@ -2732,10 +2836,16 @@ new Vue({
         tenMinMove: '10分钟异动',
         volumeSpike: '成交量异动'
       };
-      return `${names[alert.condition] || '提醒'} ${unit}${alert.value}`;
+      if (['tenMinMove', 'volumeSpike'].includes(alert.condition)) {
+        return `${names[alert.condition]} · 预留功能，暂未启用`;
+      }
+      return alert.condition.includes('change')
+        ? `${names[alert.condition] || '涨跌幅提醒'} ${alert.value}%`
+        : `${names[alert.condition] || '价格提醒'} $${alert.value}`;
     },
 
     alertStatusText(alert) {
+      if (['tenMinMove', 'volumeSpike'].includes(alert.condition)) return '暂未启用';
       if (alert.status === 'triggered') return '已触发';
       if (alert.status === 'closed') return '已关闭';
       return '等待触发';
@@ -2803,20 +2913,26 @@ new Vue({
     },
 
     requestNotificationPermission() {
+      const localHost = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
+      if (!window.isSecureContext && !localHost) {
+        this.notificationStatus = '系统通知需要 HTTPS 或 localhost；当前仅页面内提示';
+        this.showToast(this.notificationStatus);
+        return;
+      }
       if (!window.Notification) {
-        this.notificationStatus = '当前浏览器不支持系统通知';
+        this.notificationStatus = '当前浏览器不支持系统通知，将仅页面内提示';
         this.showToast(this.notificationStatus);
         return;
       }
       if (Notification.permission === 'granted') {
-        this.notificationStatus = '浏览器通知已开启';
-        this.showToast('浏览器通知已开启');
+        this.notificationStatus = '浏览器通知已授权（HTTPS/localhost）；同时保留页面内提示';
+        this.showToast('浏览器通知已授权');
         return;
       }
       Notification.requestPermission().then(permission => {
         this.notificationStatus = permission === 'granted'
-          ? '浏览器通知已开启'
-          : '浏览器通知未授权，将仅页面内提示';
+          ? '浏览器通知已授权（HTTPS/localhost）；同时保留页面内提示'
+          : '浏览器通知未授权，将仅页面内提示；需 HTTPS/localhost';
         this.showToast(this.notificationStatus);
       });
     },
@@ -2984,7 +3100,7 @@ new Vue({
     },
 
     handleAssetClick(asset) {
-      if (this.touchSuppressClick) {
+      if (this.touchSuppressClick || Date.now() - this.lastGestureAt < 550) {
         this.touchSuppressClick = false;
         return;
       }
@@ -3062,7 +3178,7 @@ new Vue({
     },
 
     handleStockClick(stock) {
-      if (this.touchSuppressClick) {
+      if (this.touchSuppressClick || Date.now() - this.lastGestureAt < 550) {
         this.touchSuppressClick = false;
         return;
       }
@@ -3127,6 +3243,7 @@ new Vue({
         this.touchGesture.dragging = true;
         this.touchGesture.axis = 'drag';
         this.touchSuppressClick = true;
+        this.lastGestureAt = Date.now();
         this.mobileActionMenu = { type, key };
         this.vibrateMobile(12);
       }, 380);
@@ -3162,7 +3279,7 @@ new Vue({
       if (gesture.dragging) {
         event.preventDefault();
         gesture.dragOffset = touch.clientY - gesture.dragAnchorY;
-        if (Math.abs(gesture.dragOffset) > 6 && this.mobileActionMenu) {
+        if (Math.abs(gesture.dragOffset) > 3 && this.mobileActionMenu) {
           this.closeMobileActionMenu();
         }
         const threshold = Math.max(34, gesture.itemHeight * .46);
@@ -3184,6 +3301,7 @@ new Vue({
         gesture.axis = 'swipe';
         gesture.swiping = true;
         this.touchSuppressClick = true;
+        this.lastGestureAt = Date.now();
         event.preventDefault();
         gesture.swipeOffset = Math.max(-118, gesture.dx);
         return;
@@ -3211,6 +3329,7 @@ new Vue({
         gesture.settling = true;
         gesture.swipeOffset = -Math.max(160, window.innerWidth);
         this.touchSuppressClick = true;
+        this.lastGestureAt = Date.now();
         setTimeout(() => {
           if (type === 'crypto') this.removeWatchAsset(key);
           if (type === 'stock') this.removeStock(key);
@@ -3225,6 +3344,7 @@ new Vue({
         gesture.thresholdVibrated = false;
         gesture.swipeOffset = 0;
         this.touchSuppressClick = true;
+        this.lastGestureAt = Date.now();
         setTimeout(() => {
           if (this.touchGesture === gesture) this.touchGesture = null;
           this.touchSuppressClick = false;
@@ -3234,6 +3354,7 @@ new Vue({
 
       if (gesture.dragging || Math.abs(gesture.dx) > 8 || Math.abs(gesture.dy) > 8) {
         this.touchSuppressClick = true;
+        this.lastGestureAt = Date.now();
         setTimeout(() => { this.touchSuppressClick = false; }, 260);
       }
       this.touchGesture = null;
@@ -3414,7 +3535,12 @@ new Vue({
         updateTime: '',
         source: '识别中',
         sourceType: 'pending',
-        status: '等待行情'
+        status: '等待行情',
+        binanceEligible: false,
+        lastWsAt: 0,
+        wsRecoveryCount: 0,
+        wsRecoverySince: 0,
+        fallbackSince: 0
       }, config);
     },
 
@@ -3498,7 +3624,7 @@ new Vue({
       const knownNames = {
         NVDA: 'NVIDIA',
         TSLA: 'Tesla',
-        SPCX: 'SpaceX',
+        SPCX: 'SPCX ETF',
         CRCL: 'Circle',
         MU: 'Micron',
         LITE: 'Lumentum',
@@ -3513,7 +3639,7 @@ new Vue({
       return {
         symbol: upper,
         query: `us${upper}`,
-        name: name || knownNames[upper] || upper,
+        name: upper === 'SPCX' ? 'SPCX ETF' : (name || knownNames[upper] || upper),
         price: '--',
         changePct: 0,
         lastPrice: null,
@@ -3745,23 +3871,27 @@ new Vue({
 
     async loadBinanceSymbols() {
       try {
-        const res = await fetch('https://data-api.binance.vision/api/v3/exchangeInfo');
+        const res = await this.fetchWithSoftTimeout('https://data-api.binance.vision/api/v3/exchangeInfo', 8000);
         if (!res.ok) throw new Error('exchangeInfo failed');
         const data = await res.json();
         this.binanceSymbolSet = new Set((data.symbols || [])
           .filter(item => item.status === 'TRADING')
           .map(item => item.symbol));
-        this.markSource('binance', '列表已刷新');
+        this.markSource('binance', '列表已读取');
       } catch (e) {
         this.binanceSymbolSet = null;
         this.fallbackStatus = 'Binance 列表读取失败，先尝试 WS';
-        this.markSource('binance', '异常', e);
+        const source = this.dataSources.binance;
+        source.status = '等待推送';
+        source.lastAttempt = Date.now();
+        source.errorCount += 1;
       }
     },
 
     routeWatchedAssets() {
       this.watchedAssets.forEach(asset => {
         if (asset.type === 'dex') {
+          asset.binanceEligible = false;
           asset.source = '链上行情';
           asset.sourceType = 'dex';
           asset.status = '轮询 10s';
@@ -3769,10 +3899,14 @@ new Vue({
         }
 
         if (!this.binanceSymbolSet || this.binanceSymbolSet.has(asset.pair)) {
-          asset.source = 'Binance WS';
-          asset.sourceType = 'binance';
-          asset.status = '实时推送';
+          asset.binanceEligible = true;
+          if (!asset.fallbackSince) {
+            asset.source = 'Binance WS';
+            asset.sourceType = 'binance';
+            asset.status = '等待实时推送';
+          }
         } else {
+          asset.binanceEligible = false;
           asset.source = '兜底查询';
           asset.sourceType = 'pending';
           asset.status = '尝试 OKX/CoinGecko';
@@ -3854,10 +3988,13 @@ new Vue({
 
       try {
         const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids.map(encodeURIComponent).join(',')}&price_change_percentage=24h`;
-        const res = await fetch(url);
+        const res = await this.fetchWithSoftTimeout(url, 8000);
         if (!res.ok) throw new Error('market cap failed');
         const list = await res.json();
-        this.markSource('coingecko', '已刷新');
+        if (!Array.isArray(list) || !list.some(item => Number(item.current_price) > 0)) {
+          throw new Error('market cap no valid data');
+        }
+        this.markSource('coingecko', '轮询');
         const byId = (Array.isArray(list) ? list : []).reduce((acc, item) => {
           acc[item.id] = item;
           return acc;
@@ -3895,7 +4032,7 @@ new Vue({
     formatPrice(value) {
       if (value === null || value === undefined || value === '') return '--';
       const num = Number(value);
-      if (!Number.isFinite(num)) return '--';
+      if (!Number.isFinite(num) || num <= 0) return '--';
       const digits = num >= 1000 ? 2 : num >= 1 ? 4 : 8;
       return `$ ${num.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
     },
@@ -3938,7 +4075,7 @@ new Vue({
         this.ws.close();
       }
 
-      const binanceAssets = this.watchedAssets.filter(asset => asset.sourceType === 'binance');
+      const binanceAssets = this.watchedAssets.filter(asset => asset.type === 'cex' && asset.binanceEligible);
       if (!binanceAssets.length) {
         this.ws = null;
         this.wsStatus = 'idle';
@@ -3954,18 +4091,31 @@ new Vue({
       this.ws.onopen = () => {
         this.wsStatus = 'connected';
         this.wsRetryCount = 0;
-        this.markSource('binance', '已连接');
-        this.binanceStaleTimer = setTimeout(this.moveStaleBinanceToFallback, 8000);
+        this.wsConnectedAt = Date.now();
+        this.markSource('binance', '等待推送');
       };
 
       this.ws.onmessage = event => {
         try {
           const payload = JSON.parse(event.data);
           const ticker = payload.data || payload;
-          const asset = this.watchedAssets.find(item => item.sourceType === 'binance' && item.pair === ticker.s);
+          const asset = this.watchedAssets.find(item => item.binanceEligible && item.pair === ticker.s);
           if (!asset) return;
+          const price = Number(ticker.c);
+          if (!Number.isFinite(price) || price <= 0) return;
+          const now = Date.now();
+          asset.lastWsAt = now;
+          if (asset.sourceType !== 'binance') {
+            asset.wsRecoverySince = asset.wsRecoverySince || now;
+            asset.wsRecoveryCount = (asset.wsRecoveryCount || 0) + 1;
+            const fallbackAge = now - Number(asset.fallbackSince || now);
+            if (asset.wsRecoveryCount < 3 || fallbackAge < 15000) return;
+          }
+          asset.wsRecoveryCount = 0;
+          asset.wsRecoverySince = 0;
+          asset.fallbackSince = 0;
           this.queueAssetUpdate(asset.id, {
-            price: parseFloat(ticker.c),
+            price,
             changePct: parseFloat(ticker.P),
             volume24h: parseFloat(ticker.q),
             updateTime: this.formatTimestamp(ticker.E || Date.now()),
@@ -3973,19 +4123,21 @@ new Vue({
             sourceType: 'binance',
             status: '实时推送'
           });
-          this.markSource('binance', '已连接');
+          this.markSource('binance', '实时');
         } catch (e) {}
       };
 
       this.ws.onerror = () => {
         this.wsStatus = 'error';
         this.markSource('binance', '异常', true);
+        this.activateBinanceFallback('Binance WS 连接异常');
       };
 
       this.ws.onclose = () => {
         if (this.watchedAssets.some(asset => asset.sourceType === 'binance')) {
           this.wsRetryCount += 1;
           this.markSource('binance', '重连中');
+          this.activateBinanceFallback('Binance WS 断线');
           this.scheduleWsReconnect();
         }
       };
@@ -3999,20 +4151,39 @@ new Vue({
     },
 
     moveStaleBinanceToFallback() {
-      if (this.binanceSymbolSet) return;
       let changed = false;
+      const now = Date.now();
       this.watchedAssets.forEach(asset => {
-        if (asset.sourceType === 'binance' && !asset.price) {
+        const lastMessageAt = Number(asset.lastWsAt || this.wsConnectedAt || 0);
+        if (asset.binanceEligible && asset.sourceType === 'binance' && (!lastMessageAt || now - lastMessageAt > 30000)) {
           asset.source = '兜底查询';
           asset.sourceType = 'pending';
-          asset.status = 'Binance 暂无推送';
+          asset.status = 'Binance WS 超过30秒无推送';
+          asset.fallbackSince = now;
+          asset.wsRecoveryCount = 0;
           changed = true;
         }
       });
       if (changed) {
-        this.connectBinanceStreams();
+        this.wsStatus = this.wsStatus === 'connected' ? 'error' : this.wsStatus;
+        this.markSource('binance', '异常', true);
         this.pollFallbackAssets();
       }
+    },
+
+    activateBinanceFallback(reason) {
+      const now = Date.now();
+      let changed = false;
+      this.watchedAssets.forEach(asset => {
+        if (!asset.binanceEligible || asset.sourceType !== 'binance') return;
+        asset.source = '兜底查询';
+        asset.sourceType = 'pending';
+        asset.status = reason || 'Binance WS 异常';
+        asset.fallbackSince = now;
+        asset.wsRecoveryCount = 0;
+        changed = true;
+      });
+      if (changed) this.pollFallbackAssets();
     },
 
     queueAssetUpdate(id, patch) {
@@ -4070,23 +4241,33 @@ new Vue({
     },
 
     async pollFallbackAssets() {
-      const fallbackAssets = this.watchedAssets.filter(asset => asset.type === 'dex' || asset.sourceType !== 'binance');
+      if (this.fallbackPolling) return;
+      const fallbackAssets = this.watchedAssets.filter(asset => asset.type === 'dex' || (asset.type === 'cex' && asset.sourceType !== 'binance'));
       if (!fallbackAssets.length) {
         this.fallbackStatus = '兜底源待命';
         return;
       }
 
+      this.fallbackPolling = true;
       this.fallbackStatus = `兜底轮询 ${fallbackAssets.length} 个 / 10s`;
-      this.markSource('okx', '轮询中');
-      if (fallbackAssets.some(asset => asset.type === 'dex')) this.markSource('dex', '轮询中');
       const dexAssets = fallbackAssets.filter(asset => asset.type === 'dex');
       const cexAssets = fallbackAssets.filter(asset => asset.type === 'cex');
+      if (cexAssets.length) {
+        this.markSource('okx', '轮询中');
+      } else if (!this.dataSources.okx.lastUpdate) {
+        this.markSource('okx', '暂停');
+      }
+      if (dexAssets.length) this.markSource('dex', '轮询中');
 
-      await Promise.allSettled([
-        this.pollDexAssets(dexAssets),
-        ...cexAssets.map(asset => this.pollCexFallback(asset))
-      ]);
-      this.fallbackStatus = `兜底已刷新 ${this.formatTimestamp(Date.now())}`;
+      try {
+        await Promise.allSettled([
+          this.pollDexAssets(dexAssets),
+          ...cexAssets.map(asset => this.pollCexFallback(asset))
+        ]);
+        this.fallbackStatus = `兜底轮询完成 ${this.formatTimestamp(Date.now())}`;
+      } finally {
+        this.fallbackPolling = false;
+      }
     },
 
     async pollCexFallback(asset) {
@@ -4111,7 +4292,7 @@ new Vue({
     async pollOkxAsset(asset) {
       const base = this.baseFromPair(asset.pair);
       const instId = `${base}-USDT`;
-      const res = await fetch(`https://www.okx.com/api/v5/market/ticker?instId=${instId}`);
+      const res = await this.fetchWithSoftTimeout(`https://www.okx.com/api/v5/market/ticker?instId=${instId}`, 7000);
       if (!res.ok) throw new Error('okx failed');
       const json = await res.json();
       const ticker = json && json.data && json.data[0];
@@ -4121,6 +4302,7 @@ new Vue({
       const open24h = parseFloat(ticker.open24h);
       const volume = parseFloat(ticker.volCcy24h || ticker.vol24h);
       const changePct = Number.isFinite(open24h) && open24h > 0 ? ((price - open24h) / open24h) * 100 : null;
+      if (!Number.isFinite(price) || price <= 0) throw new Error('okx invalid price');
       this.queueAssetUpdate(asset.id, {
         price,
         changePct,
@@ -4130,7 +4312,7 @@ new Vue({
         sourceType: 'okx',
         status: '轮询 10s'
       });
-      this.markSource('okx', '已刷新');
+      this.markSource('okx', '轮询');
     },
 
     async pollCoinGeckoAsset(asset) {
@@ -4139,14 +4321,16 @@ new Vue({
       if (!id) throw new Error('coingecko id missing');
 
       const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(id)}&vs_currencies=usd&include_market_cap=true&include_24hr_change=true&include_24hr_vol=true&include_last_updated_at=true`;
-      const res = await fetch(url);
+      const res = await this.fetchWithSoftTimeout(url, 7000);
       if (!res.ok) throw new Error('coingecko failed');
       const json = await res.json();
       const item = json[id];
       if (!item || !item.usd) throw new Error('coingecko no data');
+      const price = Number(item.usd);
+      if (!Number.isFinite(price) || price <= 0) throw new Error('coingecko invalid price');
 
       this.queueAssetUpdate(asset.id, {
-        price: parseFloat(item.usd),
+        price,
         changePct: parseFloat(item.usd_24h_change),
         volume24h: parseFloat(item.usd_24h_vol),
         marketCap: parseFloat(item.usd_market_cap),
@@ -4155,7 +4339,7 @@ new Vue({
         sourceType: 'coingecko',
         status: '轮询 10s'
       });
-      this.markSource('coingecko', '已刷新');
+      this.markSource('coingecko', '轮询');
     },
 
     async pollDexAssets(assets) {
@@ -4170,25 +4354,39 @@ new Vue({
         try {
           const group = groups[chainId];
           const addresses = group.map(asset => asset.tokenAddress).join(',');
-          const res = await fetch(`https://api.dexscreener.com/tokens/v1/${chainId}/${addresses}`);
+          const res = await this.fetchWithSoftTimeout(`https://api.dexscreener.com/tokens/v1/${chainId}/${addresses}`, 8000);
           if (!res.ok) throw new Error('dex failed');
           const pairs = await res.json();
-          this.markSource('dex', '已刷新');
+          this.markSource('dex', '轮询');
 
           group.forEach(asset => {
             const address = asset.tokenAddress.toLowerCase();
-            const matches = (pairs || []).filter(pair => {
+            const baseMatches = (pairs || []).filter(pair => {
               const baseAddress = pair.baseToken && pair.baseToken.address ? pair.baseToken.address.toLowerCase() : '';
+              const price = Number(pair.priceUsd);
+              const liquidity = Number(pair.liquidity && pair.liquidity.usd);
+              return baseAddress === address
+                && Number.isFinite(price) && price > 0
+                && Number.isFinite(liquidity) && liquidity >= 0
+                && !!pair.pairAddress;
+            });
+            const quoteMatches = (pairs || []).filter(pair => {
               const quoteAddress = pair.quoteToken && pair.quoteToken.address ? pair.quoteToken.address.toLowerCase() : '';
-              return baseAddress === address || quoteAddress === address;
+              return quoteAddress === address;
             });
 
-            const best = matches.sort((a, b) => ((b.liquidity && b.liquidity.usd) || 0) - ((a.liquidity && a.liquidity.usd) || 0))[0];
+            const best = baseMatches.sort((a, b) => Number(b.liquidity.usd) - Number(a.liquidity.usd))[0];
             if (!best) {
               this.queueAssetUpdate(asset.id, {
+                price: undefined,
+                changePct: null,
+                volume24h: null,
+                marketCap: null,
                 source: '链上行情',
                 sourceType: 'error',
-                status: '未找到交易池',
+                status: quoteMatches.length
+                  ? '交易池匹配异常 / 暂不显示价格'
+                  : '未找到有效交易池',
                 updateTime: this.formatTimestamp(Date.now())
               });
               return;
@@ -4196,9 +4394,8 @@ new Vue({
 
             const baseToken = best.baseToken || {};
             const quoteToken = best.quoteToken || {};
-            const isBase = (baseToken.address || '').toLowerCase() === address;
-            const token = isBase ? baseToken : quoteToken;
-            const quote = isBase ? quoteToken : baseToken;
+            const token = baseToken;
+            const quote = quoteToken;
             const symbol = token.symbol || asset.symbol;
             this.queueAssetUpdate(asset.id, {
               symbol,
@@ -4229,21 +4426,38 @@ new Vue({
     async fetchCrypto() {
       const symbols = encodeURIComponent(JSON.stringify(['BTCUSDT', 'ETHUSDT', 'PAXGUSDT']));
       const url = `https://data-api.binance.vision/api/v3/ticker/price?symbols=${symbols}`;
+      this.markSource('binanceRest', '轮询中');
       try {
-        const res = await fetch(url);
+        const res = await this.fetchWithSoftTimeout(url, 7000);
+        if (!res.ok) throw new Error(`Binance REST ${res.status}`);
         const data = await res.json();
 
         const btcData = data.find(item => item.symbol === 'BTCUSDT');
         const ethData = data.find(item => item.symbol === 'ETHUSDT');
         const goldData = data.find(item => item.symbol === 'PAXGUSDT');
+        if (!btcData || !ethData) throw new Error('Binance REST missing BTC/ETH');
 
         if (btcData && ethData) {
-          this.btcBase = this.btcBase || parseFloat(btcData.price);
-          this.ethBase = this.ethBase || parseFloat(ethData.price);
-          this.btcPrice = parseFloat(btcData.price);
-          this.ethPrice = parseFloat(ethData.price);
-          this.cryptoStatus = '直连刷新正常';
-          this.markSource('binance', this.wsStatus === 'connected' ? '已连接' : '已刷新');
+          const btcRestPrice = Number(btcData.price);
+          const ethRestPrice = Number(ethData.price);
+          if (!Number.isFinite(btcRestPrice) || btcRestPrice <= 0 || !Number.isFinite(ethRestPrice) || ethRestPrice <= 0) {
+            throw new Error('Binance REST invalid price');
+          }
+          const now = Date.now();
+          const btcAsset = this.watchedAssets.find(item => item.pair === 'BTCUSDT');
+          const ethAsset = this.watchedAssets.find(item => item.pair === 'ETHUSDT');
+          const btcWsFresh = btcAsset && btcAsset.sourceType === 'binance' && now - Number(btcAsset.lastWsAt || 0) <= 30000;
+          const ethWsFresh = ethAsset && ethAsset.sourceType === 'binance' && now - Number(ethAsset.lastWsAt || 0) <= 30000;
+          if (!btcWsFresh) {
+            this.btcBase = this.btcBase || btcRestPrice;
+            this.btcPrice = btcRestPrice;
+          }
+          if (!ethWsFresh) {
+            this.ethBase = this.ethBase || ethRestPrice;
+            this.ethPrice = ethRestPrice;
+          }
+          this.cryptoStatus = 'Binance REST 轮询';
+          this.markSource('binanceRest', '轮询');
         }
 
         if (goldData) {
@@ -4258,8 +4472,8 @@ new Vue({
           }
         }
       } catch (e) {
-        this.cryptoStatus = '行情接口遭拦截';
-        this.markSource('binance', '异常', e);
+        this.cryptoStatus = 'Binance REST 暂不可用';
+        this.markSource('binanceRest', '异常', e);
       }
     },
 
@@ -4274,75 +4488,139 @@ new Vue({
 
       const script = document.createElement('script');
       const query = this.stocks.map(stock => stock.query).join(',');
+      this.stocks.forEach(stock => {
+        try { window[`v_${stock.query}`] = undefined; } catch (e) {}
+      });
       script.src = `https://qt.gtimg.cn/q=${query}&_=${Date.now()}`;
+      let settled = false;
 
       const cleanup = () => {
+        if (settled) return false;
+        settled = true;
+        if (this.stockRequestTimer) {
+          clearTimeout(this.stockRequestTimer);
+          this.stockRequestTimer = null;
+        }
         this.stockRequestPending = false;
         if (script.parentNode) document.head.removeChild(script);
+        return true;
+      };
+
+      const markNoValidData = message => {
+        this.stocks.forEach(stock => {
+          if (stock.price === '--') stock.time = '暂无数据 / 可能不支持该标的';
+          else stock.time = '本次无数据 / 保留旧数据';
+        });
+        this.stockStatus = '美股接口无有效数据 / 保留旧数据';
+        const source = this.dataSources.tencentStocks;
+        if (source.lastUpdate) {
+          source.status = '旧数据';
+          source.lastAttempt = Date.now();
+          source.errorCount += 1;
+        } else {
+          this.markSource('tencentStocks', '异常', message || true);
+        }
       };
 
       script.onload = () => {
+        if (settled) return;
         try {
+          let validCount = 0;
           this.stocks.forEach(stock => {
             const raw = window[`v_${stock.query}`];
-            if (!raw) return;
+            if (!raw) {
+              stock.time = stock.price === '--' ? '暂无数据 / 可能不支持该标的' : '本次无数据 / 保留旧数据';
+              return;
+            }
 
             const arr = raw.split('~');
             const price = parseFloat(arr[3]);
             const changePct = parseFloat(arr[32]);
-            if (!Number.isFinite(price) || price <= 0) return;
+            if (!Number.isFinite(price) || price <= 0) {
+              stock.time = stock.price === '--' ? '暂无数据 / 可能不支持该标的' : '本次无数据 / 保留旧数据';
+              return;
+            }
 
+            validCount += 1;
             stock.trend = stock.lastPrice === null || price >= stock.lastPrice ? 'up' : 'down';
             stock.lastPrice = price;
             stock.price = price.toFixed(2);
             stock.changePct = Number.isFinite(changePct) ? changePct : 0;
             stock.time = arr[30] || new Date().toLocaleTimeString();
           });
-          this.stockStatus = `${this.usMarketInfo.label} · 已刷新 ${new Date().toLocaleTimeString()}`;
-          this.markSource('tencentStocks', '已刷新');
-          this.evaluatePriceAlerts();
+          if (validCount > 0) {
+            this.stockStatus = `${this.usMarketInfo.label} · 有效行情 ${validCount}/${this.stocks.length} · ${new Date().toLocaleTimeString()}`;
+            this.markSource('tencentStocks', '轮询');
+            this.evaluatePriceAlerts();
+          } else {
+            markNoValidData('no valid stock price');
+          }
         } catch (e) {
-          this.stockStatus = '美股接口解析失败';
-          this.markSource('tencentStocks', '异常', e);
+          markNoValidData(e);
         }
         cleanup();
       };
 
       script.onerror = () => {
-        this.stockStatus = '美股接口连接失败';
-        this.markSource('tencentStocks', '异常', true);
+        if (settled) return;
+        markNoValidData('stock script failed');
         cleanup();
       };
 
       document.head.appendChild(script);
+      this.stockRequestTimer = setTimeout(() => {
+        if (settled) return;
+        markNoValidData('stock request timeout');
+        cleanup();
+      }, 8000);
     },
 
     async fetchRealAHR999() {
+      const endpoints = [
+        'https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201',
+        'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201'
+      ];
       try {
-        const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201');
-        if(!res.ok) throw new Error("Blocked");
-        const klines = await res.json();
-        if (!klines || klines.length < 201) throw new Error("Kline error");
+        this.dataSources.ahr999.status = '轮询中';
+        this.dataSources.ahr999.lastAttempt = Date.now();
+        let klines = null;
+        let lastError = null;
+        for (const endpoint of endpoints) {
+          try {
+            const res = await this.fetchWithSoftTimeout(endpoint, 8000);
+            if (!res.ok) throw new Error(`Kline ${res.status}`);
+            const payload = await res.json();
+            if (!Array.isArray(payload) || payload.length < 201) throw new Error('Kline data incomplete');
+            klines = payload;
+            break;
+          } catch (error) {
+            lastError = error;
+          }
+        }
+        if (!klines) throw lastError || new Error('Kline unavailable');
 
-        const closed = klines.slice(0, -1); 
+        const closed = klines.slice(0, -1);
+        const closePrices = closed.map(row => Number(row && row[4]));
+        if (closePrices.length !== 200 || !closePrices.every(price => Number.isFinite(price) && price > 0)) {
+          throw new Error('Kline close invalid');
+        }
 
         let logSum = 0;
-        for (let i = 0; i < closed.length; i++) {
-            logSum += Math.log(parseFloat(closed[i][4])); 
-        }
-        const geoMean200 = Math.exp(logSum / closed.length);
+        closePrices.forEach(price => { logSum += Math.log(price); });
+        const geoMean200 = Math.exp(logSum / closePrices.length);
 
         const genesis = new Date('2009-01-03T00:00:00Z').getTime();
         const daysSinceGenesis = (Date.now() - genesis) / (1000 * 60 * 60 * 24); 
         const fittedPrice = Math.pow(10, 5.84 * Math.log10(daysSinceGenesis) - 17.01);
 
-        const currentPrice = this.btcPrice || parseFloat(closed[closed.length - 1][4]);
+        const currentPrice = Number(this.btcPrice) > 0 ? Number(this.btcPrice) : closePrices[closePrices.length - 1];
 
         const ahr = (currentPrice / geoMean200) * (currentPrice / fittedPrice);
+        if (!Number.isFinite(ahr) || ahr <= 0) throw new Error('AHR999 result invalid');
         this.ahrValue = ahr.toFixed(4);
-        this.markSource('ahr999', '已刷新');
+        this.markSource('ahr999', '估算');
       } catch(e) {
-        this.ahrValue = 'API遭网络拦截';
+        this.ahrValue = '--';
         this.markSource('ahr999', '异常', e);
       }
     },
@@ -4352,23 +4630,26 @@ new Vue({
       if (item) {
         const parsedPrice = parseFloat(price);
         const parsedChange = parseFloat(change);
-        this.$set(item, 'price', price === '遭拦截' || !Number.isFinite(parsedPrice) ? '遭拦截' : parsedPrice.toFixed(2));
+        if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) return false;
+        this.$set(item, 'price', parsedPrice.toFixed(2));
         this.$set(item, 'change', Number.isFinite(parsedChange) ? Number(parsedChange.toFixed(2)) : 0);
         this.$set(item, 'placeholder', false);
         this.$set(item, 'stale', false);
-        this.$set(item, 'status', '已刷新');
+        this.$set(item, 'status', '轮询');
         this.$set(item, 'source', '腾讯行情');
         this.$set(item, 'updatedAt', this.formatClock(Date.now()));
+        return true;
       }
+      return false;
     },
 
     optionalGlobalConfigs() {
       return [
-        { id: 'dxy', sourceKey: 'dxy', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'frankfurterDxy', label: 'Frankfurter 汇率篮子' }] },
-        { id: 'us10y', sourceKey: 'us10y', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 3, suffix: '%', sources: [{ type: 'treasury', label: '美国财政部' }] },
-        { id: 'usdcny', sourceKey: 'usdcny', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 4, sources: [{ type: 'frankfurter', currency: 'CNY', label: 'Frankfurter USD/CNY' }] },
-        { id: 'usdjpy', sourceKey: 'usdjpy', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 3, sources: [{ type: 'frankfurter', currency: 'JPY', label: 'Frankfurter USD/JPY' }] },
-        { id: 'vix', sourceKey: 'vix', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'cboeMirror', label: 'Cboe 官方行情' }, { type: 'cboe', label: 'Cboe 延迟行情' }, { type: 'fred', series: 'VIXCLS', label: 'FRED / Cboe 日线' }, { type: 'tencentVix', label: '腾讯 VIX 兜底' }] }
+        { id: 'dxy', sourceKey: 'dxy', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'frankfurterDxy', label: 'Frankfurter 汇率篮子估算', mode: '估算' }] },
+        { id: 'us10y', sourceKey: 'us10y', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 3, suffix: '%', sources: [{ type: 'treasury', label: '美国财政部', mode: '日线' }] },
+        { id: 'usdcny', sourceKey: 'usdcny', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 4, sources: [{ type: 'frankfurter', currency: 'CNY', label: 'Frankfurter USD/CNY', mode: '日线' }] },
+        { id: 'usdjpy', sourceKey: 'usdjpy', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 3, sources: [{ type: 'frankfurter', currency: 'JPY', label: 'Frankfurter USD/JPY', mode: '日线' }] },
+        { id: 'vix', sourceKey: 'vix', enabled: true, refreshMs: 10 * 60 * 1000, decimals: 2, sources: [{ type: 'cboeMirror', label: 'Cboe 官方延迟行情', mode: '延迟' }, { type: 'cboe', label: 'Cboe 延迟行情', mode: '延迟' }, { type: 'fred', series: 'VIXCLS', label: 'FRED / Cboe 日线', mode: '日线' }, { type: 'tencentVix', label: '腾讯 VIX 兜底', mode: '延迟' }] }
       ];
     },
 
@@ -4403,15 +4684,20 @@ new Vue({
       this.$set(item, 'price', price.toFixed(config.decimals || 2));
       this.$set(item, 'change', Number.isFinite(change) ? Number(change.toFixed(2)) : null);
       this.$set(item, 'placeholder', false);
-      this.$set(item, 'stale', false);
-      this.$set(item, 'status', quote.label || '已刷新');
+      this.$set(item, 'stale', !!quote.stale);
+      this.$set(item, 'status', quote.stale ? '旧数据' : (quote.mode || '轮询'));
       this.$set(item, 'source', quote.label || '已刷新');
       this.$set(item, 'updatedAt', quote.updatedAt || this.formatClock(Date.now()));
       this.$set(item, 'suffix', config.suffix || '');
 
       source.disabled = false;
       source.enabled = true;
-      this.markSource(config.sourceKey, '已刷新');
+      this.markSource(
+        config.sourceKey,
+        quote.stale ? '旧数据' : (quote.mode || '轮询'),
+        false,
+        { success: true }
+      );
     },
 
     keepOptionalGlobalOldData(config, error) {
@@ -4491,15 +4777,17 @@ new Vue({
       const values = rows.map(row => {
         const cells = this.parseCsvLine(row);
         const value = Number(cells[1]);
-        return Number.isFinite(value) ? value : null;
+        return Number.isFinite(value) ? { date: cells[0], value } : null;
       }).filter(value => value !== null);
       if (!values.length) throw new Error('FRED empty');
       const last = values[values.length - 1];
       const prev = values.length > 1 ? values[values.length - 2] : null;
       return {
-        price: last,
-        changePct: Number.isFinite(prev) && prev !== 0 ? ((last - prev) / prev) * 100 : null,
-        label: source.label
+        price: last.value,
+        changePct: prev && prev.value !== 0 ? ((last.value - prev.value) / prev.value) * 100 : null,
+        label: source.label,
+        mode: source.mode,
+        updatedAt: last.date
       };
     },
 
@@ -4527,13 +4815,16 @@ new Vue({
         if (Number.isFinite(prevPrice) && prevPrice > 0) changePct = ((price - prevPrice) / prevPrice) * 100;
       } catch (e) {}
 
-      return { price, changePct, label: source.label, updatedAt: current.date };
+      return { price, changePct, label: source.label, mode: source.mode, updatedAt: current.date };
     },
 
     fetchFrankfurterSnapshot(dateText) {
       if (!this._frankfurterSnapshotCache) this._frankfurterSnapshotCache = {};
       const cacheKey = dateText || 'latest';
-      if (this._frankfurterSnapshotCache[cacheKey]) return this._frankfurterSnapshotCache[cacheKey];
+      const now = Date.now();
+      const ttl = dateText ? 24 * 60 * 60 * 1000 : 10 * 60 * 1000;
+      const cached = this._frankfurterSnapshotCache[cacheKey];
+      if (cached && now - cached.savedAt < ttl) return cached.promise;
       const currencies = 'EUR,JPY,GBP,CAD,SEK,CHF,CNY';
       const url = `https://api.frankfurter.dev/v1/${dateText || 'latest'}?from=USD&to=${currencies}`;
       const request = this.fetchWithSoftTimeout(url)
@@ -4545,7 +4836,7 @@ new Vue({
           delete this._frankfurterSnapshotCache[cacheKey];
           throw error;
         });
-      this._frankfurterSnapshotCache[cacheKey] = request;
+      this._frankfurterSnapshotCache[cacheKey] = { promise: request, savedAt: now };
       return request;
     },
 
@@ -4576,24 +4867,34 @@ new Vue({
         price,
         changePct: prevPrice > 0 ? ((price - prevPrice) / prevPrice) * 100 : null,
         label: source.label,
+        mode: source.mode,
         updatedAt: current.date
       };
     },
 
     async fetchTreasuryQuote(source) {
       const year = new Date().getFullYear();
-      const url = `https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=${year}`;
-      const res = await this.fetchWithSoftTimeout(url, 12000);
-      if (!res.ok) throw new Error(`Treasury ${res.status}`);
-      const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
-      const entries = Array.from(xml.getElementsByTagName('entry')).map(entry => {
-        const yieldNode = entry.getElementsByTagNameNS('*', 'BC_10YEAR')[0];
-        const dateNode = entry.getElementsByTagNameNS('*', 'NEW_DATE')[0];
-        return {
-          price: Number(yieldNode && yieldNode.textContent),
-          date: dateNode ? dateNode.textContent.slice(0, 10) : ''
-        };
-      }).filter(row => Number.isFinite(row.price) && row.date).sort((a, b) => a.date.localeCompare(b.date));
+      let entries = [];
+      let lastError = null;
+      for (const targetYear of [year, year - 1]) {
+        try {
+          const url = `https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=${targetYear}`;
+          const res = await this.fetchWithSoftTimeout(url, 12000);
+          if (!res.ok) throw new Error(`Treasury ${res.status}`);
+          const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+          entries = Array.from(xml.getElementsByTagName('entry')).map(entry => {
+            const yieldNode = entry.getElementsByTagNameNS('*', 'BC_10YEAR')[0];
+            const dateNode = entry.getElementsByTagNameNS('*', 'NEW_DATE')[0];
+            return {
+              price: Number(yieldNode && yieldNode.textContent),
+              date: dateNode ? dateNode.textContent.slice(0, 10) : ''
+            };
+          }).filter(row => Number.isFinite(row.price) && row.date).sort((a, b) => a.date.localeCompare(b.date));
+          if (entries.length) break;
+        } catch (error) {
+          lastError = error;
+        }
+      }
       if (!entries.length) throw new Error('Treasury no 10Y data');
       const latest = entries[entries.length - 1];
       const previous = entries.length > 1 ? entries[entries.length - 2] : null;
@@ -4601,6 +4902,7 @@ new Vue({
         price: latest.price,
         changePct: previous && previous.price > 0 ? ((latest.price - previous.price) / previous.price) * 100 : null,
         label: source.label,
+        mode: source.mode,
         updatedAt: latest.date
       };
     },
@@ -4618,13 +4920,14 @@ new Vue({
         price,
         changePct: Number.isFinite(changePct) ? changePct : null,
         label: source.label,
+        mode: source.mode,
         updatedAt: data.last_trade_time || payload.timestamp || ''
       };
     },
 
     async fetchCboeVixMirrorQuote(source) {
       const officialUrl = 'https://cdn.cboe.com/api/global/delayed_quotes/quotes/_VIX.json';
-      const mirrorUrl = `https://r.jina.ai/http://${officialUrl}`;
+      const mirrorUrl = `https://r.jina.ai/http://${officialUrl.replace(/^https?:\/\//, '')}`;
       const res = await this.fetchWithSoftTimeout(mirrorUrl, 9000);
       if (!res.ok) throw new Error(`Cboe mirror ${res.status}`);
       const text = await res.text();
@@ -4639,6 +4942,7 @@ new Vue({
         price,
         changePct: Number.isFinite(changePct) ? changePct : null,
         label: source.label,
+        mode: source.mode,
         updatedAt: data.last_trade_time || payload.timestamp || ''
       };
     },
@@ -4646,22 +4950,24 @@ new Vue({
     fetchTencentVixQuote(source) {
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
+        let settled = false;
+        let timer = null;
         const cleanup = () => {
+          if (timer) clearTimeout(timer);
           if (script.parentNode) document.head.removeChild(script);
         };
         script.src = `https://qt.gtimg.cn/q=usVIX&_=${Date.now()}`;
         script.onload = () => {
+          if (settled) return;
+          settled = true;
           try {
             const raw = window.v_usVIX;
             const arr = raw ? raw.split('~') : [];
             const price = Number(arr[3]);
             const changePct = Number(arr[32]);
             const updatedAt = arr[30] || '';
-            const age = updatedAt ? Date.now() - new Date(updatedAt.replace(/-/g, '/')).getTime() : Infinity;
-            if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(age) || age > 3 * 24 * 60 * 60 * 1000) {
-              throw new Error('Tencent VIX stale');
-            }
-            resolve({ price, changePct, label: source.label, updatedAt });
+            if (!Number.isFinite(price) || price <= 0) throw new Error('Tencent VIX invalid');
+            resolve({ price, changePct, label: source.label, mode: source.mode, updatedAt });
           } catch (error) {
             reject(error);
           } finally {
@@ -4669,11 +4975,46 @@ new Vue({
           }
         };
         script.onerror = () => {
+          if (settled) return;
+          settled = true;
           cleanup();
           reject(new Error('Tencent VIX failed'));
         };
         document.head.appendChild(script);
+        timer = setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          reject(new Error('Tencent VIX timeout'));
+        }, 7000);
       });
+    },
+
+    parseMarketTimestamp(value) {
+      if (!value) return NaN;
+      if (typeof value === 'number') return value < 1e12 ? value * 1000 : value;
+      const text = String(value).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return new Date(`${text}T21:00:00Z`).getTime();
+      const normalized = text.includes('T') ? text : text.replace(' ', 'T');
+      let timestamp = new Date(normalized).getTime();
+      if (!Number.isFinite(timestamp) && /^\d{8}\d{6}$/.test(text.replace(/\D/g, ''))) {
+        const digits = text.replace(/\D/g, '');
+        timestamp = new Date(`${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}T${digits.slice(8, 10)}:${digits.slice(10, 12)}:${digits.slice(12, 14)}-04:00`).getTime();
+      }
+      return timestamp;
+    },
+
+    applyVixFreshness(quote) {
+      const timestamp = this.parseMarketTimestamp(quote && quote.updatedAt);
+      const weekday = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        weekday: 'short'
+      }).format(new Date());
+      const maxAge = weekday === 'Sat' || weekday === 'Sun'
+        ? 3 * 24 * 60 * 60 * 1000
+        : 24 * 60 * 60 * 1000;
+      const age = Number.isFinite(timestamp) ? Math.max(0, Date.now() - timestamp) : Infinity;
+      return Object.assign({}, quote, { stale: !Number.isFinite(age) || age > maxAge });
     },
 
     async fetchOptionalGlobalSource(source) {
@@ -4701,14 +5042,26 @@ new Vue({
       if (sourceState) sourceState.lastAttempt = now;
 
       let lastError = null;
+      let staleQuote = null;
       for (const source of config.sources) {
         try {
-          const quote = await this.fetchOptionalGlobalSource(source);
+          let quote = await this.fetchOptionalGlobalSource(source);
+          if (config.id === 'vix') {
+            quote = this.applyVixFreshness(quote);
+            if (quote.stale) {
+              staleQuote = staleQuote || quote;
+              continue;
+            }
+          }
           this.applyOptionalGlobalData(config, quote);
           return;
         } catch (error) {
           lastError = error;
         }
+      }
+      if (staleQuote) {
+        this.applyOptionalGlobalData(config, staleQuote);
+        return;
       }
       this.keepOptionalGlobalOldData(config, lastError);
     },
@@ -4724,47 +5077,88 @@ new Vue({
     },
 
     async fetchGlobalMarkets() {
+      if (this.globalRequestPending) {
+        this.fetchOptionalGlobalIndicators();
+        return;
+      }
+      this.globalRequestPending = true;
       // 腾讯接口支持股指和 WTI 原油，避免新浪接口因 Referer 被 Forbidden。
       this.markSource('tencentGlobal', '轮询中');
       const tencentScript = document.createElement('script');
+      let settled = false;
+      const cleanup = () => {
+        if (settled) return false;
+        settled = true;
+        this.globalRequestPending = false;
+        if (this.globalRequestTimer) {
+          clearTimeout(this.globalRequestTimer);
+          this.globalRequestTimer = null;
+        }
+        if (tencentScript.parentNode) document.head.removeChild(tencentScript);
+        return true;
+      };
+      const markGlobalFailure = error => {
+        const source = this.dataSources.tencentGlobal;
+        if (source.lastUpdate) {
+          source.status = '旧数据';
+          source.lastAttempt = Date.now();
+          source.errorCount += 1;
+        } else {
+          this.markSource('tencentGlobal', '异常', error || true);
+        }
+      };
       tencentScript.src = `https://qt.gtimg.cn/q=s_sh000001,usDJI,usIXIC,usINX,usSPX,hf_CL&_=${Date.now()}`;
       tencentScript.onload = () => {
+        if (settled) return;
         try {
-          if (window.v_s_sh000001) { const arr = window.v_s_sh000001.split('~'); this.updateMarketData('sh', arr[3], arr[5]); }
-          if (window.v_usDJI) { const arr = window.v_usDJI.split('~'); this.updateMarketData('dji', arr[3], arr[32]); }
-          if (window.v_usIXIC) { const arr = window.v_usIXIC.split('~'); this.updateMarketData('ixic', arr[3], arr[32]); }
+          let validCount = 0;
+          if (window.v_s_sh000001) { const arr = window.v_s_sh000001.split('~'); if (this.updateMarketData('sh', arr[3], arr[5])) validCount += 1; }
+          if (window.v_usDJI) { const arr = window.v_usDJI.split('~'); if (this.updateMarketData('dji', arr[3], arr[32])) validCount += 1; }
+          if (window.v_usIXIC) { const arr = window.v_usIXIC.split('~'); if (this.updateMarketData('ixic', arr[3], arr[32])) validCount += 1; }
           const spxRaw = window.v_usINX || window.v_usSPX;
-          if (spxRaw) { const arr = spxRaw.split('~'); this.updateMarketData('spx', arr[3], arr[32]); }
+          if (spxRaw) { const arr = spxRaw.split('~'); if (this.updateMarketData('spx', arr[3], arr[32])) validCount += 1; }
           if (window.v_hf_CL) {
             const arr = window.v_hf_CL.split(',');
             const price = parseFloat(arr[0]);
             const changePct = parseFloat(arr[1]);
             if (Number.isFinite(price) && price > 0) {
-              this.updateMarketData('cl', price, Number.isFinite(changePct) ? changePct : 0);
+              if (this.updateMarketData('cl', price, Number.isFinite(changePct) ? changePct : 0)) validCount += 1;
             }
           }
-          this.markSource('tencentGlobal', '已刷新');
+          if (validCount > 0) {
+            this.markSource('tencentGlobal', '轮询');
+          } else {
+            markGlobalFailure('global quote empty');
+          }
         } catch (e) {
-          this.markSource('tencentGlobal', '异常', e);
+          markGlobalFailure(e);
         }
-        if (tencentScript.parentNode) document.head.removeChild(tencentScript);
+        cleanup();
       };
       tencentScript.onerror = () => {
-        this.markSource('tencentGlobal', '异常', true);
-        if (tencentScript.parentNode) document.head.removeChild(tencentScript);
+        if (settled) return;
+        markGlobalFailure('global script failed');
+        cleanup();
       };
       document.head.appendChild(tencentScript);
+      this.globalRequestTimer = setTimeout(() => {
+        if (settled) return;
+        markGlobalFailure('global request timeout');
+        cleanup();
+      }, 8000);
       this.fetchOptionalGlobalIndicators();
     },
 
     async fetchHalvingCountdown() {
       try {
-        const res = await fetch('https://mempool.space/api/blocks/tip/height');
-        if (!res.ok) throw new Error('Blocked');
+        this.dataSources.mempool.status = '轮询中';
+        this.dataSources.mempool.lastAttempt = Date.now();
+        const res = await this.fetchWithSoftTimeout('https://mempool.space/api/blocks/tip/height', 8000);
+        if (!res.ok) throw new Error(`Mempool ${res.status}`);
         
         const heightStr = await res.text();
         const height = parseInt(heightStr.trim(), 10);
-        if (!Number.isFinite(height)) return;
+        if (!Number.isFinite(height)) throw new Error('Mempool height invalid');
 
         this.halvingTargetHeight = 1050000; 
         this.halvingCurrentHeight = height;
@@ -4781,7 +5175,7 @@ new Vue({
         const epochEnd = 1050000;
         const progressPct = ((height - epochStart) / (epochEnd - epochStart)) * 100;
         this.halvingProgressPct = Math.max(0, Math.min(100, progressPct)).toFixed(2);
-        this.markSource('mempool', '已刷新');
+        this.markSource('mempool', '轮询');
       } catch (error) {
         this.halvingEtaText = '节点连接失败';
         this.markSource('mempool', '异常', error);
@@ -4790,10 +5184,14 @@ new Vue({
 
     async fetchFearGreed() {
       try {
-        const res = await fetch("https://api.alternative.me/fng/");
+        this.dataSources.fearGreed.status = '轮询中';
+        this.dataSources.fearGreed.lastAttempt = Date.now();
+        const res = await this.fetchWithSoftTimeout('https://api.alternative.me/fng/', 8000);
+        if (!res.ok) throw new Error(`Fear Greed ${res.status}`);
         const d = await res.json();
         if (d && d.data && d.data.length) {
           const val = parseInt(d.data[0].value, 10);
+          if (!Number.isFinite(val)) throw new Error('Fear Greed invalid');
           this.fgValue = val;
           if (val <= 25) { this.fgText = "极度恐慌"; this.fgColor = "#ef4444"; this.fearNote = "市场极度恐慌，可能是买入机会"; }
           else if (val <= 45) { this.fgText = "恐慌"; this.fgColor = "#fb923c"; this.fearNote = "市场偏恐慌，适合分批观察"; }
@@ -4801,7 +5199,9 @@ new Vue({
           else if (val <= 75) { this.fgText = "贪婪"; this.fgColor = "#4ade80"; this.fearNote = "市场偏贪婪，注意追高风险"; }
           else { this.fgText = "极度贪婪"; this.fgColor = "#22c55e"; this.fearNote = "市场极度贪婪，注意阶段性过热"; }
           if (this.gaugeChart) this.gaugeChart.setOption({ series: [{ data: [{ value: val }] }] });
-          this.markSource('fearGreed', '已刷新');
+          this.markSource('fearGreed', '轮询');
+        } else {
+          throw new Error('Fear Greed empty');
         }
       } catch (e) {
         this.markSource('fearGreed', '异常', e);
@@ -4844,6 +5244,9 @@ new Vue({
     this.unlockPageScroll();
     if (this.wsReconnectTimer) clearTimeout(this.wsReconnectTimer);
     if (this.binanceStaleTimer) clearTimeout(this.binanceStaleTimer);
+    if (this.binanceWatchdogTimer) clearInterval(this.binanceWatchdogTimer);
+    if (this.stockRequestTimer) clearTimeout(this.stockRequestTimer);
+    if (this.globalRequestTimer) clearTimeout(this.globalRequestTimer);
     if (this.fallbackTimer) clearInterval(this.fallbackTimer);
     if (this.marketCapTimer) clearInterval(this.marketCapTimer);
     if (this.holdersTimer) clearInterval(this.holdersTimer);
@@ -4860,6 +5263,7 @@ new Vue({
     this.loadStocks();
     this.loadPriceAlerts();
     this.initWatchlistMarket();
+    this.binanceWatchdogTimer = setInterval(() => this.moveStaleBinanceToFallback(), 5000);
     this.fetchCrypto();
     this.fetchUSStocks();
     this.fetchRealAHR999();
