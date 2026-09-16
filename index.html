@@ -395,6 +395,9 @@
     .global-change.placeholder { color:#64748b; font-weight:700; }
     .global-price.stale, .global-change.stale { color:#facc15; }
     .global-meta { margin-top: 2px; color:#64748b; font-size:.6rem; font-weight:700; }
+    .global-note { max-width: 210px; margin-top: 2px; color:#facc15; font-size:.58rem; line-height:1.25; }
+    .data-stale-badge { display:inline-flex; align-items:center; margin-left:4px; padding:1px 5px; border:1px solid rgba(250,204,21,.44); border-radius:999px; color:#facc15; background:rgba(245,158,11,.1); font-size:.58rem; font-weight:900; white-space:nowrap; }
+    .data-unavailable { color:#94a3b8 !important; }
     .global-card-head { gap: 10px; }
     .global-card-head > span:first-child { min-width: 0; }
     .global-toggle {
@@ -970,12 +973,15 @@
     .holder-sync.live { color:#4ade80; border-color:rgba(74,222,128,.35); }
     .holder-sync.disclosure { color:#facc15; border-color:rgba(250,204,21,.32); }
     .entity-holders-card .holders-list { max-height: 298px; }
-    .entity-holders-card .holder-row { grid-template-columns: 22px minmax(0, 1fr) auto; padding: 7px 0; }
+    .entity-holders-card .holder-row { grid-template-columns: 36px minmax(0, 1fr) auto; padding: 7px 0; }
     .entity-holders-card .holder-rank { width: 22px; height: 22px; }
     .entity-holders-card .holder-name { font-size: .8rem; }
     .entity-holders-card .holder-address { font-size: .66rem; }
     .entity-holders-card .holder-balance { font-size: .8rem; }
     .holder-estimate { color: #facc15; font-size: .62rem; margin-right: 3px; }
+    .holder-group + .holder-group { margin-top: 8px; }
+    .holder-group-title { position:sticky; top:0; z-index:1; padding:4px 6px; border-radius:6px; background:#111a2a; color:#93c5fd; font-size:.66rem; font-weight:900; }
+    .holder-type-tag { min-width:30px; height:20px; padding:0 4px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; background:#111a2a; color:#93c5fd; font-size:.58rem; font-weight:900; }
     .fear-note { color: #9fb0c8; font-size: .62rem; line-height: 1.2; margin-top: 2px; }
     .compact-card .fear-note { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .compact-card .fear-scale { font-size: .58rem; padding: 0 4px; margin-top: -2px; }
@@ -1481,7 +1487,7 @@
     <div class="topbar-actions">
       <span class="topbar-pill desktop-only">刷新 {{ formatClock(clockNow) }}</span>
       <span class="mobile-top-metric" :class="btcTrend">BTC {{ formatPrice(btcPrice) }}</span>
-      <span class="mobile-top-metric" :style="{ color: fgColor }">恐惧 {{ fgValue }}</span>
+      <span class="mobile-top-metric" :style="fgValue !== null ? { color: fgColor } : {}">恐惧 {{ fgValue !== null ? fgValue : '--' }}</span>
       <button class="topbar-button" :class="sourceHealthClass" type="button" @click="toggleSourcePanel">
         数据源 {{ sourceHealthText }}
       </button>
@@ -1501,15 +1507,15 @@
     </div>
     <div class="pulse-item">
       <div class="pulse-label">BTC</div>
-      <div class="pulse-value" :class="btcTrend">{{ formatPrice(btcPrice) }}</div>
+      <div class="pulse-value" :class="btcTrend">{{ formatPrice(btcPrice) }}<span v-if="btcAssetStale" class="data-stale-badge">旧数据</span></div>
     </div>
     <div class="pulse-item">
       <div class="pulse-label">ETH</div>
-      <div class="pulse-value" :class="ethTrend">{{ formatPrice(ethPrice) }}</div>
+      <div class="pulse-value" :class="ethTrend">{{ formatPrice(ethPrice) }}<span v-if="ethAssetStale" class="data-stale-badge">旧数据</span></div>
     </div>
     <div class="pulse-item">
       <div class="pulse-label">恐惧贪婪</div>
-      <div class="pulse-value" :style="{color: fgColor}">{{ fgValue }} · {{ fgText }}</div>
+      <div class="pulse-value" :class="{ 'data-unavailable': fgValue === null }" :style="fgValue !== null ? {color: fgColor} : {}">{{ fgValue !== null ? fgValue : '--' }} · {{ fgText }}<span v-if="fgDisplayStale && fgValue !== null" class="data-stale-badge">旧数据</span></div>
     </div>
     <div class="pulse-item">
       <div class="pulse-label">AHR999</div>
@@ -1672,7 +1678,7 @@
             <div :class="asset.changePct >= 0 ? 'up' : 'down'">{{ formatPercent(asset.changePct) }}</div>
             <div class="metric-cell"><span class="metric-label">成交</span>{{ formatVolume(asset.volume24h) }}</div>
             <div class="metric-cell market-cap-cell"><span class="metric-label">流通市值</span>{{ formatMarketCap(asset.marketCap) }}</div>
-            <div class="metric-cell time-cell"><span class="metric-label">更新</span>{{ asset.updateTime || '--' }}</div>
+            <div class="metric-cell time-cell"><span class="metric-label">时间</span>{{ assetTimeText(asset) }}<span v-if="asset.stale" class="data-stale-badge">旧数据</span></div>
             <div>
               <span class="source-pill" :class="asset.sourceType">{{ asset.source }}</span>
               <div class="muted" v-if="asset.status">{{ asset.status }}</div>
@@ -1685,7 +1691,7 @@
             <div class="mobile-card-meta">
               <span>24H成交量：{{ formatVolume(asset.volume24h) }}</span>
               <span>来源：{{ asset.source || '暂无' }}</span>
-              <span>更新时间：{{ asset.updateTime || '--' }}</span>
+              <span>{{ assetTimeText(asset) }}<span v-if="asset.stale" class="data-stale-badge">旧数据</span></span>
               <span>{{ asset.status || '等待行情' }}</span>
             </div>
           </div>
@@ -1760,7 +1766,7 @@
               <span class="stock-symbol">{{ stock.symbol }}</span>
               <div class="stock-left-info">
                 <div class="stock-name">{{ stock.name }}</div>
-                <div class="muted stock-time">{{ stock.time || stockStatus }}</div>
+                <div class="muted stock-time">{{ stockTimeText(stock) }}<span v-if="stock.stale" class="data-stale-badge">旧数据</span></div>
                 <div class="stock-type">{{ stockTypeLabel(stock) }}</div>
               </div>
             </div>
@@ -1780,7 +1786,7 @@
             <div class="stock-mobile-meta">
               <span>美东：{{ usMarketInfo.etTime }}</span>
               <span>{{ usMarketInfo.desc }}</span>
-              <span>{{ stock.time || stockStatus }}</span>
+              <span>{{ stockTimeText(stock) }}<span v-if="stock.stale" class="data-stale-badge">旧数据</span></span>
             </div>
           </div>
           <div
@@ -1823,7 +1829,8 @@
           <div style="text-align:right">
             <div class="global-price" :class="globalTrendClass(item)" :style="globalErrorStyle(item)">{{ globalPriceText(item) }}</div>
             <div class="global-change" :class="globalTrendClass(item)" v-if="!isGlobalError(item)">{{ globalChangeText(item) }}</div>
-            <div class="global-meta" v-if="item.source || item.updatedAt">{{ item.source || item.status }}<span v-if="item.updatedAt"> · {{ item.updatedAt }}</span></div>
+            <div class="global-meta" v-if="item.source || item.dataTime || item.receivedAt">{{ item.source || item.status }}<span v-if="item.dataTime"> · 数据 {{ item.dataTime }}</span><span v-else-if="item.receivedAt"> · 接收 {{ item.receivedAt }}</span><span v-if="item.stale" class="data-stale-badge">旧数据</span></div>
+            <div class="global-note" v-if="item.note">{{ item.note }}</div>
           </div>
         </div>
       </div>
@@ -1854,11 +1861,12 @@
             <span>100</span>
           </div>
           <div id="gaugeChart"></div>
-          <div class="fear-gauge-value" :style="{color: fgColor}">{{ fgValue }}</div>
+          <div class="fear-gauge-value" :style="{color: fgColor}">{{ fgValue !== null ? fgValue : '--' }}</div>
         </div>
         <div class="fear-score" :style="{ borderColor: fgColor }">
-          <div class="fear-text" :style="{color: fgColor}">{{ fgText }} <span class="fear-inline-value">{{ fgValue }}</span></div>
+          <div class="fear-text" :class="{ 'data-unavailable': fgValue === null }" :style="fgValue !== null ? {color: fgColor} : {}">{{ fgText }} <span class="fear-inline-value">{{ fgValue !== null ? fgValue : '--' }}</span><span v-if="fgDisplayStale && fgValue !== null" class="data-stale-badge">旧数据</span></div>
           <div class="fear-note">{{ fearNote }}</div>
+          <div class="fear-note" v-if="fgDataTime">数据 {{ fgDataTime }}<span v-if="fgReceivedAt"> · 接收 {{ fgReceivedAt }}</span></div>
         </div>
       </div>
     </div>
@@ -1917,25 +1925,28 @@
             <circle cx="16" cy="16" r="16" fill="#F7931A"/>
             <path fill="#FFF" d="M23.189 14.293c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6.3l-.708 2.84c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.18-.045-1.13 4.532c-.086.212-.303.531-.793.41l-1.256-.313-.716 1.652 2.25.561c.418.105.827.212 1.232.312l-.715 2.866 1.727.43.715-2.868c.472.127.93.245 1.378.357l-.714 2.863 1.728.43.723-2.898c2.948.559 5.168.334 6.1-2.335.752-2.15-.037-3.389-1.59-4.197 1.13-.261 1.98-.1 2.447 1.751zm-3.85 6.419c-.535 2.147-4.151.986-5.32.693l.948-3.8c1.17.292 4.912.872 4.372 3.107zm.535-6.452c-.487 1.953-3.495.961-4.47.718l.86-3.448c.975.243 4.107.696 3.61 2.73z"/>
           </svg>
-          <span>比特币实体持仓前十</span>
+          <span>BTC主要实体与公开持仓参考</span>
         </span>
       </h2>
-      <div class="holder-note">公开地址每 30 秒同步链上余额；机构、ETF 和估算项目按公开披露更新。地址流入/流出不一定等同实际买卖。</div>
+      <div class="holder-note">按链上、公开披露、ETF与静态估算分类展示；类别口径不同，不可直接相加。地址流入/流出不一定等同实际买卖。</div>
       <div class="holders-list">
-        <div v-for="holder in btcHolders" :key="holder.id" class="holder-row">
-          <span class="holder-rank">{{ holder.rank }}</span>
-          <div>
-            <div class="holder-name">
-              {{ holder.name }}
-              <span class="holder-sync" :class="holderSyncClass(holder)">{{ holderSyncLabel(holder) }}</span>
+        <div class="holder-group" v-for="group in holderGroups" :key="group.key">
+          <div class="holder-group-title">{{ group.label }}</div>
+          <div v-for="holder in group.items" :key="holder.id" class="holder-row">
+            <span class="holder-type-tag">{{ holder.typeTag }}</span>
+            <div>
+              <div class="holder-name">
+                {{ holder.name }}
+                <span class="holder-sync" :class="holderSyncClass(holder)">{{ holderSyncLabel(holder) }}</span>
+              </div>
+              <div class="holder-address">{{ holder.type }}<span v-if="holder.dataDate"> · {{ holder.dataDate }}</span></div>
             </div>
-            <div class="holder-address">{{ holder.type }}</div>
-          </div>
-          <div>
-            <div class="holder-balance">
-              <span v-if="holder.approx" class="holder-estimate">约</span>{{ formatBtc(holder.balance) }}
+            <div>
+              <div class="holder-balance">
+                <span v-if="holder.approx" class="holder-estimate">约</span>{{ formatBtc(holder.balance) }}
+              </div>
+              <div class="holder-change" :class="holder.delta > 0 ? 'up' : holder.delta < 0 ? 'down' : ''">{{ holder.changeText }}</div>
             </div>
-            <div class="holder-change" :class="holder.delta > 0 ? 'up' : holder.delta < 0 ? 'down' : ''">{{ holder.changeText }}</div>
           </div>
         </div>
       </div>
@@ -2192,8 +2203,11 @@ new Vue({
       render: 'render-token'
     },
     ahrValue: '--',
-    fgValue: 50, fgText: '中立', fgColor: '#facc15',
-    fearNote: '市场情绪加载中，数值越低代表越恐慌，越高代表越贪婪。',
+    fgValue: null, fgText: '数据加载中', fgColor: '#94a3b8',
+    fgStale: true,
+    fgDataTime: '',
+    fgReceivedAt: '',
+    fearNote: '正在获取市场情绪数据。',
     etfProducts: [
       { symbol: 'IBIT', issuer: 'BlackRock', active: true },
       { symbol: 'FBTC', issuer: 'Fidelity', active: true },
@@ -2210,16 +2224,16 @@ new Vue({
     ],
     holdersStatus: '实体/机构口径，公开资料手动整理',
     btcHolders: [
-      { id: 'us-etf-total', rank: 1, name: '美国现货BTC ETF合计', type: '美国现货BTC ETF共 12 家合计，含IBIT/FBTC/GBTC/BTC等', balance: 1292000, approx: true, changeText: '类别合计，和单只ETF有重叠' },
-      { id: 'satoshi', rank: 2, name: '中本聪', type: '早期挖矿估算，长期未移动', balance: 1100000, approx: true, changeText: 'Patoshi/公开研究估算' },
-      { id: 'strategy', rank: 3, name: 'Strategy / 微策略', type: '上市公司公开披露，自动检查最新值', balance: 846842, approx: false, autoDisclosure: true, changeText: '参考站披露接口同步' },
-      { id: 'ibit', rank: 4, name: 'BlackRock IBIT', type: '贝莱德现货比特币ETF', balance: 785600, approx: true, changeText: '按官方净资产估算' },
-      { id: 'binance-known', rank: 5, name: 'Binance 公开冷钱包', type: '交易所客户资产，已标记地址下限', balance: 423532, approx: true, changeText: '公开地址合计下限', addresses: ['34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo', '3M219KR5vEneNb47ewrPfWyb5jQ2DjxRP6'] },
-      { id: 'us-gov', rank: 6, name: '美国政府', type: '主权/执法没收持仓估算', balance: 328372, approx: true, changeText: '2026-02 公开估算' },
-      { id: 'blockone', rank: 7, name: 'Block.one', type: '私营公司持仓估算', balance: 164000, approx: true, changeText: '公开资料估算' },
-      { id: 'robinhood', rank: 8, name: 'Robinhood 冷钱包', type: '平台客户资产，公开标记地址', balance: 140063, approx: false, changeText: '公开地址', addresses: ['bc1ql49ydapnjafl5t2cp9zqpjwe6pdgmxy98859v2'] },
-      { id: 'bitfinex', rank: 9, name: 'Bitfinex 冷钱包', type: '交易所客户资产，公开标记地址', balance: 130010, approx: false, changeText: '公开地址', addresses: ['bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97'] },
-      { id: 'tether', rank: 10, name: 'Tether 储备地址', type: '公司储备/公开标记地址', balance: 96936, approx: false, changeText: '公开地址', addresses: ['bc1qjasf9z3h7w3jspkhtgatgpyvvzgpa2wwd2lr0eh5tx44reyn2k7sfc27a4'] }
+      { id: 'us-etf-total', rank: 1, category: 'etf', typeTag: 'ETF', name: '美国现货BTC ETF合计', type: '美国现货BTC ETF共 12 家合计，含IBIT/FBTC/GBTC/BTC等', balance: 1292000, approx: true, changeText: '类别合计，含IBIT，不可与单只ETF相加' },
+      { id: 'satoshi', rank: 2, category: 'estimate', typeTag: '估算', name: '中本聪', type: '早期挖矿估算，长期未移动', balance: 1100000, approx: true, changeText: 'Patoshi/公开研究估算' },
+      { id: 'strategy', rank: 3, category: 'disclosure', typeTag: '披露', name: 'Strategy / 微策略', type: '上市公司公开披露，自动检查最新值', balance: 846842, approx: false, autoDisclosure: true, changeText: '参考站披露接口同步' },
+      { id: 'ibit', rank: 4, category: 'etf', typeTag: 'ETF', name: 'BlackRock IBIT', type: '贝莱德现货比特币ETF；已包含在ETF合计中', balance: 785600, approx: true, changeText: '按官方净资产估算，不可与ETF合计相加' },
+      { id: 'binance-known', rank: 5, category: 'onchain', typeTag: '链上', name: 'Binance 公开冷钱包', type: '交易所客户资产，已标记地址下限', balance: 423532, approx: true, changeText: '公开地址合计下限', addresses: ['34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo', '3M219KR5vEneNb47ewrPfWyb5jQ2DjxRP6'] },
+      { id: 'us-gov', rank: 6, category: 'estimate', typeTag: '估算', name: '美国政府', type: '主权/执法没收持仓估算', balance: 328372, approx: true, dataDate: '2026-02', changeText: '公开估算' },
+      { id: 'blockone', rank: 7, category: 'estimate', typeTag: '估算', name: 'Block.one', type: '私营公司持仓估算', balance: 164000, approx: true, changeText: '公开资料估算' },
+      { id: 'robinhood', rank: 8, category: 'onchain', typeTag: '链上', name: 'Robinhood 冷钱包', type: '平台客户资产，公开标记地址', balance: 140063, approx: false, changeText: '公开地址', addresses: ['bc1ql49ydapnjafl5t2cp9zqpjwe6pdgmxy98859v2'] },
+      { id: 'bitfinex', rank: 9, category: 'onchain', typeTag: '链上', name: 'Bitfinex 冷钱包', type: '交易所客户资产，公开标记地址', balance: 130010, approx: false, changeText: '公开地址', addresses: ['bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97'] },
+      { id: 'tether', rank: 10, category: 'onchain', typeTag: '链上', name: 'Tether 储备地址', type: '公司储备/公开标记地址', balance: 96936, approx: false, changeText: '公开地址', addresses: ['bc1qjasf9z3h7w3jspkhtgatgpyvvzgpa2wwd2lr0eh5tx44reyn2k7sfc27a4'] }
     ],
     holderBalanceCache: {},
     btcHolderFallback: [
@@ -2265,7 +2279,7 @@ new Vue({
     globalRequestPending: false,
     globalRequestTimer: null,
     globalMarkets: [
-      { id: 'gc', name: '黄金 (1oz)', icon: '🟡', price: '--', change: 0, prefix: '$' },
+      { id: 'gc', name: 'PAXG / USDT', icon: '🟡', price: '--', change: null, prefix: '$', placeholder: true, stale: false, status: '等待数据', dataTime: '', receivedAt: '', note: '代币化黄金代理价格，非 XAU/USD 黄金现货' },
       { id: 'cl', name: '原油 (WTI)', icon: '🛢️', price: '--', change: 0, prefix: '$' },
       { id: 'spx', name: '标普500', icon: '🇺🇸', price: '--', change: 0 },
       { id: 'dji', name: '道琼斯', icon: '📊', price: '--', change: 0 },
@@ -2284,6 +2298,7 @@ new Vue({
     halvingProgressPct: 0,
     minerDifficulty: 0,
     minerHashrateEh: '',
+    minerDataStale: true,
     minerDataStatus: '正在同步全网难度 ...',
     minerElectricityUsd: 0.06,
     minerBlockReward: 3.125,
@@ -2317,6 +2332,18 @@ new Vue({
   computed: {
     btcTrend() { return this.btcPrice >= this.btcBase ? 'up' : 'down'; },
     ethTrend() { return this.ethPrice >= this.ethBase ? 'up' : 'down'; },
+    btcAssetStale() {
+      const asset = this.watchedAssets.find(item => item.pair === 'BTCUSDT');
+      return !!(asset && asset.stale);
+    },
+    ethAssetStale() {
+      const asset = this.watchedAssets.find(item => item.pair === 'ETHUSDT');
+      return !!(asset && asset.stale);
+    },
+    fgDisplayStale() {
+      if (this.fgValue === null || this.fgStale) return true;
+      return this.sourceBadge(this.dataSources.fearGreed) !== 'ok';
+    },
     btcChangePct() {
       if (!this.btcBase) return '0.00';
       return (((this.btcPrice - this.btcBase) / this.btcBase) * 100).toFixed(2);
@@ -2430,39 +2457,49 @@ new Vue({
     marketRadar() {
       const btc = this.watchedAssets.find(asset => asset.pair === 'BTCUSDT');
       const eth = this.watchedAssets.find(asset => asset.pair === 'ETHUSDT');
-      const btcChange = Number(btc && btc.changePct);
-      const ethChange = Number(eth && eth.changePct);
+      const btcChange = this.isAssetUsable(btc) ? Number(btc.changePct) : null;
+      const ethChange = this.isAssetUsable(eth) ? Number(eth.changePct) : null;
       const ahr = Number(this.ahrValue);
       const fg = Number(this.fgValue);
-      const spx = this.globalChangeValue('spx');
-      const nasdaq = this.globalChangeValue('ixic');
-      const gold = this.globalChangeValue('gc');
-      const oil = this.globalChangeValue('cl');
-      const upCount = this.watchedAssets.filter(asset => Number(asset.changePct) > 0).length;
-      const downCount = this.watchedAssets.filter(asset => Number(asset.changePct) < 0).length;
+      const fgUsable = this.fgValue !== null && !this.fgDisplayStale;
+      const ahrUsable = Number.isFinite(ahr) && this.sourceBadge(this.dataSources.ahr999) === 'ok';
+      const spx = this.usableGlobalChange('spx');
+      const nasdaq = this.usableGlobalChange('ixic');
+      const gold = this.usableGlobalChange('gc');
+      const oil = this.usableGlobalChange('cl');
+      const freshAssets = this.watchedAssets.filter(asset => this.isAssetUsable(asset));
+      const upCount = freshAssets.filter(asset => Number(asset.changePct) > 0).length;
+      const downCount = freshAssets.filter(asset => Number(asset.changePct) < 0).length;
       const weakestMiner = this.miners.reduce((min, miner) => Math.min(min, Number(miner.shutdownPrice)), Infinity);
-      const minerGap = Number.isFinite(weakestMiner) && this.btcPrice ? ((this.btcPrice - weakestMiner) / weakestMiner) * 100 : null;
+      const minerGap = !this.minerDataStale && this.isAssetUsable(btc) && Number.isFinite(weakestMiner) && this.btcPrice ? ((this.btcPrice - weakestMiner) / weakestMiner) * 100 : null;
 
       let score = 0;
-      if (Number.isFinite(fg)) score += fg <= 25 ? -2 : fg <= 45 ? -1 : fg >= 75 ? 2 : fg >= 60 ? 1 : 0;
-      if (Number.isFinite(ahr)) score += ahr < 0.45 ? -2 : ahr < 1.2 ? -1 : ahr > 5 ? 2 : 0;
+      let scoreInputs = 0;
+      if (fgUsable) { score += fg <= 25 ? -2 : fg <= 45 ? -1 : fg >= 75 ? 2 : fg >= 60 ? 1 : 0; scoreInputs += 1; }
+      if (ahrUsable) { score += ahr < 0.45 ? -2 : ahr < 1.2 ? -1 : ahr > 5 ? 2 : 0; scoreInputs += 1; }
       if (Number.isFinite(btcChange)) score += btcChange > 2 ? 1 : btcChange < -2 ? -1 : 0;
       if (Number.isFinite(ethChange)) score += ethChange > 2 ? 1 : ethChange < -2 ? -1 : 0;
       if (Number.isFinite(spx)) score += spx > 0 ? 0.5 : spx < -0.8 ? -0.5 : 0;
       if (Number.isFinite(nasdaq)) score += nasdaq > 0 ? 0.5 : nasdaq < -0.8 ? -0.5 : 0;
       if (minerGap !== null && minerGap < 18) score -= 1;
-      score += upCount > downCount ? 0.5 : downCount > upCount ? -0.5 : 0;
+      if (Number.isFinite(btcChange)) scoreInputs += 1;
+      if (Number.isFinite(ethChange)) scoreInputs += 1;
+      if (Number.isFinite(spx)) scoreInputs += 1;
+      if (Number.isFinite(nasdaq)) scoreInputs += 1;
+      if (minerGap !== null) scoreInputs += 1;
+      if (freshAssets.length) { score += upCount > downCount ? 0.5 : downCount > upCount ? -0.5 : 0; scoreInputs += 1; }
 
       let state = '中性观察';
       let badge = 'warn';
       let className = '';
-      if (score <= -3) { state = '极度恐慌'; badge = 'bad'; className = 'down'; }
+      if (scoreInputs < 2) { state = '数据不足'; badge = 'warn'; className = ''; }
+      else if (score <= -3) { state = '极度恐慌'; badge = 'bad'; className = 'down'; }
       else if (score <= -1) { state = '偏弱防守'; badge = 'warn'; className = 'down'; }
       else if (score < 2) { state = '修复观察'; badge = 'ok'; className = 'up'; }
       else if (score < 4) { state = '强势修复'; badge = 'ok'; className = 'up'; }
       else { state = '阶段过热'; badge = 'warn'; className = 'up'; }
 
-      const summary = `当前市场处于${state}，BTC ${this.formatSignedPercent(btcChange)}，ETH ${this.formatSignedPercent(ethChange)}，恐惧贪婪 ${this.fgValue}，AHR999 ${Number.isFinite(ahr) ? ahr.toFixed(4) : '暂无'}。建议重点观察风险变化、关键价格与数据源状态，不构成投资建议。`;
+      const summary = `当前市场处于${state}，BTC ${this.formatSignedPercent(btcChange)}，ETH ${this.formatSignedPercent(ethChange)}，恐惧贪婪 ${fgUsable ? this.fgValue : '暂无有效数据'}，AHR999 ${ahrUsable ? ahr.toFixed(4) : '暂无有效数据'}。已使用 ${scoreInputs} 组有效数据，旧数据和异常数据不参与评分。`;
       return {
         state,
         badge,
@@ -2570,6 +2607,17 @@ new Vue({
         ? `${item.symbol || item.pair} 操作`
         : `${item.symbol} · ${item.name}`;
     },
+    holderGroups() {
+      const groups = [
+        { key: 'onchain', label: 'A. 链上可验证地址余额' },
+        { key: 'disclosure', label: 'B. 公司 / 机构公开披露' },
+        { key: 'etf', label: 'C. ETF / 基金类（存在包含关系）' },
+        { key: 'estimate', label: 'D. 研究 / 政府 / 静态估算' }
+      ];
+      return groups.map(group => Object.assign({}, group, {
+        items: this.btcHolders.filter(holder => holder.category === group.key)
+      })).filter(group => group.items.length);
+    },
     profitableMinerCount() {
       return this.miners.filter(miner => this.minerIsProfitable(miner)).length;
     }
@@ -2584,6 +2632,37 @@ new Vue({
     formatClock(value) {
       const date = value ? new Date(value) : new Date();
       return date.toLocaleTimeString('zh-CN', { hour12: false });
+    },
+
+    formatDateTime(value) {
+      const date = new Date(value);
+      return Number.isFinite(date.getTime()) ? date.toLocaleString('zh-CN', { hour12: false }) : '';
+    },
+
+    isAssetUsable(asset) {
+      if (!asset || asset.stale || ['error', 'pending'].includes(asset.sourceType)) return false;
+      return Number(asset.price) > 0 && asset.changePct !== null && Number.isFinite(Number(asset.changePct));
+    },
+
+    usableGlobalChange(id) {
+      const item = this.globalMarkets.find(row => row.id === id);
+      if (!item || item.stale || item.placeholder || item.status === '旧数据' || item.change === null || !(Number(item.price) > 0)) return null;
+      const value = Number(item.change);
+      return Number.isFinite(value) ? value : null;
+    },
+
+    assetTimeText(asset) {
+      if (!asset) return '--';
+      if (asset.dataTime) return `数据 ${asset.dataTime}`;
+      if (asset.receivedAt) return `接收 ${asset.receivedAt}`;
+      return '--';
+    },
+
+    stockTimeText(stock) {
+      if (!stock) return '--';
+      if (stock.dataTime) return `数据 ${stock.dataTime}`;
+      if (stock.receivedAt) return `接收 ${stock.receivedAt}`;
+      return stock.time || this.stockStatus;
     },
 
     formatSignedPercent(value) {
@@ -2864,14 +2943,14 @@ new Vue({
       if (alert.type === 'crypto') {
         const id = alert.targetKey.replace(/^crypto:/, '');
         const asset = this.watchedAssets.find(item => item.id === id);
-        if (!asset) return null;
+        if (!asset || asset.stale) return null;
         const value = alert.condition.includes('change') ? Number(asset.changePct) : Number(asset.price);
         return Number.isFinite(value) ? value : null;
       }
       if (alert.type === 'stock') {
         const symbol = alert.targetKey.replace(/^stock:/, '');
         const stock = this.stocks.find(item => item.symbol === symbol);
-        if (!stock) return null;
+        if (!stock || stock.stale) return null;
         const value = alert.condition.includes('change') ? Number(stock.changePct) : Number(stock.price);
         return Number.isFinite(value) ? value : null;
       }
@@ -3050,6 +3129,7 @@ new Vue({
         if (!Number.isFinite(difficulty) || difficulty <= 0) throw new Error('mining difficulty unavailable');
         this.minerDifficulty = difficulty;
         this.minerHashrateEh = Number.isFinite(hashrate) ? (hashrate / 1e18).toFixed(1) : '';
+        this.minerDataStale = false;
         this.updateMinerShutdownPrices();
         this.minerDataStatus = `关机价已更新 ${this.formatClock(Date.now())}`;
         try {
@@ -3060,6 +3140,7 @@ new Vue({
           }));
         } catch (e) {}
       } catch (error) {
+        this.minerDataStale = true;
         this.minerDataStatus = this.minerDifficulty ? '网络难度刷新失败，保留最近数据' : '网络难度暂不可用';
       }
     },
@@ -3533,6 +3614,9 @@ new Vue({
         dexId: '',
         dexUrl: '',
         updateTime: '',
+        dataTime: '',
+        receivedAt: '',
+        stale: false,
         source: '识别中',
         sourceType: 'pending',
         status: '等待行情',
@@ -3644,7 +3728,11 @@ new Vue({
         changePct: 0,
         lastPrice: null,
         trend: '',
-        time: '等待刷新'
+        time: '等待刷新',
+        dataTime: '',
+        receivedAt: '',
+        stale: false,
+        source: '腾讯行情'
       };
     },
 
@@ -3734,7 +3822,7 @@ new Vue({
       const preview = activeEtfs.slice(0, 4).map(item => item.symbol).join('/');
       const holder = this.btcHolders.find(item => item.id === 'us-etf-total');
       if (!holder) return;
-      holder.type = `美国现货BTC ETF共 ${activeEtfs.length} 家合计，含${preview}等`;
+      holder.type = `美国现货BTC ETF共 ${activeEtfs.length} 家合计，含${preview}等；单只ETF已包含在合计中`;
     },
 
     async refreshHolderAddressBalances() {
@@ -4119,6 +4207,9 @@ new Vue({
             changePct: parseFloat(ticker.P),
             volume24h: parseFloat(ticker.q),
             updateTime: this.formatTimestamp(ticker.E || Date.now()),
+            dataTime: this.formatTimestamp(ticker.E || Date.now()),
+            receivedAt: this.formatTimestamp(now),
+            stale: false,
             source: 'Binance WS',
             sourceType: 'binance',
             status: '实时推送'
@@ -4159,6 +4250,7 @@ new Vue({
           asset.source = '兜底查询';
           asset.sourceType = 'pending';
           asset.status = 'Binance WS 超过30秒无推送';
+          asset.stale = Number(asset.price) > 0;
           asset.fallbackSince = now;
           asset.wsRecoveryCount = 0;
           changed = true;
@@ -4179,6 +4271,7 @@ new Vue({
         asset.source = '兜底查询';
         asset.sourceType = 'pending';
         asset.status = reason || 'Binance WS 异常';
+        asset.stale = Number(asset.price) > 0;
         asset.fallbackSince = now;
         asset.wsRecoveryCount = 0;
         changed = true;
@@ -4282,8 +4375,8 @@ new Vue({
           this.queueAssetUpdate(asset.id, {
             source: '无可用源',
             sourceType: 'error',
-            status: 'OKX/CoinGecko 暂无数据',
-            updateTime: this.formatTimestamp(Date.now())
+            status: Number(asset.price) > 0 ? '数据源异常，保留旧数据' : 'OKX/CoinGecko 暂无数据',
+            stale: Number(asset.price) > 0
           });
         }
       }
@@ -4308,6 +4401,9 @@ new Vue({
         changePct,
         volume24h: volume,
         updateTime: this.formatTimestamp(parseInt(ticker.ts, 10) || Date.now()),
+        dataTime: this.formatTimestamp(parseInt(ticker.ts, 10) || Date.now()),
+        receivedAt: this.formatTimestamp(Date.now()),
+        stale: false,
         source: 'OKX',
         sourceType: 'okx',
         status: '轮询 10s'
@@ -4335,6 +4431,9 @@ new Vue({
         volume24h: parseFloat(item.usd_24h_vol),
         marketCap: parseFloat(item.usd_market_cap),
         updateTime: this.formatTimestamp(item.last_updated_at ? item.last_updated_at * 1000 : Date.now()),
+        dataTime: item.last_updated_at ? this.formatTimestamp(item.last_updated_at * 1000) : '',
+        receivedAt: this.formatTimestamp(Date.now()),
+        stale: false,
         source: 'CoinGecko',
         sourceType: 'coingecko',
         status: '轮询 10s'
@@ -4384,10 +4483,13 @@ new Vue({
                 marketCap: null,
                 source: '链上行情',
                 sourceType: 'error',
+                stale: false,
                 status: quoteMatches.length
                   ? '交易池匹配异常 / 暂不显示价格'
                   : '未找到有效交易池',
-                updateTime: this.formatTimestamp(Date.now())
+                updateTime: this.formatTimestamp(Date.now()),
+                dataTime: '',
+                receivedAt: this.formatTimestamp(Date.now())
               });
               return;
             }
@@ -4412,6 +4514,9 @@ new Vue({
               dexId: best.dexId || '',
               dexUrl: best.url || '',
               updateTime: this.formatTimestamp(Date.now()),
+              dataTime: '',
+              receivedAt: this.formatTimestamp(Date.now()),
+              stale: false,
               source: '链上行情',
               sourceType: 'dex',
               status: '轮询 10s'
@@ -4419,13 +4524,22 @@ new Vue({
           });
         } catch (e) {
           this.markSource('dex', '异常', e);
+          groups[chainId].forEach(asset => {
+            const hasOldValue = Number(asset.price) > 0;
+            this.queueAssetUpdate(asset.id, {
+              source: '链上行情',
+              sourceType: 'error',
+              status: hasOldValue ? '数据源异常，保留旧数据' : '链上行情暂不可用',
+              stale: hasOldValue
+            });
+          });
         }
       }));
     },
 
     async fetchCrypto() {
       const symbols = encodeURIComponent(JSON.stringify(['BTCUSDT', 'ETHUSDT', 'PAXGUSDT']));
-      const url = `https://data-api.binance.vision/api/v3/ticker/price?symbols=${symbols}`;
+      const url = `https://data-api.binance.vision/api/v3/ticker/24hr?symbols=${symbols}`;
       this.markSource('binanceRest', '轮询中');
       try {
         const res = await this.fetchWithSoftTimeout(url, 7000);
@@ -4438,8 +4552,8 @@ new Vue({
         if (!btcData || !ethData) throw new Error('Binance REST missing BTC/ETH');
 
         if (btcData && ethData) {
-          const btcRestPrice = Number(btcData.price);
-          const ethRestPrice = Number(ethData.price);
+          const btcRestPrice = Number(btcData.lastPrice);
+          const ethRestPrice = Number(ethData.lastPrice);
           if (!Number.isFinite(btcRestPrice) || btcRestPrice <= 0 || !Number.isFinite(ethRestPrice) || ethRestPrice <= 0) {
             throw new Error('Binance REST invalid price');
           }
@@ -4463,17 +4577,29 @@ new Vue({
         if (goldData) {
           const goldItem = this.globalMarkets.find(m => m.id === 'gc');
           if (goldItem) {
-            const currentPrice = parseFloat(goldData.price);
-            const prevPrice = goldItem.price === '--' ? currentPrice : parseFloat(goldItem.price);
+            const currentPrice = parseFloat(goldData.lastPrice);
+            const change24h = parseFloat(goldData.priceChangePercent);
+            if (!Number.isFinite(currentPrice) || currentPrice <= 0) throw new Error('Binance PAXG invalid price');
             goldItem.price = currentPrice.toFixed(2);
-            goldItem.change = (((currentPrice - prevPrice) / prevPrice) * 100).toFixed(2);
-            goldItem.source = 'Binance PAXG';
-            goldItem.updatedAt = this.formatClock(Date.now());
+            goldItem.change = Number.isFinite(change24h) ? Number(change24h.toFixed(2)) : null;
+            goldItem.source = 'Binance PAXG/USDT';
+            goldItem.status = Number.isFinite(change24h) ? '24H行情' : '24H暂不可用';
+            goldItem.stale = false;
+            goldItem.placeholder = false;
+            goldItem.dataTime = goldData.closeTime ? this.formatTimestamp(goldData.closeTime) : '';
+            goldItem.receivedAt = this.formatTimestamp(Date.now());
+            goldItem.updatedAt = goldItem.dataTime || goldItem.receivedAt;
           }
         }
       } catch (e) {
         this.cryptoStatus = 'Binance REST 暂不可用';
         this.markSource('binanceRest', '异常', e);
+        const goldItem = this.globalMarkets.find(m => m.id === 'gc');
+        if (goldItem) {
+          const hasOldValue = Number(goldItem.price) > 0;
+          goldItem.stale = hasOldValue;
+          goldItem.status = hasOldValue ? '数据源异常，保留旧数据' : '数据暂不可用';
+        }
       }
     },
 
@@ -4508,8 +4634,13 @@ new Vue({
 
       const markNoValidData = message => {
         this.stocks.forEach(stock => {
-          if (stock.price === '--') stock.time = '暂无数据 / 可能不支持该标的';
-          else stock.time = '本次无数据 / 保留旧数据';
+          if (stock.price === '--') {
+            stock.time = '暂无数据 / 可能不支持该标的';
+            this.$set(stock, 'stale', false);
+          } else {
+            stock.time = '数据源异常 / 保留旧数据';
+            this.$set(stock, 'stale', true);
+          }
         });
         this.stockStatus = '美股接口无有效数据 / 保留旧数据';
         const source = this.dataSources.tencentStocks;
@@ -4530,6 +4661,7 @@ new Vue({
             const raw = window[`v_${stock.query}`];
             if (!raw) {
               stock.time = stock.price === '--' ? '暂无数据 / 可能不支持该标的' : '本次无数据 / 保留旧数据';
+              if (stock.price !== '--') this.$set(stock, 'stale', true);
               return;
             }
 
@@ -4538,6 +4670,7 @@ new Vue({
             const changePct = parseFloat(arr[32]);
             if (!Number.isFinite(price) || price <= 0) {
               stock.time = stock.price === '--' ? '暂无数据 / 可能不支持该标的' : '本次无数据 / 保留旧数据';
+              if (stock.price !== '--') this.$set(stock, 'stale', true);
               return;
             }
 
@@ -4547,6 +4680,10 @@ new Vue({
             stock.price = price.toFixed(2);
             stock.changePct = Number.isFinite(changePct) ? changePct : 0;
             stock.time = arr[30] || new Date().toLocaleTimeString();
+            this.$set(stock, 'dataTime', arr[30] || '');
+            this.$set(stock, 'receivedAt', this.formatTimestamp(Date.now()));
+            this.$set(stock, 'stale', false);
+            this.$set(stock, 'source', '腾讯行情');
           });
           if (validCount > 0) {
             this.stockStatus = `${this.usMarketInfo.label} · 有效行情 ${validCount}/${this.stocks.length} · ${new Date().toLocaleTimeString()}`;
@@ -4625,7 +4762,7 @@ new Vue({
       }
     },
 
-    updateMarketData(id, price, change) {
+    updateMarketData(id, price, change, dataTime = '') {
       const item = this.globalMarkets.find(m => m.id === id);
       if (item) {
         const parsedPrice = parseFloat(price);
@@ -4637,7 +4774,9 @@ new Vue({
         this.$set(item, 'stale', false);
         this.$set(item, 'status', '轮询');
         this.$set(item, 'source', '腾讯行情');
-        this.$set(item, 'updatedAt', this.formatClock(Date.now()));
+        this.$set(item, 'dataTime', dataTime || '');
+        this.$set(item, 'receivedAt', this.formatTimestamp(Date.now()));
+        this.$set(item, 'updatedAt', dataTime || this.formatTimestamp(Date.now()));
         return true;
       }
       return false;
@@ -4663,6 +4802,8 @@ new Vue({
         this.$set(item, 'status', '数据源暂不可用');
         this.$set(item, 'source', '');
         this.$set(item, 'updatedAt', '');
+        this.$set(item, 'dataTime', '');
+        this.$set(item, 'receivedAt', '');
         if (config.suffix) this.$set(item, 'suffix', config.suffix);
       }
       const source = this.dataSources[config.sourceKey];
@@ -4687,7 +4828,9 @@ new Vue({
       this.$set(item, 'stale', !!quote.stale);
       this.$set(item, 'status', quote.stale ? '旧数据' : (quote.mode || '轮询'));
       this.$set(item, 'source', quote.label || '已刷新');
-      this.$set(item, 'updatedAt', quote.updatedAt || this.formatClock(Date.now()));
+      this.$set(item, 'dataTime', quote.updatedAt || '');
+      this.$set(item, 'receivedAt', this.formatTimestamp(Date.now()));
+      this.$set(item, 'updatedAt', quote.updatedAt || this.formatTimestamp(Date.now()));
       this.$set(item, 'suffix', config.suffix || '');
 
       source.disabled = false;
@@ -4725,10 +4868,27 @@ new Vue({
     },
 
     async fetchWithSoftTimeout(url, timeoutMs = 7000) {
-      return Promise.race([
-        fetch(url, { cache: 'no-store' }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('请求超时')), timeoutMs))
-      ]);
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      if (!controller) {
+        return Promise.race([
+          fetch(url, { cache: 'no-store' }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('请求超时')), timeoutMs))
+        ]);
+      }
+      const timer = setTimeout(() => {
+        controller.abort();
+      }, timeoutMs);
+      try {
+        return await fetch(url, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
+      } catch (error) {
+        if (error && error.name === 'AbortError') throw new Error('请求超时');
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
     },
 
     parseCsvLine(line) {
@@ -5099,6 +5259,13 @@ new Vue({
       };
       const markGlobalFailure = error => {
         const source = this.dataSources.tencentGlobal;
+        ['sh', 'dji', 'ixic', 'spx', 'cl'].forEach(id => {
+          const item = this.globalMarkets.find(row => row.id === id);
+          if (item && Number(item.price) > 0) {
+            this.$set(item, 'stale', true);
+            this.$set(item, 'status', '旧数据');
+          }
+        });
         if (source.lastUpdate) {
           source.status = '旧数据';
           source.lastAttempt = Date.now();
@@ -5112,19 +5279,27 @@ new Vue({
         if (settled) return;
         try {
           let validCount = 0;
-          if (window.v_s_sh000001) { const arr = window.v_s_sh000001.split('~'); if (this.updateMarketData('sh', arr[3], arr[5])) validCount += 1; }
-          if (window.v_usDJI) { const arr = window.v_usDJI.split('~'); if (this.updateMarketData('dji', arr[3], arr[32])) validCount += 1; }
-          if (window.v_usIXIC) { const arr = window.v_usIXIC.split('~'); if (this.updateMarketData('ixic', arr[3], arr[32])) validCount += 1; }
+          const refreshedIds = [];
+          if (window.v_s_sh000001) { const arr = window.v_s_sh000001.split('~'); if (this.updateMarketData('sh', arr[3], arr[5], arr[30] || '')) { validCount += 1; refreshedIds.push('sh'); } }
+          if (window.v_usDJI) { const arr = window.v_usDJI.split('~'); if (this.updateMarketData('dji', arr[3], arr[32], arr[30] || '')) { validCount += 1; refreshedIds.push('dji'); } }
+          if (window.v_usIXIC) { const arr = window.v_usIXIC.split('~'); if (this.updateMarketData('ixic', arr[3], arr[32], arr[30] || '')) { validCount += 1; refreshedIds.push('ixic'); } }
           const spxRaw = window.v_usINX || window.v_usSPX;
-          if (spxRaw) { const arr = spxRaw.split('~'); if (this.updateMarketData('spx', arr[3], arr[32])) validCount += 1; }
+          if (spxRaw) { const arr = spxRaw.split('~'); if (this.updateMarketData('spx', arr[3], arr[32], arr[30] || '')) { validCount += 1; refreshedIds.push('spx'); } }
           if (window.v_hf_CL) {
             const arr = window.v_hf_CL.split(',');
             const price = parseFloat(arr[0]);
             const changePct = parseFloat(arr[1]);
             if (Number.isFinite(price) && price > 0) {
-              if (this.updateMarketData('cl', price, Number.isFinite(changePct) ? changePct : 0)) validCount += 1;
+              if (this.updateMarketData('cl', price, Number.isFinite(changePct) ? changePct : 0)) { validCount += 1; refreshedIds.push('cl'); }
             }
           }
+          ['sh', 'dji', 'ixic', 'spx', 'cl'].filter(id => !refreshedIds.includes(id)).forEach(id => {
+            const item = this.globalMarkets.find(row => row.id === id);
+            if (item && Number(item.price) > 0) {
+              this.$set(item, 'stale', true);
+              this.$set(item, 'status', '旧数据');
+            }
+          });
           if (validCount > 0) {
             this.markSource('tencentGlobal', '轮询');
           } else {
@@ -5193,6 +5368,9 @@ new Vue({
           const val = parseInt(d.data[0].value, 10);
           if (!Number.isFinite(val)) throw new Error('Fear Greed invalid');
           this.fgValue = val;
+          this.fgStale = false;
+          this.fgDataTime = d.data[0].timestamp ? this.formatDateTime(Number(d.data[0].timestamp) * 1000) : '';
+          this.fgReceivedAt = this.formatTimestamp(Date.now());
           if (val <= 25) { this.fgText = "极度恐慌"; this.fgColor = "#ef4444"; this.fearNote = "市场极度恐慌，可能是买入机会"; }
           else if (val <= 45) { this.fgText = "恐慌"; this.fgColor = "#fb923c"; this.fearNote = "市场偏恐慌，适合分批观察"; }
           else if (val <= 55) { this.fgText = "中立"; this.fgColor = "#facc15"; this.fearNote = "情绪中性，等待方向确认"; }
@@ -5204,7 +5382,21 @@ new Vue({
           throw new Error('Fear Greed empty');
         }
       } catch (e) {
-        this.markSource('fearGreed', '异常', e);
+        if (this.fgValue !== null) {
+          this.fgStale = true;
+          this.fearNote = '数据源异常，当前显示最近一次成功数据。';
+          const source = this.dataSources.fearGreed;
+          source.status = '旧数据';
+          source.lastAttempt = Date.now();
+          source.errorCount = (source.errorCount || 0) + 1;
+        } else {
+          this.fgValue = null;
+          this.fgText = '数据暂不可用';
+          this.fgColor = '#94a3b8';
+          this.fgStale = true;
+          this.fearNote = '恐惧贪婪数据源暂不可用，当前不参与市场雷达评分。';
+          this.markSource('fearGreed', '异常', e);
+        }
       }
     },
 
@@ -5234,7 +5426,7 @@ new Vue({
           axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
           pointer: { length: "76%", width: 2, itemStyle: { color: "#e2e8f0" } },
           detail: { show: false },
-          data: [{ value: 50 }]
+          data: []
         }]
       });
       window.addEventListener('resize', this.resizeGauge);
@@ -5284,7 +5476,7 @@ new Vue({
     this.registerInterval(this.fetchRealAHR999, 60000);
     this.registerInterval(this.fetchFearGreed, 60 * 60 * 1000);
     this.registerInterval(this.fetchHalvingCountdown, 10 * 60 * 1000);
-    this.registerInterval(this.fetchMinerNetworkData, 15000);
+    this.registerInterval(this.fetchMinerNetworkData, 10 * 60 * 1000);
   }
 });
 </script>
