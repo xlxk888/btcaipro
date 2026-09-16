@@ -2,15 +2,25 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="referrer" content="no-referrer" />
-  <title>Crypto AI</title>
+  <meta name="description" content="Crypto AI：聚合比特币、以太坊、市场情绪、估值与风险状态的专业加密市场仪表盘。" />
+  <meta property="og:title" content="Crypto AI · 加密市场仪表盘" />
+  <meta property="og:description" content="查看 BTC、ETH、Fear &amp; Greed、AHR999、市场雷达与自选行情。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://xlxk888.github.io/btcaipro/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Crypto AI · 加密市场仪表盘" />
+  <meta name="twitter:description" content="清晰呈现核心行情、市场状态与数据质量。" />
+  <link rel="canonical" href="https://xlxk888.github.io/btcaipro/" />
+  <title>Crypto AI · 加密市场仪表盘</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
 
   <style>
+    [v-cloak] { display: none !important; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
       width: 100%;
@@ -1471,18 +1481,199 @@
         }
       }
     }
+
+    /* AI-2: restrained hierarchy, unified trust states, and responsive priority */
+    body {
+      background: #0a101c;
+      color: #e5e7eb;
+      line-height: 1.45;
+    }
+    .noscript-message {
+      max-width: 720px;
+      margin: 32px auto;
+      padding: 16px;
+      border: 1px solid rgba(245,158,11,.45);
+      border-radius: 12px;
+      background: #111827;
+      color: #f8fafc;
+      text-align: center;
+    }
+    .app-topbar {
+      margin-bottom: 12px;
+      padding: 12px 16px;
+      border-color: rgba(148,163,184,.18);
+      border-radius: 16px;
+      background: rgba(15,23,42,.88);
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    }
+    .brand-copy { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .brand-copy h1 { color: #f8fafc; letter-spacing: -.035em; }
+    .brand-copy > span { color: #8492a8; font-size: .75rem; font-weight: 650; }
+    .card {
+      padding: 18px;
+      border-color: rgba(148,163,184,.16);
+      border-radius: 14px;
+      background: rgba(20,31,51,.92);
+      box-shadow: 0 12px 28px rgba(0,0,0,.12);
+    }
+    .card h2 {
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-color: rgba(148,163,184,.14);
+      color: #d8e1ee;
+      font-size: 1rem;
+      letter-spacing: -.01em;
+    }
+    .card h2 small {
+      margin-left: 7px;
+      color: #7f8da3;
+      font-size: .72rem;
+      font-weight: 650;
+    }
+    .top-strip {
+      grid-template-columns: minmax(190px, 1.1fr) repeat(5, minmax(125px, .78fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .pulse-item {
+      min-height: 82px;
+      padding: 12px;
+      border-color: rgba(148,163,184,.16);
+      border-radius: 12px;
+      background: rgba(17,27,45,.88);
+    }
+    .pulse-item.brand-pulse { border-color: rgba(245,158,11,.36); }
+    .pulse-label { color: #8492a8; font-size: .72rem; letter-spacing: .02em; }
+    .pulse-value { margin-top: 6px; font-size: 1.08rem; letter-spacing: -.02em; }
+    .pulse-value.small { color: #aab5c5; font-size: .75rem; }
+    .trust-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      margin-left: 7px;
+      padding: 1px 7px;
+      border: 1px solid rgba(148,163,184,.28);
+      border-radius: 999px;
+      color: #94a3b8;
+      background: rgba(100,116,139,.08);
+      font-size: .64rem;
+      font-weight: 800;
+      line-height: 1.2;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .trust-badge.ok, .trust-badge.good { color:#4ade80; border-color:rgba(74,222,128,.32); background:rgba(34,197,94,.08); }
+    .trust-badge.warn { color:#fbbf24; border-color:rgba(251,191,36,.34); background:rgba(245,158,11,.08); }
+    .trust-badge.bad { color:#f87171; border-color:rgba(248,113,113,.36); background:rgba(127,29,29,.12); }
+    .trust-badge.idle { color:#94a3b8; }
+    .data-stale-badge { font-size: .64rem; }
+    .primary-card {
+      border-color: rgba(96,165,250,.28);
+      background: linear-gradient(145deg, rgba(21,35,59,.98), rgba(16,27,45,.94));
+    }
+    .radar-card { order: 1; min-height: 0; }
+    .crypto-card { order: 2; }
+    .gauge-card { order: 3; }
+    .ahr-card { order: 4; }
+    .alerts-card { order: 5; }
+    .stocks-card { order: 6; }
+    .global-card { order: 7; }
+    .halving-card { order: 8; }
+    .miner-card { order: 9; }
+    .entity-holders-card { order: 10; }
+    .radar-body { grid-template-columns: minmax(180px,.55fr) minmax(0,1.45fr); gap: 18px; }
+    .radar-meter { padding: 16px; border-color: rgba(96,165,250,.2); background: rgba(7,14,26,.62); }
+    .radar-state { font-size: 1.8rem; letter-spacing: -.04em; }
+    .radar-status-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
+    .radar-status-grid > div { padding: 10px; border-radius: 10px; background: rgba(7,14,26,.54); }
+    .radar-status-grid span { display: block; color: #7f8da3; font-size: .7rem; font-weight: 700; }
+    .radar-status-grid strong { display: block; margin-top: 4px; color: #e5e7eb; font-size: .9rem; }
+    .radar-status-grid strong.warn, .warn-text { color: #fbbf24; }
+    .radar-status-grid strong.bad { color: #f87171; }
+    .radar-status-grid strong.ok { color: #4ade80; }
+    .neutral-text { color: #dbeafe; }
+    .muted-text { color: #94a3b8; }
+    .radar-summary { font-size: .84rem; line-height: 1.6; }
+    .radar-reasons { margin-top: 14px; border-top: 1px solid rgba(148,163,184,.14); }
+    .radar-reasons summary { padding: 12px 2px 4px; color: #dbeafe; font-size: .82rem; font-weight: 850; cursor: pointer; }
+    .radar-reasons summary span { margin-left: 6px; color: #77869d; font-size: .7rem; font-weight: 650; }
+    .reason-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+    .reason-item { min-width: 0; padding: 10px; border-radius: 10px; background: rgba(7,14,26,.58); }
+    .reason-item > span, .reason-item small { display: block; color: #77869d; font-size: .68rem; }
+    .reason-item strong { display: block; margin: 4px 0; color: #e5e7eb; font-size: .86rem; overflow-wrap: anywhere; }
+    .reason-item small { line-height: 1.35; }
+    .holder-collapsed-summary { padding: 18px 12px; border-radius: 10px; background: rgba(7,14,26,.48); color:#94a3b8; font-size:.78rem; text-align:center; }
+    .entity-holders-card.expanded { grid-column: span 6; }
+    .entity-holders-card.expanded .holders-list { max-height: none; overflow: visible; }
+    .holder-group { padding-left: 8px; border-left: 3px solid #64748b; }
+    .holder-group-onchain { border-left-color: #38bdf8; }
+    .holder-group-disclosure { border-left-color: #4ade80; }
+    .holder-group-etf { border-left-color: #a78bfa; }
+    .holder-group-estimate { border-left-color: #fbbf24; }
+    .holder-group-title { color: #cbd5e1; }
+    .global-note { color: #fbbf24; }
+    .global-name { display: flex; gap: 4px; }
+    .bottom-notice { border-color: rgba(148,163,184,.15); background: rgba(17,27,45,.82); }
+
+    @media (max-width: 1024px) {
+      .app-topbar { padding: 10px; }
+      .brand-wrap { align-items: center; }
+      .brand-copy > span { display: none; }
+      .top-strip {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 8px;
+      }
+      .pulse-item { min-height: 70px; padding: 9px; }
+      .pulse-item.brand-pulse { grid-column: 1 / -1; }
+      .pulse-item:last-child { grid-column: 1 / -1; min-height: 54px; }
+      .grid { gap: 12px; }
+      .radar-card { order: 1; }
+      .crypto-card { order: 2; }
+      .gauge-card { order: 3; }
+      .ahr-card { order: 4; }
+      .alerts-card { order: 5; }
+      .stocks-card { order: 6; }
+      .global-card { order: 7; }
+      .halving-card { order: 8; }
+      .miner-card { order: 9; }
+      .entity-holders-card { order: 10; }
+      .reason-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .entity-holders-card.expanded { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 12px; }
+      .card h2 { font-size: .92rem; }
+      .card h2 small { display: block; margin: 3px 0 0; font-size: .68rem; }
+      .topbar-actions .mobile-top-metric { display: none; }
+      .pulse-value { font-size: .98rem; }
+      .trust-badge { margin-left: 4px; padding: 1px 5px; font-size: .6rem; }
+      .radar-body { grid-template-columns: 1fr; gap: 10px; }
+      .radar-status-grid { gap: 6px; }
+      .radar-status-grid > div { padding: 8px 6px; }
+      .radar-status-grid strong { font-size: .78rem; }
+      .reason-grid { grid-template-columns: 1fr; }
+      .radar-reasons summary { min-height: 42px; display: flex; align-items: center; flex-wrap: wrap; }
+      .topbar-button, .alert-form button, .small-action, .global-toggle, .miner-toggle { min-height: 40px; }
+      .holder-note { font-size: .7rem; line-height: 1.5; }
+    }
   </style>
 </head>
 <body>
+<noscript><div class="noscript-message">Crypto AI 需要 JavaScript 才能显示实时市场数据。</div></noscript>
 
-<div id="app" :class="{ 'compact-mode': compactMode }">
+<div id="app" v-cloak :class="{ 'compact-mode': compactMode }">
   <header class="app-topbar">
     <div class="brand-wrap">
       <svg viewBox="0 0 32 32" class="brand-logo" xmlns="http://www.w3.org/2000/svg" aria-label="Bitcoin">
         <circle cx="16" cy="16" r="16" fill="#F7931A"/>
         <path fill="#FFF" d="M23.189 14.293c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6.3l-.708 2.84c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.18-.045-1.13 4.532c-.086.212-.303.531-.793.41l-1.256-.313-.716 1.652 2.25.561c.418.105.827.212 1.232.312l-.715 2.866 1.727.43.715-2.868c.472.127.93.245 1.378.357l-.714 2.863 1.728.43.723-2.898c2.948.559 5.168.334 6.1-2.335.752-2.15-.037-3.389-1.59-4.197 1.13-.261 1.98-.1 2.447 1.751zm-3.85 6.419c-.535 2.147-4.151.986-5.32.693l.948-3.8c1.17.292 4.912.872 4.372 3.107zm.535-6.452c-.487 1.953-3.495.961-4.47.718l.86-3.448c.975.243 4.107.696 3.61 2.73z"/>
       </svg>
-      <h1>Crypto AI</h1>
+      <div class="brand-copy">
+        <h1>Crypto AI</h1>
+        <span>市场状态与数据质量，一眼看清</span>
+      </div>
     </div>
     <div class="topbar-actions">
       <span class="topbar-pill desktop-only">刷新 {{ formatClock(clockNow) }}</span>
@@ -1503,27 +1694,27 @@
         <div class="pulse-label">市场状态</div>
         <div class="pulse-value" :class="marketRadar.className">{{ marketRadar.state }}</div>
       </div>
-      <div class="pulse-value small">{{ sourceHealthText }}</div>
+      <div class="pulse-value small">规则模型 · 基于实时市场数据</div>
     </div>
     <div class="pulse-item">
       <div class="pulse-label">BTC</div>
-      <div class="pulse-value" :class="btcTrend">{{ formatPrice(btcPrice) }}<span v-if="btcAssetStale" class="data-stale-badge">旧数据</span></div>
+      <div class="pulse-value" :class="btcPrice > 0 ? btcTrend : 'data-unavailable'">{{ btcPrice > 0 ? formatPrice(btcPrice) : '--' }}<span class="trust-badge" :class="btcPrice <= 0 ? 'idle' : btcAssetStale ? 'warn' : 'ok'">{{ btcPrice <= 0 ? '数据不足' : btcAssetStale ? '旧数据' : '实时' }}</span></div>
     </div>
     <div class="pulse-item">
       <div class="pulse-label">ETH</div>
-      <div class="pulse-value" :class="ethTrend">{{ formatPrice(ethPrice) }}<span v-if="ethAssetStale" class="data-stale-badge">旧数据</span></div>
+      <div class="pulse-value" :class="ethPrice > 0 ? ethTrend : 'data-unavailable'">{{ ethPrice > 0 ? formatPrice(ethPrice) : '--' }}<span class="trust-badge" :class="ethPrice <= 0 ? 'idle' : ethAssetStale ? 'warn' : 'ok'">{{ ethPrice <= 0 ? '数据不足' : ethAssetStale ? '旧数据' : '实时' }}</span></div>
     </div>
     <div class="pulse-item">
       <div class="pulse-label">恐惧贪婪</div>
-      <div class="pulse-value" :class="{ 'data-unavailable': fgValue === null }" :style="fgValue !== null ? {color: fgColor} : {}">{{ fgValue !== null ? fgValue : '--' }} · {{ fgText }}<span v-if="fgDisplayStale && fgValue !== null" class="data-stale-badge">旧数据</span></div>
+      <div class="pulse-value" :class="{ 'data-unavailable': fgValue === null }" :style="fgValue !== null ? {color: fgColor} : {}">{{ fgValue !== null ? fgValue : '--' }} · {{ fgText }}<span class="trust-badge" :class="fgValue === null ? 'idle' : fgDisplayStale ? 'warn' : 'ok'">{{ fgValue === null ? '数据不足' : fgDisplayStale ? '旧数据' : '实时' }}</span></div>
     </div>
     <div class="pulse-item">
       <div class="pulse-label">AHR999</div>
-      <div class="pulse-value">{{ ahrValue }}</div>
+      <div class="pulse-value">{{ ahrValue }}<span class="trust-badge warn">估算</span></div>
     </div>
     <div class="pulse-item">
-      <div class="pulse-label">刷新时间</div>
-      <div class="pulse-value small">{{ formatClock(clockNow) }}</div>
+      <div class="pulse-label">数据健康</div>
+      <div class="pulse-value small"><span class="trust-badge" :class="sourceHealthClass">{{ sourceHealthText }}</span></div>
     </div>
   </div>
 
@@ -1540,35 +1731,45 @@
   </div>
 
   <div class="grid">
-    <div class="card span-3 radar-card">
+    <div class="card span-6 radar-card primary-card">
       <h2>
-        <span>🧠 AI 市场雷达</span>
+        <span>市场雷达 <small>规则模型 · 基于实时市场数据</small></span>
         <span class="module-status" :class="marketRadar.badge">{{ marketRadar.state }}</span>
       </h2>
       <div class="radar-body">
         <div class="radar-meter">
-          <div class="radar-score">综合观察</div>
+          <div class="radar-score">当前市场状态</div>
           <div class="radar-state" :class="marketRadar.className">{{ marketRadar.state }}</div>
           <div class="radar-score">{{ watchedAssets.length }} 个自选 · {{ marketRadar.upCount }} 涨 / {{ marketRadar.downCount }} 跌</div>
         </div>
         <div>
-          <div class="radar-summary">{{ marketRadar.summary }}</div>
-          <div class="radar-focus">
-            <div class="radar-point" v-for="item in marketRadar.focus" :key="item.title">
-              <strong>{{ item.title }}</strong>{{ item.text }}
-            </div>
+          <div class="radar-status-grid">
+            <div><span>市场状态</span><strong :class="marketRadar.className">{{ marketRadar.state }}</strong></div>
+            <div><span>风险等级</span><strong :class="marketRadar.riskClass">{{ marketRadar.risk }}</strong></div>
+            <div><span>数据质量</span><strong :class="sourceHealthClass">{{ marketRadar.dataQuality }}</strong></div>
           </div>
+          <div class="radar-summary">{{ marketRadar.summary }}</div>
         </div>
       </div>
+      <details class="radar-reasons">
+        <summary>判断依据 <span>为什么是这个状态？</span></summary>
+        <div class="reason-grid">
+          <div class="reason-item" v-for="item in marketRadar.basis" :key="item.label">
+            <span>{{ item.label }}</span>
+            <strong :class="item.status">{{ item.value }}</strong>
+            <small>{{ item.note }}</small>
+          </div>
+        </div>
+      </details>
       <div class="muted stocks-footer">
-        <span>规则型本地总结，不构成投资建议</span>
+        <span>规则模型，本地计算；旧数据与异常数据不参与实时判断，不构成投资建议</span>
         <span>{{ formatClock(clockNow) }}</span>
       </div>
     </div>
 
-    <div class="card span-3 alerts-card">
+    <div class="card span-6 alerts-card">
       <h2>
-        <span>🔔 价格提醒中心</span>
+        <span>价格提醒</span>
         <span class="module-status" :class="triggeredAlertCount ? 'bad' : activeAlertCount ? 'warn' : 'ok'">
           {{ activeAlertCount }} 条监控
         </span>
@@ -1613,7 +1814,7 @@
 
     <div class="card span-6 market-card crypto-card">
       <h2>
-        <span>📈 自选币种实时行情</span>
+        <span>自选币行情</span>
         <span class="status-pill" :class="wsStatus">{{ wsStatusText }}</span>
       </h2>
       <form class="add-form" @submit.prevent="addWatchAsset">
@@ -1726,7 +1927,7 @@
 
     <div class="card span-3 stocks-card">
       <h2>
-        <span>🇺🇸 美股</span>
+        <span>美股</span>
         <span class="module-status" :class="usMarketInfo.badge">{{ usMarketInfo.label }}</span>
       </h2>
       <div class="stock-market-box">
@@ -1820,7 +2021,7 @@
 
     <div class="card span-3 global-card" :class="{ expanded: globalExpanded }">
       <h2 class="global-card-head">
-        <span>🌍 环球金融</span>
+        <span>环球金融</span>
         <button class="global-toggle" type="button" @click="globalExpanded = !globalExpanded">{{ globalExpanded ? '收起' : '展开全部' }}</button>
       </h2>
       <div class="scroll news-container">
@@ -1837,8 +2038,8 @@
       <div class="list-scroll-hint">{{ globalExpanded ? '已展开全部项目' : '框内可上下滑动，点击展开全部平铺查看' }}</div>
     </div>
 
-    <div class="card span-2 compact-card halving-card">
-      <h2>⏳ 比特币减半倒计时</h2>
+    <div class="card span-6 compact-card halving-card">
+      <h2>比特币减半倒计时</h2>
       <div class="halving-days">
         {{ halvingDaysRemaining !== null ? halvingDaysRemaining : '--' }}
         <span>天</span>
@@ -1852,8 +2053,8 @@
       </div>
     </div>
 
-    <div class="card span-2 gauge-card compact-card">
-      <h2>😱 恐慌 & 贪婪指数</h2>
+    <div class="card span-3 gauge-card compact-card">
+      <h2>情绪与估值 <small>Fear &amp; Greed</small></h2>
       <div class="fear-body">
         <div class="fear-meter">
           <div class="fear-scale">
@@ -1871,9 +2072,9 @@
       </div>
     </div>
 
-    <div class="card span-2 ahr-card compact-card">
-      <h2>🧮 AHR999 指数（本地估算）</h2>
-      <div class="ahr-val">{{ ahrValue }}</div>
+    <div class="card span-3 ahr-card compact-card">
+      <h2>情绪与估值 <small>AHR999 · 本地估算</small></h2>
+      <div class="ahr-val">{{ ahrValue }}<span class="trust-badge" :class="sourceBadge(dataSources.ahr999) === 'ok' ? 'warn' : sourceBadge(dataSources.ahr999)">{{ sourceBadge(dataSources.ahr999) === 'ok' ? '估算' : sourceDisplayLabel(dataSources.ahr999) }}</span></div>
       <div class="fear-note">基于 BTC 价格、200日数据与拟合公式估算，仅供参考。</div>
       <div class="ahr-compact-grid">
         <div class="ahr-mini"><span>&lt; 0.45</span><strong>抄底区间</strong></div>
@@ -1883,7 +2084,7 @@
 
     <div class="card span-3 miner-card" :class="{ expanded: minersExpanded }">
       <h2>
-        <span>⛏️ 矿机详情 (电费 0.4 元/度)</span>
+        <span>矿机详情 <small>电费 0.4 元/度</small></span>
         <button class="miner-toggle" type="button" @click="toggleMinersExpanded">{{ minersExpanded ? '收起' : '展开全部' }}</button>
       </h2>
       <div class="miner-list">
@@ -1918,19 +2119,20 @@
       <div class="miner-scroll-hint">{{ minersExpanded ? '已展开全部矿机' : '框内可上下滑动查看全部矿机' }}</div>
     </div>
 
-    <div class="card span-3 holders-card entity-holders-card">
+    <div class="card span-3 holders-card entity-holders-card" :class="{ expanded: holdersExpanded }">
       <h2>
         <span class="title-left">
           <svg viewBox="0 0 32 32" class="btc-title-logo" xmlns="http://www.w3.org/2000/svg" aria-label="Bitcoin">
             <circle cx="16" cy="16" r="16" fill="#F7931A"/>
             <path fill="#FFF" d="M23.189 14.293c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6.3l-.708 2.84c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.18-.045-1.13 4.532c-.086.212-.303.531-.793.41l-1.256-.313-.716 1.652 2.25.561c.418.105.827.212 1.232.312l-.715 2.866 1.727.43.715-2.868c.472.127.93.245 1.378.357l-.714 2.863 1.728.43.723-2.898c2.948.559 5.168.334 6.1-2.335.752-2.15-.037-3.389-1.59-4.197 1.13-.261 1.98-.1 2.447 1.751zm-3.85 6.419c-.535 2.147-4.151.986-5.32.693l.948-3.8c1.17.292 4.912.872 4.372 3.107zm.535-6.452c-.487 1.953-3.495.961-4.47.718l.86-3.448c.975.243 4.107.696 3.61 2.73z"/>
           </svg>
-          <span>BTC主要实体与公开持仓参考</span>
+          <span>BTC 主要实体与公开持仓参考</span>
         </span>
+        <button class="miner-toggle" type="button" @click="holdersExpanded = !holdersExpanded">{{ holdersExpanded ? '收起' : '展开详情' }}</button>
       </h2>
-      <div class="holder-note">按链上、公开披露、ETF与静态估算分类展示；类别口径不同，不可直接相加。地址流入/流出不一定等同实际买卖。</div>
-      <div class="holders-list">
-        <div class="holder-group" v-for="group in holderGroups" :key="group.key">
+      <div class="holder-note">A 链上可验证 · B 公司公开披露 · C ETF 持仓 · D 估算数据。ETF 合计与单只 ETF 存在包含关系，不可简单相加。</div>
+      <div class="holders-list" v-show="holdersExpanded">
+        <div class="holder-group" :class="'holder-group-' + group.key" v-for="group in holderGroups" :key="group.key">
           <div class="holder-group-title">{{ group.label }}</div>
           <div v-for="holder in group.items" :key="holder.id" class="holder-row">
             <span class="holder-type-tag">{{ holder.typeTag }}</span>
@@ -1950,7 +2152,8 @@
           </div>
         </div>
       </div>
-      <div class="muted stocks-footer">
+      <div class="holder-collapsed-summary" v-if="!holdersExpanded">四类数据已保留，展开后查看全部实体、口径与更新时间。</div>
+      <div class="muted stocks-footer" v-show="holdersExpanded">
         <span>{{ holdersStatus }}</span>
         <span>链上变动保留最近一次记录</span>
       </div>
@@ -2041,7 +2244,7 @@
 
   <div class="bottom-notice">
     <div class="bottom-notice-head">
-      <strong class="bottom-notice-title">🔗 工具推荐与访问提示</strong>
+      <strong class="bottom-notice-title">工具推荐与访问提示</strong>
       <button class="bottom-notice-toggle" type="button" @click="toggleToolsPanel">{{ toolsExpanded ? '收起' : '展开' }}</button>
     </div>
     <div class="bottom-notice-body" v-if="toolsExpanded">
@@ -2124,6 +2327,7 @@ new Vue({
     compactMode: false,
     minersExpanded: false,
     globalExpanded: false,
+    holdersExpanded: false,
     notificationStatus: '系统通知需要 HTTPS 或 localhost 并经用户授权；未授权时仅页面内提示',
     alertSoundEnabled: false,
     alertForm: {
@@ -2279,17 +2483,17 @@ new Vue({
     globalRequestPending: false,
     globalRequestTimer: null,
     globalMarkets: [
-      { id: 'gc', name: 'PAXG / USDT', icon: '🟡', price: '--', change: null, prefix: '$', placeholder: true, stale: false, status: '等待数据', dataTime: '', receivedAt: '', note: '代币化黄金代理价格，非 XAU/USD 黄金现货' },
-      { id: 'cl', name: '原油 (WTI)', icon: '🛢️', price: '--', change: 0, prefix: '$' },
-      { id: 'spx', name: '标普500', icon: '🇺🇸', price: '--', change: 0 },
-      { id: 'dji', name: '道琼斯', icon: '📊', price: '--', change: 0 },
-      { id: 'ixic', name: '纳斯达克', icon: '🚀', price: '--', change: 0 },
-      { id: 'sh', name: '上证指数', icon: '🇨🇳', price: '--', change: 0 },
-      { id: 'dxy', name: 'DXY 美元指数（估算）', icon: '💵', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
-      { id: 'us10y', name: 'US10Y 美债10年', icon: '🏦', price: '--', change: null, placeholder: true, stale: false, status: '等待数据', suffix: '%' },
-      { id: 'vix', name: 'VIX 恐慌指数', icon: '⚠️', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
-      { id: 'usdcny', name: '美元 / 人民币', icon: '🇨🇳', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
-      { id: 'usdjpy', name: '美元 / 日元', icon: '🇯🇵', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' }
+      { id: 'gc', name: 'PAXG / USDT', icon: '', price: '--', change: null, prefix: '$', placeholder: true, stale: false, status: '等待数据', dataTime: '', receivedAt: '', note: '代币化黄金代理价，非 XAU/USD 黄金现货' },
+      { id: 'cl', name: '原油 (WTI)', icon: '', price: '--', change: 0, prefix: '$' },
+      { id: 'spx', name: '标普500', icon: '', price: '--', change: 0 },
+      { id: 'dji', name: '道琼斯', icon: '', price: '--', change: 0 },
+      { id: 'ixic', name: '纳斯达克', icon: '', price: '--', change: 0 },
+      { id: 'sh', name: '上证指数', icon: '', price: '--', change: 0 },
+      { id: 'dxy', name: 'DXY 美元指数（估算）', icon: '', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
+      { id: 'us10y', name: 'US10Y 美债10年', icon: '', price: '--', change: null, placeholder: true, stale: false, status: '等待数据', suffix: '%' },
+      { id: 'vix', name: 'VIX 恐慌指数', icon: '', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
+      { id: 'usdcny', name: '美元 / 人民币', icon: '', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' },
+      { id: 'usdjpy', name: '美元 / 日元', icon: '', price: '--', change: null, placeholder: true, stale: false, status: '等待数据' }
     ],
     halvingTargetHeight: 1050000,
     halvingCurrentHeight: null,
@@ -2499,11 +2703,49 @@ new Vue({
       else if (score < 4) { state = '强势修复'; badge = 'ok'; className = 'up'; }
       else { state = '阶段过热'; badge = 'warn'; className = 'up'; }
 
+      const risk = badge === 'bad' ? '高' : badge === 'warn' ? '中' : '低';
+      const riskClass = badge === 'bad' ? 'down' : badge === 'warn' ? 'warn-text' : 'up';
+      const basis = [
+        {
+          label: 'BTC 24H',
+          value: Number.isFinite(btcChange) ? this.formatSignedPercent(btcChange) : (btc && btc.stale ? '旧数据' : '数据暂不可用'),
+          note: Number.isFinite(btcChange) ? `${btc.source || '行情源'} · 参与判断` : '不参与实时判断',
+          status: Number.isFinite(btcChange) ? (btcChange >= 0 ? 'up' : 'down') : (btc && btc.stale ? 'warn-text' : 'muted-text')
+        },
+        {
+          label: 'ETH 24H',
+          value: Number.isFinite(ethChange) ? this.formatSignedPercent(ethChange) : (eth && eth.stale ? '旧数据' : '数据暂不可用'),
+          note: Number.isFinite(ethChange) ? `${eth.source || '行情源'} · 参与判断` : '不参与实时判断',
+          status: Number.isFinite(ethChange) ? (ethChange >= 0 ? 'up' : 'down') : (eth && eth.stale ? 'warn-text' : 'muted-text')
+        },
+        {
+          label: 'Fear & Greed',
+          value: fgUsable ? String(this.fgValue) : (this.fgValue !== null ? '旧数据' : '数据暂不可用'),
+          note: fgUsable ? 'Alternative.me · 参与判断' : '不参与实时判断',
+          status: fgUsable ? 'neutral-text' : (this.fgValue !== null ? 'warn-text' : 'muted-text')
+        },
+        {
+          label: 'AHR999',
+          value: ahrUsable ? ahr.toFixed(4) : (Number.isFinite(ahr) ? '旧数据' : '数据暂不可用'),
+          note: ahrUsable ? '本地估算 · 参与判断' : '本地估算 · 不参与实时判断',
+          status: ahrUsable ? 'neutral-text' : (Number.isFinite(ahr) ? 'warn-text' : 'muted-text')
+        },
+        {
+          label: '美股',
+          value: Number.isFinite(spx) || Number.isFinite(nasdaq) ? `标普 ${this.formatSignedPercent(spx)} · 纳指 ${this.formatSignedPercent(nasdaq)}` : '数据暂不可用',
+          note: Number.isFinite(spx) || Number.isFinite(nasdaq) ? '有效项参与判断' : '不参与实时判断',
+          status: Number.isFinite(spx) || Number.isFinite(nasdaq) ? 'neutral-text' : 'muted-text'
+        }
+      ];
       const summary = `当前市场处于${state}，BTC ${this.formatSignedPercent(btcChange)}，ETH ${this.formatSignedPercent(ethChange)}，恐惧贪婪 ${fgUsable ? this.fgValue : '暂无有效数据'}，AHR999 ${ahrUsable ? ahr.toFixed(4) : '暂无有效数据'}。已使用 ${scoreInputs} 组有效数据，旧数据和异常数据不参与评分。`;
       return {
         state,
         badge,
         className,
+        risk,
+        riskClass,
+        dataQuality: this.sourceHealthText,
+        basis,
         upCount,
         downCount,
         summary,
