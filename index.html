@@ -1603,6 +1603,7 @@
     .reason-item strong { display: block; margin: 4px 0; color: #e5e7eb; font-size: .86rem; overflow-wrap: anywhere; }
     .reason-item small { line-height: 1.35; }
     .holder-collapsed-summary { padding: 18px 12px; border-radius: 10px; background: rgba(7,14,26,.48); color:#94a3b8; font-size:.78rem; text-align:center; }
+    .entity-holders-card:not(.expanded) { align-self: start; min-height: 0; }
     .entity-holders-card.expanded { grid-column: span 6; }
     .entity-holders-card.expanded .holders-list { max-height: none; overflow: visible; }
     .holder-group { padding-left: 8px; border-left: 3px solid #64748b; }
@@ -2054,7 +2055,7 @@
     </div>
 
     <div class="card span-3 gauge-card compact-card">
-      <h2>情绪与估值 <small>Fear &amp; Greed</small></h2>
+      <h2>恐惧与贪婪 <small>Fear &amp; Greed</small></h2>
       <div class="fear-body">
         <div class="fear-meter">
           <div class="fear-scale">
@@ -2073,7 +2074,7 @@
     </div>
 
     <div class="card span-3 ahr-card compact-card">
-      <h2>情绪与估值 <small>AHR999 · 本地估算</small></h2>
+      <h2>AHR999 估值 <small>本地估算</small></h2>
       <div class="ahr-val">{{ ahrValue }}<span class="trust-badge" :class="sourceBadge(dataSources.ahr999) === 'ok' ? 'warn' : sourceBadge(dataSources.ahr999)">{{ sourceBadge(dataSources.ahr999) === 'ok' ? '估算' : sourceDisplayLabel(dataSources.ahr999) }}</span></div>
       <div class="fear-note">基于 BTC 价格、200日数据与拟合公式估算，仅供参考。</div>
       <div class="ahr-compact-grid">
