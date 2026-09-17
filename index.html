@@ -495,7 +495,12 @@
     }
     .bottom-notice-body { margin-top: 10px; display:grid; gap:8px; }
     .bottom-notice-desc { color:#8fa0ba; font-size:.74rem; }
-    .bottom-notice-link { color: #93c5fd; text-decoration: none; font-weight: 900; border: 1px solid rgba(147,197,253,.42); border-radius: 999px; padding: 2px 8px; font-size: 0.72rem; margin-left: 5px; display: inline-block; max-width: 100%; white-space: normal; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; }
+    .bottom-notice-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .bottom-notice-item { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border:1px solid rgba(147,197,253,.16); border-radius:10px; background:rgba(7,14,26,.42); }
+    .bottom-notice-copy { min-width:0; color:#cbd5e1; font-size:.78rem; line-height:1.45; overflow-wrap:anywhere; }
+    .bottom-notice-kicker { display:block; margin-bottom:2px; color:#64748b; font-size:.68rem; font-weight:800; }
+    .bottom-notice-link { flex:0 0 auto; min-height:44px; display:inline-flex; align-items:center; justify-content:center; color:#dbeafe; text-decoration:none; font-weight:900; border:1px solid rgba(96,165,250,.58); border-radius:9px; padding:8px 14px; font-size:.78rem; line-height:1.2; white-space:nowrap; background:linear-gradient(135deg,rgba(37,99,235,.28),rgba(14,165,233,.16)); box-shadow:0 5px 14px rgba(2,8,23,.2); }
+    .bottom-notice-link:hover { color:#fff; border-color:rgba(125,211,252,.8); background:linear-gradient(135deg,rgba(37,99,235,.4),rgba(14,165,233,.24)); }
 
     .chart-overlay {
       position: fixed;
@@ -1867,6 +1872,8 @@
       .dex-contract-address, .dex-settings-info, .dex-market-grid, .dex-trade-item { font-size: .75rem; }
       .bottom-notice { font-size: .8rem; line-height: 1.55; }
       .bottom-notice-toggle { min-height: 44px; padding: 7px 12px; font-size: .75rem; }
+      .bottom-notice-item { padding:12px; }
+      .bottom-notice-link { min-height:44px; }
     }
 
     @media (max-width: 480px) {
@@ -1886,6 +1893,9 @@
         gap: 10px;
       }
       .mobile-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bottom-notice-actions { grid-template-columns:1fr; }
+      .bottom-notice-item { align-items:stretch; flex-direction:column; }
+      .bottom-notice-link { width:100%; }
     }
 
     @media (max-width: 340px) {
@@ -2491,13 +2501,15 @@
     </div>
     <div class="bottom-notice-body" v-if="toolsExpanded">
       <div class="bottom-notice-desc">工具推荐与访问提示：部分网页或下载入口可能需要稳定网络环境。</div>
-      <div>
-        1. 币安交易所注册省手续费链接
-        <a class="bottom-notice-link" href="https://www.bsmkweb.cc/register?ref=XLXK888" target="_blank" rel="noopener noreferrer">https://www.bsmkweb.cc/register?ref=XLXK888</a>
-      </div>
-      <div>
-        2. FOOMO交易平台，用此注册链接省10%手续费
-        <a class="bottom-notice-link" href="https://fomo.family/r/xlxk888" target="_blank" rel="noopener noreferrer">https://fomo.family/r/xlxk888</a>
+      <div class="bottom-notice-actions">
+        <div class="bottom-notice-item">
+          <div class="bottom-notice-copy"><span class="bottom-notice-kicker">注册链接</span>币安交易所注册省手续费</div>
+          <a class="bottom-notice-link" href="https://www.bsmkweb.cc/register?ref=XLXK888" target="_blank" rel="noopener noreferrer">去币安注册</a>
+        </div>
+        <div class="bottom-notice-item">
+          <div class="bottom-notice-copy"><span class="bottom-notice-kicker">注册链接</span>FOOMO 交易平台，用此注册链接省 10% 手续费</div>
+          <a class="bottom-notice-link" href="https://fomo.family/r/xlxk888" target="_blank" rel="noopener noreferrer">去 FOOMO 注册</a>
+        </div>
       </div>
     </div>
   </div>
@@ -2571,7 +2583,7 @@ new Vue({
     compactMode: false,
     minersExpanded: false,
     globalExpanded: false,
-    holdersExpanded: false,
+    holdersExpanded: true,
     notificationStatus: '系统通知需要 HTTPS 或 localhost 并经用户授权；未授权时仅页面内提示',
     alertSoundEnabled: false,
     alertForm: {
