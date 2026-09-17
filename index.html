@@ -2534,6 +2534,8 @@ new Vue({
     binanceSymbolSet: null,
     pendingUpdates: {},
     rafId: null,
+    backendActiveUntil: 0,
+    backendSnapshotId: '',
     fallbackTimer: null,
     fallbackPolling: false,
     marketCapTimer: null,
@@ -2580,6 +2582,7 @@ new Vue({
     priceAlerts: [],
     optionalGlobalPending: false,
     dataSources: {
+      backend: { name: 'Crypto AI 后台', status: '待检查', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '15s', staleMs: 45000, expireMs: 180000 },
       binance: { name: 'Binance WS', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '实时', staleMs: 30000, expireMs: 120000 },
       binanceRest: { name: 'Binance REST', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 30000, expireMs: 120000 },
       okx: { name: 'OKX', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 45000, expireMs: 180000 },
@@ -3111,6 +3114,64 @@ new Vue({
       const timer = setInterval(fn, delay);
       this.intervalTimers.push(timer);
       return timer;
+    },
+
+    backendIsActive() {
+      return Date.now() < this.backendActiveUntil;
+    },
+
+    async fetchBackendSnapshot() {
+      this.dataSources.backend.lastAttempt = Date.now();
+      try {
+        const response = await this.fetchWithSoftTimeout('/api/market/snapshot', 3500);
+        if (!response.ok) throw new Error(`Backend snapshot ${response.status}`);
+        const payload = await response.json();
+        const snapshot = payload && payload.data;
+        if (!snapshot || !snapshot.snapshotId || !snapshot.assets) throw new Error('Backend snapshot invalid');
+        this.backendActiveUntil = Date.now() + 45000;
+        this.backendSnapshotId = snapshot.snapshotId;
+        ['BTCUSDT', 'ETHUSDT'].forEach(pair => {
+          const metrics = snapshot.assets[pair];
+          const price = metrics && metrics.price;
+          if (!price || price.value === null || price.stale) return;
+          const asset = this.watchedAssets.find(item => item.pair === pair);
+          if (!asset) return;
+          this.queueAssetUpdate(asset.id, {
+            price: Number(price.value),
+            changePct: metrics.change24h && metrics.change24h.value,
+            volume24h: metrics.volume24h && metrics.volume24h.value,
+            updateTime: this.formatDateTime(price.dataTime),
+            dataTime: this.formatDateTime(price.dataTime),
+            receivedAt: this.formatDateTime(price.receivedAt),
+            stale: Boolean(price.stale),
+            source: `后台 · ${price.source}`,
+            sourceType: 'backend',
+            status: price.status === 'fresh' ? '后台实时' : `后台 ${price.status}`
+          });
+        });
+        const fearGreed = snapshot.sentiment && snapshot.sentiment.fearGreed;
+        if (fearGreed && fearGreed.value !== null && !fearGreed.stale) {
+          const val = Number(fearGreed.value);
+          this.fgValue = val; this.fgStale = false;
+          this.fgDataTime = this.formatDateTime(fearGreed.dataTime); this.fgReceivedAt = this.formatDateTime(fearGreed.receivedAt);
+          if (val <= 25) { this.fgText = '极度恐慌'; this.fgColor = '#ef4444'; this.fearNote = '市场极度恐慌，可能是买入机会'; }
+          else if (val <= 45) { this.fgText = '恐慌'; this.fgColor = '#fb923c'; this.fearNote = '市场偏恐慌，适合分批观察'; }
+          else if (val <= 55) { this.fgText = '中立'; this.fgColor = '#facc15'; this.fearNote = '情绪中性，等待方向确认'; }
+          else if (val <= 75) { this.fgText = '贪婪'; this.fgColor = '#4ade80'; this.fearNote = '市场偏贪婪，注意追高风险'; }
+          else { this.fgText = '极度贪婪'; this.fgColor = '#22c55e'; this.fearNote = '市场极度贪婪，注意阶段性过热'; }
+          if (this.gaugeChart) this.gaugeChart.setOption({ series: [{ data: [{ value: val }] }] });
+          this.markSource('fearGreed', '后台');
+        }
+        const ahr999 = snapshot.sentiment && snapshot.sentiment.ahr999;
+        if (ahr999 && ahr999.value !== null && !ahr999.stale) {
+          this.ahrValue = Number(ahr999.value).toFixed(4);
+          this.markSource('ahr999', '后台估算');
+        }
+        this.markSource('backend', '后台');
+      } catch (error) {
+        this.backendActiveUntil = 0;
+        this.markSource('backend', '异常', error);
+      }
     },
 
     formatClock(value) {
@@ -4779,6 +4840,7 @@ new Vue({
         const asset = this.watchedAssets.find(item => item.id === id);
         if (!asset) return;
         const next = updates[id];
+        if (this.backendIsActive() && ['BTCUSDT', 'ETHUSDT'].includes(asset.pair) && next.sourceType !== 'backend') return;
         const newPrice = Number(next.price);
 
         if (Number.isFinite(newPrice)) {
@@ -5046,11 +5108,11 @@ new Vue({
           const ethAsset = this.watchedAssets.find(item => item.pair === 'ETHUSDT');
           const btcWsFresh = btcAsset && btcAsset.sourceType === 'binance' && now - Number(btcAsset.lastWsAt || 0) <= 30000;
           const ethWsFresh = ethAsset && ethAsset.sourceType === 'binance' && now - Number(ethAsset.lastWsAt || 0) <= 30000;
-          if (!btcWsFresh) {
+          if (!this.backendIsActive() && !btcWsFresh) {
             this.btcBase = this.btcBase || btcRestPrice;
             this.btcPrice = btcRestPrice;
           }
-          if (!ethWsFresh) {
+          if (!this.backendIsActive() && !ethWsFresh) {
             this.ethBase = this.ethBase || ethRestPrice;
             this.ethPrice = ethRestPrice;
           }
@@ -5197,6 +5259,7 @@ new Vue({
     },
 
     async fetchRealAHR999() {
+      if (this.backendIsActive()) return;
       const endpoints = [
         'https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201',
         'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201'
@@ -5842,6 +5905,7 @@ new Vue({
     },
 
     async fetchFearGreed() {
+      if (this.backendIsActive()) return;
       try {
         this.dataSources.fearGreed.status = '轮询中';
         this.dataSources.fearGreed.lastAttempt = Date.now();
@@ -5949,6 +6013,7 @@ new Vue({
     this.loadMinerNetworkCache();
     this.fetchMinerNetworkData();
     this.startBtcHoldersPolling();
+    this.fetchBackendSnapshot();
 
     this.registerInterval(() => {
       this.clockNow = Date.now();
@@ -5961,6 +6026,7 @@ new Vue({
     this.registerInterval(this.fetchFearGreed, 60 * 60 * 1000);
     this.registerInterval(this.fetchHalvingCountdown, 10 * 60 * 1000);
     this.registerInterval(this.fetchMinerNetworkData, 10 * 60 * 1000);
+    this.registerInterval(this.fetchBackendSnapshot, 15000);
   }
 });
 </script>

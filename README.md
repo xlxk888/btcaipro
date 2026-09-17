@@ -1,0 +1,134 @@
+# Crypto AI
+
+Crypto AI is a Vue 2 dashboard with a small Node.js market-data backend. Phase AI-3 keeps the existing browser data path as a temporary fallback while adding traceable snapshots and rule-based anomaly events. It does **not** use an LLM and does not require a paid market-data key.
+
+## Architecture
+
+```text
+Binance WS / Binance REST / OKX / CoinGecko / Alternative.me
+                         ↓
+                    adapters
+                         ↓
+       normalization → freshness → confidence
+                         ↓
+        cache (Redis optional, memory fallback)
+                         ↓
+             SQLite market snapshots
+                         ↓
+   rule engine → dedup / cooldown / hysteresis
+                         ↓
+                  SQLite events
+                         ↓
+                  HTTP API → UI
+```
+
+The backend uses only Node.js built-ins. Node 24 or newer is required because persistence uses `node:sqlite`.
+
+## Layout
+
+- `index.html` — existing Vue dashboard, progressively reads the backend snapshot API.
+- `src/adapters/` — provider-specific spot, derivatives, sentiment, valuation and stream adapters.
+- `src/model/` — normalized market observation model.
+- `src/core/` — freshness, confidence, and snapshot construction.
+- `src/cache/` — in-memory cache and optional Redis adapter.
+- `src/engine/` — deterministic anomaly rules and event gate.
+- `src/store/` — SQLite store and migration; memory store for tests.
+- `src/worker/` — independent schedules, polling, stream ingestion and retention.
+- `src/app.js` — HTTP routes and static dashboard.
+- `test/` — network-independent fixtures and tests.
+
+## Run
+
+```bash
+cp .env.example .env
+npm start
+```
+
+Open `http://127.0.0.1:8787/`. The server starts the worker by default. To run API and worker as separate processes, set `WORKER_ENABLED=false` for the API process and run `npm run worker` separately. The cache lock prevents duplicate workers sharing the same configured Redis instance. In memory-only mode the lock is process-local.
+
+Useful commands:
+
+```bash
+npm test
+npm run check
+npm run worker
+```
+
+## Configuration
+
+All configuration is optional; see `.env.example`.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `HOST` / `PORT` | `127.0.0.1` / `8787` | HTTP bind address |
+| `WORKER_ENABLED` | `true` | Run worker in the API process |
+| `MARKET_SYMBOLS` | `BTCUSDT,ETHUSDT` | Spot symbols; CoinGecko fallback currently maps BTC, ETH, SOL, BNB |
+| `DATABASE_PATH` | `./data/crypto-ai.sqlite` | Local SQLite file |
+| `REDIS_URL` | empty | Optional `redis://` or `rediss://` cache endpoint |
+| `SPOT_POLL_MS` | `30000` | REST recovery/refresh interval |
+| `DERIVATIVES_POLL_MS` | `60000` | OI/funding interval |
+| `SNAPSHOT_INTERVAL_MS` | `30000` | Snapshot and anomaly cycle |
+| `SNAPSHOT_RETENTION_DAYS` | `7` | Snapshot retention |
+| `EVENT_RETENTION_DAYS` | `90` | Event retention |
+
+Never commit `.env`. Redis passwords and other credentials stay server-side and structured logs redact secret-like fields.
+
+## Data model and provenance
+
+Every observation entering a snapshot contains `value`, `source`, `dataTime`, `receivedAt`, `stale`, and `confidence`, plus its symbol, market, metric, unit, interval, latency/status, priority, raw value and metadata when applicable. Freshness is classified as `fresh`, `delayed`, `stale`, or `unavailable` using separate windows for spot, derivatives, sentiment, valuation, daily macro and miner data. Confidence is an explainable rule score (`high`, `medium`, `low`) based on source priority, age, missing fields and optional multi-source agreement; it is not presented as a scientific probability.
+
+Snapshots retain the complete normalized inputs seen by the engine, including BTC/ETH price, 24-hour change and volume, OI, funding, Fear & Greed, local AHR999 estimate, and risk-quality flags. AHR999 records its formula version and inputs (current price, 200-day geometric mean, fitted price and days since genesis).
+
+## Sources and fallback
+
+- Spot primary: Binance WebSocket, with Binance REST recovery.
+- Spot fallback: OKX, then CoinGecko when the prior source fails.
+- Derivatives: Binance Futures public OI and funding endpoints for BTC/ETH.
+- Sentiment: Alternative.me Fear & Greed; failures produce no fabricated default.
+- Valuation: local AHR999 from 200 closed Binance daily candles; explicitly labeled as a local estimate.
+- Liquidations: adapter is deliberately disabled because no stable keyless aggregate source is configured. No values are synthesized.
+
+The UI requests `/api/market/snapshot` every 15 seconds. A valid, fresh backend snapshot takes priority for BTC, ETH, Fear & Greed, and AHR999. If the API is missing or fails, the pre-existing browser adapters continue operating. Other dashboard modules are unchanged.
+
+## Anomaly rules
+
+Rules are deterministic and thresholds are configurable in `AnomalyEngine`:
+
+- price moves over 1m, 5m, 15m and 1h;
+- 24-hour volume spike against the median of recent snapshots;
+- open-interest increase or decrease;
+- extreme or rapidly changing funding;
+- liquidation spike only when a real observation exists;
+- momentum confluence (aligned price, volume and OI);
+- deleveraging risk (falling price/OI plus real liquidation spike).
+
+Events store `eventId`, asset, type, direction, severity, time window, detection time, snapshot ID, metrics, thresholds and evidence. The gate deduplicates on asset/type/direction/window, applies a 15-minute cooldown, allows severity upgrades, and uses a release threshold (hysteresis) before a condition can re-arm.
+
+## API
+
+- `GET /api/health`
+- `GET /api/market/snapshot`
+- `GET /api/market/quotes?symbols=BTCUSDT,ETHUSDT`
+- `GET /api/events?limit=50&asset=BTCUSDT&type=price_move`
+- `GET /api/events/latest`
+- `GET /api/sources/status`
+
+The source observations returned by snapshot and quote endpoints retain timing, staleness, source and confidence fields.
+
+## Storage, cache and operations
+
+SQLite tables are created by `src/store/migrations/001_init.sql`: `snapshots`, `events`, and `source_status`, with time and lookup indexes. WAL mode and a busy timeout are enabled. Snapshots and events are pruned on an independent six-hour schedule using the configured retention periods.
+
+When `REDIS_URL` is configured, latest observations/snapshot, source health, worker lock and event state use Redis. A failed or absent Redis connection degrades to bounded process memory so development is not blocked. The worker separates spot REST, derivatives, low-frequency sentiment/valuation, snapshots and retention schedules; tasks do not overlap and failures use exponential backoff. The Binance stream reconnects with capped backoff. One source failure cannot terminate the worker.
+
+Structured logs cover server/worker lifecycle, source latency and failures, fallback, Redis degradation, retention, and generated anomalies. Secret-shaped fields are redacted.
+
+## Current limits
+
+- Public endpoints can be rate-limited or regionally unavailable; fallback status remains visible.
+- CoinGecko fallback supports only its explicit symbol map.
+- OI units are provider-native base-asset quantities; cross-provider derivatives normalization is future work.
+- Liquidation detection remains disabled until a reliable licensed or authenticated source is configured.
+- Redis implementation intentionally covers the small command set this service uses; it is optional.
+- SQLite targets a single-node deployment. A later multi-node service should migrate storage and use Redis for the shared worker lock.
+- Existing macro, equities, miner and holder modules remain browser-side in this phase.

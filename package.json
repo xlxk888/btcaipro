@@ -1,0 +1,15 @@
+{
+  "name": "crypto-ai-market-infrastructure",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "worker": "node --env-file-if-exists=.env src/worker-runner.js",
+    "test": "node --test",
+    "check": "node --check src/server.js && node --check src/worker-runner.js"
+  }
+}
