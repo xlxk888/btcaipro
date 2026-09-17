@@ -1659,6 +1659,247 @@
       .topbar-button, .alert-form button, .small-action, .global-toggle, .miner-toggle { min-height: 40px; }
       .holder-note { font-size: .7rem; line-height: 1.5; }
     }
+
+    /* AI-2.2: mobile readability and touch targets */
+    @media (max-width: 768px) {
+      body { padding: 10px 10px calc(96px + env(safe-area-inset-bottom)); }
+      .app-topbar { gap: 8px; margin-bottom: 10px; padding: 10px 12px; }
+      .brand-logo { width: 28px; height: 28px; }
+      .brand-wrap h1 { font-size: 1.25rem; line-height: 1.15; }
+      .topbar-actions { gap: 8px; }
+      .topbar-button {
+        min-height: 44px;
+        padding: 8px 12px;
+        font-size: .75rem;
+        line-height: 1.35;
+      }
+      .top-strip { gap: 10px; margin-bottom: 14px; }
+      .pulse-item { min-height: 82px; padding: 12px; }
+      .pulse-label { font-size: .75rem; line-height: 1.35; }
+      .pulse-value {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 7px;
+        overflow: visible;
+        font-size: 1.08rem;
+        line-height: 1.25;
+        white-space: normal;
+        text-overflow: clip;
+      }
+      .pulse-value.small { font-size: .78rem; line-height: 1.4; }
+      .trust-badge, .data-stale-badge {
+        min-height: 24px;
+        margin-left: 0;
+        padding: 3px 8px;
+        font-size: .75rem;
+        line-height: 1.25;
+      }
+      .source-strip { gap: 8px; padding: 10px; }
+      .source-chip { min-height: 34px; padding: 6px 10px; font-size: .75rem; line-height: 1.4; }
+      .grid { gap: 14px; }
+      .card { padding: 14px; border-radius: 12px; }
+      .card h2 {
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        font-size: 1rem;
+        line-height: 1.35;
+      }
+      .card h2 small { font-size: .75rem; line-height: 1.4; }
+      .module-status, .status-pill {
+        min-height: 30px;
+        padding: 4px 9px;
+        font-size: .75rem;
+        line-height: 1.3;
+      }
+      .muted, .watch-hint, .stock-hint, .watch-footer, .stocks-footer,
+      .fear-note, .holder-note, .holder-collapsed-summary, .list-scroll-hint,
+      .miner-summary, .miner-scroll-hint, .global-meta, .global-note {
+        font-size: .75rem;
+        line-height: 1.5;
+      }
+
+      .radar-body { gap: 12px; }
+      .radar-meter { padding: 14px; }
+      .radar-state { font-size: 1.75rem; line-height: 1.15; }
+      .radar-score { font-size: .8rem; line-height: 1.45; }
+      .radar-status-grid { gap: 8px; }
+      .radar-status-grid > div { padding: 10px; }
+      .radar-status-grid span { font-size: .75rem; line-height: 1.35; }
+      .radar-status-grid strong { margin-top: 5px; font-size: .9rem; line-height: 1.35; overflow-wrap: anywhere; }
+      .radar-summary { font-size: .875rem; line-height: 1.65; overflow-wrap: anywhere; }
+      .radar-reasons summary {
+        min-height: 44px;
+        padding: 10px 2px;
+        font-size: .875rem;
+        line-height: 1.45;
+      }
+      .radar-reasons summary span { font-size: .75rem; line-height: 1.4; }
+      .reason-grid { grid-template-columns: 1fr; gap: 8px; }
+      .reason-item { padding: 12px; }
+      .reason-item > span, .reason-item small { font-size: .75rem; line-height: 1.45; }
+      .reason-item strong { margin: 5px 0; font-size: .9rem; line-height: 1.4; }
+
+      .add-form, .alert-form, .stock-form { gap: 10px; }
+      .asset-input, .chain-select, .add-btn,
+      .alert-form select, .alert-form input, .alert-value-input,
+      .stock-input, .stock-add-btn {
+        min-height: 44px;
+        height: 44px;
+        font-size: .875rem;
+      }
+      .alert-value-input input { height: 42px; }
+      .alert-value-input span { font-size: .8rem; }
+      .alert-form button, .small-action {
+        min-height: 44px;
+        padding: 8px 14px;
+        font-size: .8rem;
+      }
+      .alert-toolbar {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: .75rem;
+        line-height: 1.5;
+      }
+      .alert-toolbar .small-action { flex: 0 0 auto; }
+      .alert-row { gap: 8px 10px; padding: 10px; font-size: .78rem; line-height: 1.45; }
+      .alert-actions { gap: 8px; }
+      .alert-actions button { min-height: 44px; padding: 7px 12px; font-size: .75rem; }
+
+      .watch-row {
+        grid-template-columns: minmax(0, 1fr) minmax(104px, auto);
+        gap: 6px 10px;
+        min-height: 112px;
+        padding: 11px 12px;
+        border-radius: 11px;
+      }
+      .token-logo, .token-fallback { width: 30px; height: 30px; }
+      .token-main { gap: 9px; }
+      .token-symbol { font-size: .95rem; line-height: 1.3; }
+      .token-copy .muted { font-size: .75rem; line-height: 1.4; }
+      .watch-price { font-size: 1.08rem; line-height: 1.35; }
+      .watch-row > :nth-child(3) { font-size: .9rem; line-height: 1.35; }
+      .watch-row .mobile-card-meta {
+        gap: 6px 10px;
+        padding-top: 6px;
+        font-size: .75rem;
+        line-height: 1.5;
+      }
+      .metric-cell { font-size: .75rem; line-height: 1.45; }
+      .source-pill { min-height: 26px; padding: 3px 8px; font-size: .75rem; }
+      .swipe-delete-reveal { width: 96px; font-size: .8rem; }
+      .mobile-action-menu { padding: 12px; }
+      .mobile-action-head strong { font-size: .875rem; }
+      .mobile-action-close { width: 44px; height: 44px; font-size: 1rem; }
+      .mobile-action-grid { gap: 8px; }
+      .mobile-action-grid button { min-height: 44px; padding: 7px; font-size: .78rem; }
+      .mobile-action-hint { margin-top: 8px; font-size: .75rem; line-height: 1.45; }
+
+      .stock-form { grid-template-columns: minmax(0, 1fr) 88px; }
+      .stock-row {
+        grid-template-columns: 52px minmax(0, 1fr) minmax(96px, auto);
+        min-height: 104px;
+        gap: 8px 10px;
+        padding: 11px 10px;
+      }
+      .stock-symbol { min-width: 48px; height: 32px; font-size: .8rem; }
+      .stock-name { max-width: none; font-size: .875rem; line-height: 1.4; }
+      .stock-type, .stock-mobile-meta { font-size: .75rem; line-height: 1.45; }
+      .stock-val { font-size: 1rem; }
+      .stock-change { font-size: .8rem; }
+      .market-state-item span { font-size: .75rem; line-height: 1.35; }
+      .market-state-item strong { font-size: .8rem; line-height: 1.4; }
+
+      .global-toggle, .miner-toggle {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 7px 12px;
+        font-size: .75rem;
+      }
+      .global-item { min-height: 58px; gap: 12px; padding: 11px 0; align-items: flex-start; }
+      .global-item > div:last-child { min-width: 0; max-width: 70%; }
+      .global-name { min-width: 0; font-size: .9rem; line-height: 1.45; }
+      .global-price { font-size: 1rem; line-height: 1.35; }
+      .global-change { font-size: .8rem; line-height: 1.4; }
+      .global-meta, .global-note { max-width: 100%; overflow-wrap: anywhere; }
+
+      .gauge-card.compact-card h2 { font-size: 1rem; }
+      .gauge-card.compact-card .fear-text { font-size: 1.35rem; line-height: 1.2; }
+      .gauge-card.compact-card .fear-note, .ahr-card .fear-note { font-size: .75rem; line-height: 1.5; }
+      .ahr-card .ahr-val { font-size: 1.5rem; line-height: 1.3; }
+      .ahr-mini { padding: 8px; }
+      .ahr-mini span { font-size: .75rem; line-height: 1.35; }
+      .ahr-mini strong { font-size: .8rem; line-height: 1.4; }
+
+      .miner-row { min-height: 112px; gap: 8px 12px; padding: 12px 0; }
+      .miner-model { font-size: .875rem; line-height: 1.4; white-space: normal; }
+      .miner-spec span, .miner-spec strong { font-size: .75rem; line-height: 1.4; }
+      .miner-status { min-width: 48px; min-height: 30px; height: 30px; font-size: .75rem; }
+
+      .holder-note { margin-bottom: 10px; }
+      .holder-collapsed-summary { padding: 14px 12px; }
+      .holder-group-title { padding: 7px 8px; font-size: .75rem; line-height: 1.4; }
+      .holder-row {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 7px 10px;
+        padding: 11px 0;
+      }
+      .holder-row > :nth-child(3) {
+        grid-column: 2;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        min-width: 0;
+      }
+      .holder-type-tag { min-width: 38px; height: 28px; padding: 3px 6px; font-size: .75rem; }
+      .holder-name { font-size: .85rem; line-height: 1.4; white-space: normal; }
+      .holder-address { font-size: .75rem; line-height: 1.45; white-space: normal; overflow-wrap: anywhere; }
+      .holder-balance, .holder-change { font-size: .75rem; line-height: 1.4; text-align: left; }
+      .holder-sync { min-height: 24px; padding: 2px 7px; font-size: .75rem; }
+
+      .chart-refresh, .chart-close, .dex-copy-button, .dex-data-toggle,
+      .dex-settings-trigger, .dex-settings-close { min-width: 44px; min-height: 44px; }
+      .dex-contract-address, .dex-settings-info, .dex-market-grid, .dex-trade-item { font-size: .75rem; }
+      .bottom-notice { font-size: .8rem; line-height: 1.55; }
+      .bottom-notice-toggle { min-height: 44px; padding: 7px 12px; font-size: .75rem; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 8px 8px calc(96px + env(safe-area-inset-bottom)); }
+      .grid { gap: 12px; }
+      .card { padding: 12px; }
+      .top-strip { gap: 8px; }
+      .pulse-item { min-height: 80px; padding: 10px; }
+      .radar-status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .radar-status-grid > div:last-child { grid-column: 1 / -1; }
+      .alert-form { grid-template-columns: 1fr; }
+      .alert-form button { grid-column: auto; }
+      .watch-row .mobile-card-meta, .stock-mobile-meta { grid-template-columns: 1fr; }
+      .gauge-card.compact-card { padding: 12px; }
+      .gauge-card.compact-card .fear-body {
+        grid-template-columns: minmax(118px, .86fr) minmax(0, 1.14fr);
+        gap: 10px;
+      }
+      .mobile-action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 340px) {
+      .brand-wrap h1 { font-size: 1.15rem; }
+      .card { padding: 11px; }
+      .pulse-value { font-size: 1rem; }
+      .stock-form { grid-template-columns: 1fr; }
+      .stock-add-btn { width: 100%; }
+      .stock-row { grid-template-columns: 48px minmax(0, 1fr) minmax(86px, auto); }
+      .gauge-card.compact-card .fear-body { grid-template-columns: 1fr; }
+      .gauge-card.compact-card .fear-meter { order: 1; }
+      .gauge-card.compact-card .fear-score { order: 2; }
+      .global-item > div:last-child { max-width: 66%; }
+    }
   </style>
 </head>
 <body>
