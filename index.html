@@ -501,6 +501,7 @@
     .bottom-notice-kicker { display:block; margin-bottom:2px; color:#64748b; font-size:.68rem; font-weight:800; }
     .bottom-notice-link { flex:0 0 auto; min-height:44px; display:inline-flex; align-items:center; justify-content:center; color:#dbeafe; text-decoration:none; font-weight:900; border:1px solid rgba(96,165,250,.58); border-radius:9px; padding:8px 14px; font-size:.78rem; line-height:1.2; white-space:nowrap; background:linear-gradient(135deg,rgba(37,99,235,.28),rgba(14,165,233,.16)); box-shadow:0 5px 14px rgba(2,8,23,.2); }
     .bottom-notice-link:hover { color:#fff; border-color:rgba(125,211,252,.8); background:linear-gradient(135deg,rgba(37,99,235,.4),rgba(14,165,233,.24)); }
+    .bottom-notice-link:active { transform:translateY(1px); background:linear-gradient(135deg,rgba(29,78,216,.5),rgba(2,132,199,.3)); box-shadow:0 2px 8px rgba(2,8,23,.28); }
 
     .chart-overlay {
       position: fixed;
@@ -2380,7 +2381,7 @@
           </svg>
           <span>BTC 主要实体与公开持仓参考</span>
         </span>
-        <button class="miner-toggle" type="button" @click="holdersExpanded = !holdersExpanded">{{ holdersExpanded ? '收起' : '展开详情' }}</button>
+        <button class="miner-toggle" type="button" @click="holdersExpanded = !holdersExpanded">{{ holdersExpanded ? '收起详情' : '展开详情' }}</button>
       </h2>
       <div class="holder-note">A 链上可验证 · B 公司公开披露 · C ETF 持仓 · D 估算数据。ETF 合计与单只 ETF 存在包含关系，不可简单相加。</div>
       <div class="holders-list" v-show="holdersExpanded">
@@ -2404,7 +2405,6 @@
           </div>
         </div>
       </div>
-      <div class="holder-collapsed-summary" v-if="!holdersExpanded">四类数据已保留，展开后查看全部实体、口径与更新时间。</div>
       <div class="muted stocks-footer" v-show="holdersExpanded">
         <span>{{ holdersStatus }}</span>
         <span>链上变动保留最近一次记录</span>
@@ -2558,7 +2558,6 @@ new Vue({
     storageKey: 'crypto_ai_watchlist_v1',
     stockStorageKey: 'crypto_ai_stocklist_v1',
     alertStorageKey: 'crypto_ai_price_alerts_v1',
-    toolPanelStorageKey: 'crypto_ai_tool_panel_v1',
     uiStorageKey: 'crypto_ai_ui_settings_v1',
     holderStorageKey: 'crypto_ai_entity_holder_snapshot_v1',
     holderHistoryStorageKey: 'crypto_ai_entity_holder_history_v2',
@@ -2578,7 +2577,7 @@ new Vue({
     intervalTimers: [],
     toastText: '',
     toastTimer: null,
-    toolsExpanded: false,
+    toolsExpanded: true,
     sourcePanelOpen: false,
     compactMode: false,
     minersExpanded: false,
@@ -3594,12 +3593,12 @@ new Vue({
 
     loadUiSettings() {
       try {
-        this.toolsExpanded = localStorage.getItem(this.toolPanelStorageKey) === 'open';
+        this.toolsExpanded = true;
         const ui = JSON.parse(localStorage.getItem(this.uiStorageKey) || '{}');
         this.sourcePanelOpen = !!ui.sourcePanelOpen;
         this.compactMode = !!ui.compactMode;
       } catch (e) {
-        this.toolsExpanded = false;
+        this.toolsExpanded = true;
         this.sourcePanelOpen = false;
         this.compactMode = false;
       }
@@ -3607,7 +3606,6 @@ new Vue({
 
     saveUiSettings() {
       try {
-        localStorage.setItem(this.toolPanelStorageKey, this.toolsExpanded ? 'open' : 'closed');
         localStorage.setItem(this.uiStorageKey, JSON.stringify({
           sourcePanelOpen: this.sourcePanelOpen,
           compactMode: this.compactMode
