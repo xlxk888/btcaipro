@@ -988,7 +988,12 @@
     }
     .holder-sync.live { color:#4ade80; border-color:rgba(74,222,128,.35); }
     .holder-sync.disclosure { color:#facc15; border-color:rgba(250,204,21,.32); }
-    .entity-holders-card .holders-list { max-height: 298px; }
+    .entity-holders-card .holders-list {
+      max-height: 298px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
     .entity-holders-card .holder-row { grid-template-columns: 36px minmax(0, 1fr) auto; padding: 7px 0; }
     .entity-holders-card .holder-rank { width: 22px; height: 22px; }
     .entity-holders-card .holder-name { font-size: .8rem; }
@@ -1668,6 +1673,7 @@
 
     /* AI-2.2: mobile readability and touch targets */
     @media (max-width: 768px) {
+      .entity-holders-card:not(.expanded) .holders-list { max-height: 360px; }
       body { padding: 10px 10px calc(96px + env(safe-area-inset-bottom)); }
       .app-topbar { gap: 8px; margin-bottom: 10px; padding: 10px 12px; }
       .brand-logo { width: 28px; height: 28px; }
@@ -2384,7 +2390,7 @@
         <button class="miner-toggle" type="button" @click="holdersExpanded = !holdersExpanded">{{ holdersExpanded ? '收起详情' : '展开详情' }}</button>
       </h2>
       <div class="holder-note">A 链上可验证 · B 公司公开披露 · C ETF 持仓 · D 估算数据。ETF 合计与单只 ETF 存在包含关系，不可简单相加。</div>
-      <div class="holders-list" v-show="holdersExpanded">
+      <div class="holders-list">
         <div class="holder-group" :class="'holder-group-' + group.key" v-for="group in holderGroups" :key="group.key">
           <div class="holder-group-title">{{ group.label }}</div>
           <div v-for="holder in group.items" :key="holder.id" class="holder-row">
@@ -2582,7 +2588,7 @@ new Vue({
     compactMode: false,
     minersExpanded: false,
     globalExpanded: false,
-    holdersExpanded: true,
+    holdersExpanded: false,
     notificationStatus: '系统通知需要 HTTPS 或 localhost 并经用户授权；未授权时仅页面内提示',
     alertSoundEnabled: false,
     alertForm: {
