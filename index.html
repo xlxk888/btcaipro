@@ -1617,6 +1617,25 @@
     .entity-holders-card:not(.expanded) { align-self: start; min-height: 0; }
     .entity-holders-card.expanded { grid-column: span 6; }
     .entity-holders-card.expanded .holders-list { max-height: none; overflow: visible; }
+    @media (min-width: 1025px) {
+      .miner-card:not(.expanded),
+      .entity-holders-card:not(.expanded) {
+        height: 500px;
+        min-height: 0;
+      }
+      .entity-holders-card:not(.expanded) {
+        display: flex;
+        flex-direction: column;
+        align-self: stretch;
+      }
+      .miner-card:not(.expanded) .miner-list,
+      .entity-holders-card:not(.expanded) .holders-list {
+        flex: 1;
+        min-height: 0;
+        max-height: none;
+        overflow-y: auto;
+      }
+    }
     .holder-group { padding-left: 8px; border-left: 3px solid #64748b; }
     .holder-group-onchain { border-left-color: #38bdf8; }
     .holder-group-disclosure { border-left-color: #4ade80; }
@@ -2554,6 +2573,8 @@ new Vue({
     rafId: null,
     backendActiveUntil: 0,
     backendSnapshotId: '',
+    backendSourceStatuses: [],
+    backendSourceStatusLoaded: false,
     fallbackTimer: null,
     fallbackPolling: false,
     marketCapTimer: null,
@@ -2814,7 +2835,63 @@ new Vue({
       if (!this.btcBase) return '0.00';
       return (((this.btcPrice - this.btcBase) / this.btcBase) * 100).toFixed(2);
     },
+    backendSourceList() {
+      const sources = Array.isArray(this.backendSourceStatuses) ? this.backendSourceStatuses : [];
+      const healthyKinds = new Set(sources.filter(source => source && source.state === 'healthy').map(source => source.kind));
+      const names = {
+        ahr999_local: 'AHR999 本地估算',
+        binance_derivatives: 'Binance 衍生品',
+        binance_spot_rest: 'Binance Spot REST',
+        binance_spot_ws: 'Binance Spot WS',
+        fear_greed: '恐惧贪婪',
+        liquidations: '清算数据'
+      };
+      return sources.map(source => {
+        const state = String(source.state || 'idle').toLowerCase();
+        const disabled = state === 'disabled';
+        const stale = state === 'stale' || source.stale === true;
+        const failed = ['error', 'unavailable'].includes(state) || stale;
+        const fallbackActive = failed && healthyKinds.has(source.kind);
+        const badge = disabled ? 'idle' : fallbackActive ? 'warn' : failed ? 'bad' : state === 'healthy' ? 'ok' : 'idle';
+        const label = disabled
+          ? '未启用'
+          : fallbackActive
+            ? '已回退'
+            : stale
+              ? '旧数据'
+              : state === 'healthy'
+                ? '正常'
+                : state === 'unavailable'
+                  ? '不可用'
+                  : state === 'error'
+                    ? '异常'
+                    : '等待';
+        const reason = source.disabledReason || source.lastError || '';
+        const dataTime = source.lastSuccess || '';
+        const receivedAt = source.updatedAt || source.lastAttempt || '';
+        const times = [
+          dataTime ? `数据 ${this.formatDateTime(dataTime)}` : '',
+          receivedAt ? `接收 ${this.formatDateTime(receivedAt)}` : ''
+        ].filter(Boolean).join(' · ');
+        const detail = [
+          fallbackActive ? `${reason || '主源异常'}，备用源正常` : reason,
+          times
+        ].filter(Boolean).join(' · ');
+        return {
+          key: `backend:${source.id}`,
+          name: names[source.id] || source.id,
+          label,
+          badge,
+          relevant: true,
+          countsForHealth: !disabled,
+          fallbackActive,
+          detail,
+          title: `状态：${label}${reason ? `；原因：${reason}` : ''}${times ? `；${times}` : ''}`
+        };
+      });
+    },
     dataSourceList() {
+      if (this.backendSourceStatusLoaded) return this.backendSourceList;
       return Object.keys(this.dataSources).map(key => {
         const source = this.dataSources[key];
         const label = this.sourceDisplayLabel(source);
@@ -2824,24 +2901,26 @@ new Vue({
           label,
           badge: this.sourceBadge(source),
           relevant: this.sourceIsRelevant(key),
+          countsForHealth: !(source.disabled || ['待接入', '未启用'].includes(source.status)),
           detail: this.sourceDetail(source),
           title: `状态：${label}；错误：${source.errorCount || 0}；间隔：${source.interval || '--'}`
         };
       });
     },
     sourceHealthClass() {
-      const list = this.dataSourceList.filter(item => item.relevant);
+      const list = this.dataSourceList.filter(item => item.relevant && item.countsForHealth !== false);
       if (list.some(item => item.badge === 'bad')) return 'bad';
       if (list.some(item => item.badge === 'warn' || item.badge === 'idle')) return 'warn';
       return 'ok';
     },
     sourceHealthText() {
-      const list = this.dataSourceList.filter(item => item.relevant);
+      const list = this.dataSourceList.filter(item => item.relevant && item.countsForHealth !== false);
       const bad = list.filter(item => item.badge === 'bad').length;
       if (bad) return `${bad} 个数据源异常`;
-      const delayed = list.some(item => ['延迟', '旧数据', '日线'].includes(item.label));
+      if (list.some(item => item.fallbackActive)) return '备用数据源运行中';
+      const delayed = list.some(item => ['延迟', '日线'].includes(item.label));
       if (delayed) return '部分数据延迟';
-      const waiting = list.some(item => item.badge === 'idle' || !this.dataSources[item.key].lastUpdate);
+      const waiting = list.some(item => item.badge === 'idle' || (this.dataSources[item.key] && !this.dataSources[item.key].lastUpdate));
       if (waiting) return '部分数据等待';
       return '数据源正常';
     },
@@ -3139,6 +3218,7 @@ new Vue({
 
     async fetchBackendSnapshot() {
       this.dataSources.backend.lastAttempt = Date.now();
+      this.fetchBackendSourceStatus();
       try {
         const response = await this.fetchWithSoftTimeout('/api/market/snapshot', 3500);
         if (!response.ok) throw new Error(`Backend snapshot ${response.status}`);
@@ -3184,10 +3264,23 @@ new Vue({
           this.ahrValue = Number(ahr999.value).toFixed(4);
           this.markSource('ahr999', '后台估算');
         }
-        this.markSource('backend', '后台');
+        this.markSource('backend', '后台', false, { success: true });
       } catch (error) {
         this.backendActiveUntil = 0;
         this.markSource('backend', '异常', error);
+      }
+    },
+
+    async fetchBackendSourceStatus() {
+      try {
+        const response = await this.fetchWithSoftTimeout('/api/sources/status', 3500);
+        if (!response.ok) throw new Error(`Backend source status ${response.status}`);
+        const payload = await response.json();
+        if (!payload || !Array.isArray(payload.data)) throw new Error('Backend source status invalid');
+        this.backendSourceStatuses = payload.data;
+        this.backendSourceStatusLoaded = payload.data.length > 0;
+      } catch (_) {
+        this.backendSourceStatusLoaded = false;
       }
     },
 
@@ -3310,7 +3403,8 @@ new Vue({
       if (source.disabled || ['待接入', '未启用', '暂停', '等待', '连接中', '重连中', '轮询中', '列表已读取', '等待推送', '等待数据'].includes(source.status)) return 'idle';
       const label = this.sourceDisplayLabel(source);
       if (label === '异常') return 'bad';
-      if (['延迟', '旧数据', '日线'].includes(label)) return 'warn';
+      if (label === '旧数据') return 'bad';
+      if (['延迟', '日线'].includes(label)) return 'warn';
       if (['等待', '暂停', '连接中', '重连中', '轮询中', '列表已读取', '等待推送', '等待数据'].includes(label)) return 'idle';
       return 'ok';
     },
