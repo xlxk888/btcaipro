@@ -12,8 +12,8 @@ export class BinanceDerivativesAdapter extends MarketDataAdapter {
       const [oi, funding] = await Promise.all([oiResponse.json(), fundingResponse.json()]);
       const receivedAt = new Date().toISOString();
       return [
-        { symbol, market: 'crypto_derivatives', kind: 'derivatives', metric: 'openInterest', value: oi.openInterest, unit: symbol.replace(/USDT$/, ''), interval: 'current', source: 'Binance Futures', sourcePriority: 'primary', dataTime: new Date(Number(oi.time || Date.now())).toISOString(), receivedAt },
-        { symbol, market: 'crypto_derivatives', kind: 'derivatives', metric: 'fundingRate', value: funding.lastFundingRate, unit: 'ratio', interval: '8h', source: 'Binance Futures', sourcePriority: 'primary', dataTime: new Date(Number(funding.time || Date.now())).toISOString(), receivedAt, metadata: { nextFundingTime: funding.nextFundingTime ? new Date(Number(funding.nextFundingTime)).toISOString() : null } }
+        { symbol, market: 'crypto_derivatives', kind: 'derivatives', metric: 'openInterest', value: oi.openInterest, unit: symbol.replace(/USDT$/, ''), interval: 'current', source: 'Binance Futures', sourceId: 'binance_derivatives', sourceType: 'exchange', sourcePriority: 'primary', dataTime: new Date(Number(oi.time || Date.now())).toISOString(), receivedAt },
+        { symbol, market: 'crypto_derivatives', kind: 'derivatives', metric: 'fundingRate', value: funding.lastFundingRate, unit: 'ratio', interval: '8h', source: 'Binance Futures', sourceId: 'binance_derivatives', sourceType: 'exchange', sourcePriority: 'primary', dataTime: new Date(Number(funding.time || Date.now())).toISOString(), receivedAt, metadata: { nextFundingTime: funding.nextFundingTime ? new Date(Number(funding.nextFundingTime)).toISOString() : null } }
       ];
     }));
     return rows.flat();

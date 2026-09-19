@@ -1,5 +1,6 @@
 import { evaluateConfidence } from '../core/confidence.js';
 import { evaluateFreshness, policyFor } from '../core/freshness.js';
+import { createProvenance } from '../provenance/source-definitions.js';
 
 export const METRICS = Object.freeze({
   PRICE: 'price', CHANGE_24H: 'change24h', VOLUME_24H: 'volume24h',
@@ -26,6 +27,16 @@ export function normalizeObservation(input, now = Date.now()) {
     missingFields,
     consensusDeltaPct: input.consensusDeltaPct
   });
+  const sourceId = input.sourceId || input.metadata?.sourceId || String(input.source || 'unknown').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  const provenance = createProvenance({
+    ...input,
+    sourceId,
+    sourceName: input.sourceName || input.source,
+    freshness: freshness.status,
+    confidence,
+    receivedAt,
+    dataTime
+  });
   return {
     symbol: String(input.symbol || 'MARKET').toUpperCase(),
     market: input.market || 'crypto',
@@ -43,6 +54,15 @@ export function normalizeObservation(input, now = Date.now()) {
     confidence,
     rawValue: input.rawValue ?? input.value ?? null,
     metadata: input.metadata || {}
+    ,sourceId: provenance.sourceId
+    ,sourceName: provenance.sourceName
+    ,sourceType: provenance.sourceType
+    ,sourceUrl: provenance.sourceUrl
+    ,updatedAt: provenance.updatedAt
+    ,freshness: provenance.freshness
+    ,calculationMethod: provenance.calculationMethod
+    ,fallbackSource: provenance.fallbackSource
+    ,provenance
   };
 }
 

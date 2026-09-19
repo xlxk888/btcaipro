@@ -4,4 +4,6 @@ data/*.sqlite-shm
 data/*.sqlite-wal
 data/*.jsonl
 coverage/
+node_modules/
+npm-debug.log*
 .DS_Store

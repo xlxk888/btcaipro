@@ -21,6 +21,7 @@ export function loadConfig(env = process.env) {
     workerEnabled: bool(env.WORKER_ENABLED, true),
     symbols: [...new Set(symbols.length ? symbols : ['BTCUSDT', 'ETHUSDT'])],
     databasePath: path.resolve(env.DATABASE_PATH || './data/crypto-ai.sqlite'),
+    databaseUrl: env.DATABASE_URL || '',
     redisUrl: env.REDIS_URL || '',
     logLevel: env.LOG_LEVEL || 'info',
     corsOrigin: env.CORS_ORIGIN || '',

@@ -104,8 +104,8 @@
     .pulse-value { margin-top: 4px; color: #e2e8f0; font-size: .95rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .pulse-value.small { font-size: .78rem; }
     .source-strip {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 7px;
       margin: -4px 0 14px;
       padding: 8px;
@@ -119,13 +119,15 @@
       align-items: center;
       gap: 6px;
       padding: 4px 9px;
-      border-radius: 999px;
+      border-radius: 10px;
       border: 1px solid rgba(148,163,184,.28);
       background: rgba(15,23,42,.72);
       color: #cbd5e1;
       font-size: .68rem;
       font-weight: 800;
     }
+    .source-chip-copy { min-width:0; display:flex; flex-direction:column; gap:2px; }
+    .source-chip-copy small { color:#8fa0ba; font-size:.61rem; font-weight:600; line-height:1.35; overflow-wrap:anywhere; }
     .source-dot {
       width: 7px;
       height: 7px;
@@ -2004,7 +2006,7 @@
       :class="source.badge"
       :title="source.title"
     >
-      <span class="source-dot"></span>{{ source.name }} · {{ source.label }}<span v-if="source.detail"> · {{ source.detail }}</span>
+      <span class="source-dot"></span><span class="source-chip-copy"><strong>{{ source.name }} · {{ source.label }}</strong><small v-if="source.detail">{{ source.detail }}</small></span>
     </span>
   </div>
 
@@ -2367,7 +2369,7 @@
       </h2>
       <div class="miner-list">
         <div class="miner-row" v-for="miner in miners" :key="miner.model">
-          <div class="miner-model">{{ miner.model }}</div>
+          <div class="miner-model" :title="miner.sourceUrl || ''">{{ miner.model }}<span class="trust-badge" :class="miner.status === 'verified' ? 'ok' : 'warn'">{{ miner.status === 'verified' ? '已核验' : '待核验' }}</span></div>
           <div class="miner-spec">
             <span>算力</span>
             <strong>{{ minerHashrateText(miner) }}</strong>
@@ -2394,6 +2396,7 @@
         <span>{{ profitableMinerCount }} 台盈利 / {{ miners.length }} 台</span>
       </div>
       <div class="miner-scroll-hint">{{ minerDataStatus }}<span v-if="minerHashrateEh"> · 全网算力 {{ minerHashrateEh }} EH/s</span></div>
+      <div class="miner-scroll-hint">规格：厂商官方资料 / 未核验明确标记 · 网络：mempool.space · BTC：行情主源及 fallback · 关机价：Crypto AI 本地计算</div>
       <div class="miner-scroll-hint">{{ minersExpanded ? '已展开全部矿机' : '框内可上下滑动查看全部矿机' }}</div>
     </div>
 
@@ -2539,6 +2542,17 @@
     </div>
   </div>
 
+  <div class="bottom-notice">
+    <div class="bottom-notice-head">
+      <strong class="bottom-notice-title">数据与信息来源</strong>
+      <a class="bottom-notice-link" href="/sources">查看完整来源与计算说明</a>
+    </div>
+    <div class="bottom-notice-body">
+      <div class="bottom-notice-desc">Binance · OKX · CoinGecko · Alternative.me · mempool.space · Cboe · U.S. Treasury · 腾讯行情 · 官方公司/监管机构公开资料</div>
+      <div class="bottom-notice-desc">部分指标由 Crypto AI 基于公开数据本地计算或估算；估算不会伪装成官方实时数据。</div>
+    </div>
+  </div>
+
   <div class="toast" v-if="toastText">{{ toastText }}</div>
 
 </div>
@@ -2574,6 +2588,7 @@ new Vue({
     backendActiveUntil: 0,
     backendSnapshotId: '',
     backendSourceStatuses: [],
+    backendSourceSummary: null,
     backendSourceStatusLoaded: false,
     fallbackTimer: null,
     fallbackPolling: false,
@@ -2837,27 +2852,16 @@ new Vue({
     },
     backendSourceList() {
       const sources = Array.isArray(this.backendSourceStatuses) ? this.backendSourceStatuses : [];
-      const healthyKinds = new Set(sources.filter(source => source && source.state === 'healthy').map(source => source.kind));
-      const names = {
-        ahr999_local: 'AHR999 本地估算',
-        binance_derivatives: 'Binance 衍生品',
-        binance_spot_rest: 'Binance Spot REST',
-        binance_spot_ws: 'Binance Spot WS',
-        fear_greed: '恐惧贪婪',
-        liquidations: '清算数据'
-      };
       return sources.map(source => {
-        const state = String(source.state || 'idle').toLowerCase();
+        const state = String(source.status || 'idle').toLowerCase();
         const disabled = state === 'disabled';
-        const stale = state === 'stale' || source.stale === true;
-        const failed = ['error', 'unavailable'].includes(state) || stale;
-        const fallbackActive = failed && healthyKinds.has(source.kind);
-        const badge = disabled ? 'idle' : fallbackActive ? 'warn' : failed ? 'bad' : state === 'healthy' ? 'ok' : 'idle';
+        const fallbackActive = state === 'fallback';
+        const badge = disabled ? 'idle' : fallbackActive || state === 'stale' ? 'warn' : source.critical ? 'bad' : state === 'healthy' ? 'ok' : 'idle';
         const label = disabled
           ? '未启用'
           : fallbackActive
             ? '已回退'
-            : stale
+            : state === 'stale'
               ? '旧数据'
               : state === 'healthy'
                 ? '正常'
@@ -2866,20 +2870,15 @@ new Vue({
                   : state === 'error'
                     ? '异常'
                     : '等待';
-        const reason = source.disabledReason || source.lastError || '';
-        const dataTime = source.lastSuccess || '';
-        const receivedAt = source.updatedAt || source.lastAttempt || '';
-        const times = [
-          dataTime ? `数据 ${this.formatDateTime(dataTime)}` : '',
-          receivedAt ? `接收 ${this.formatDateTime(receivedAt)}` : ''
-        ].filter(Boolean).join(' · ');
+        const reason = source.errorReason || '';
+        const times = [`当前 ${source.activeSource || '--'}`, source.fallbackSource ? `fallback ${source.fallbackSource}` : '', source.dataTime ? `数据 ${this.formatDateTime(source.dataTime)}` : '', source.receivedAt ? `接收 ${this.formatDateTime(source.receivedAt)}` : '', `新鲜度 ${source.freshness || 'unknown'}`, `置信度 ${source.confidence || 'unknown'}`, `enabled ${source.enabled ? 'yes' : 'no'}`, source.lastSuccess ? `最近成功 ${this.formatDateTime(source.lastSuccess)}` : ''].filter(Boolean).join(' · ');
         const detail = [
           fallbackActive ? `${reason || '主源异常'}，备用源正常` : reason,
           times
         ].filter(Boolean).join(' · ');
         return {
-          key: `backend:${source.id}`,
-          name: names[source.id] || source.id,
+          key: `backend:${source.sourceId}`,
+          name: source.sourceName || source.sourceId,
           label,
           badge,
           relevant: true,
@@ -2908,12 +2907,19 @@ new Vue({
       });
     },
     sourceHealthClass() {
+      if (this.backendSourceSummary) return this.backendSourceSummary.criticalCount > 0 ? 'bad' : (this.backendSourceSummary.fallbackCount > 0 || this.backendSourceSummary.staleCount > 0 ? 'warn' : 'ok');
       const list = this.dataSourceList.filter(item => item.relevant && item.countsForHealth !== false);
       if (list.some(item => item.badge === 'bad')) return 'bad';
       if (list.some(item => item.badge === 'warn' || item.badge === 'idle')) return 'warn';
       return 'ok';
     },
     sourceHealthText() {
+      if (this.backendSourceSummary) {
+        if (this.backendSourceSummary.criticalCount > 0) return `${this.backendSourceSummary.criticalCount} 个数据源异常`;
+        if (this.backendSourceSummary.fallbackCount > 0) return '备用数据源运行中';
+        if (this.backendSourceSummary.staleCount > 0) return '部分数据延迟';
+        return '数据源正常';
+      }
       const list = this.dataSourceList.filter(item => item.relevant && item.countsForHealth !== false);
       const bad = list.filter(item => item.badge === 'bad').length;
       if (bad) return `${bad} 个数据源异常`;
@@ -3276,11 +3282,13 @@ new Vue({
         const response = await this.fetchWithSoftTimeout('/api/sources/status', 3500);
         if (!response.ok) throw new Error(`Backend source status ${response.status}`);
         const payload = await response.json();
-        if (!payload || !Array.isArray(payload.data)) throw new Error('Backend source status invalid');
-        this.backendSourceStatuses = payload.data;
-        this.backendSourceStatusLoaded = payload.data.length > 0;
+        if (!payload || !payload.summary || !Array.isArray(payload.summary.sources)) throw new Error('Backend source status invalid');
+        this.backendSourceStatuses = payload.summary.sources;
+        this.backendSourceSummary = payload.summary;
+        this.backendSourceStatusLoaded = true;
       } catch (_) {
         this.backendSourceStatusLoaded = false;
+        this.backendSourceSummary = null;
       }
     },
 
@@ -3731,6 +3739,25 @@ new Vue({
 
     toggleMinersExpanded() {
       this.minersExpanded = !this.minersExpanded;
+    },
+
+    async fetchMinerCatalog() {
+      try {
+        const response = await this.fetchWithSoftTimeout('/api/miners/catalog', 3500);
+        if (!response.ok) throw new Error(`Miner catalog ${response.status}`);
+        const payload = await response.json();
+        if (!Array.isArray(payload.data) || !payload.data.length) throw new Error('Miner catalog empty');
+        this.miners = payload.data.filter(miner => miner.status !== 'unsupported').map(miner => ({
+          ...miner,
+          model: `${miner.model}${miner.variant ? ` ${miner.variant}` : ''}${miner.coolingType === 'hydro' ? ' Hyd.' : ''}`,
+          hashrateTh: miner.hashrateTH,
+          source: miner.manufacturer,
+          sourceUrl: miner.officialSource
+        }));
+        this.updateMinerShutdownPrices();
+      } catch (_) {
+        this.minerDataStatus = '矿机 catalog 暂不可用，保留内置最后已知规格';
+      }
     },
 
     minerHashrateText(miner) {
@@ -4453,23 +4480,13 @@ new Vue({
       const now = Date.now();
       if (this.holderDisclosureLastAttempt && now - this.holderDisclosureLastAttempt < 30 * 60 * 1000) return true;
       this.holderDisclosureLastAttempt = now;
-      try {
-        const res = await this.fetchWithSoftTimeout('https://looknode-proxy.corms-cushier-0l.workers.dev/mnav', 10000);
-        if (!res.ok) throw new Error(`holder disclosure ${res.status}`);
-        const data = await res.json();
-        const holdings = Number(data && data.mstr && data.mstr.btc_holdings);
-        const holder = this.btcHolders.find(item => item.id === 'strategy');
-        if (holder && Number.isFinite(holdings) && holdings > 0) {
-          holder.balance = holdings;
-          holder.updatedAt = now;
-          holder.changeText = 'Strategy 最新公开披露';
-          holder.type = '上市公司公开披露，30分钟检查更新';
-          return true;
-        }
-        return false;
-      } catch (e) {
-        return false;
+      const holder = this.btcHolders.find(item => item.id === 'strategy');
+      if (holder) {
+        holder.source = 'Strategy investor relations / SEC filings';
+        holder.sourceUrl = 'https://www.strategy.com/press';
+        holder.verificationType = 'company-disclosure';
       }
+      return false;
     },
 
     updateEtfHolderLabel() {
@@ -6120,6 +6137,7 @@ new Vue({
     this.fetchGlobalMarkets();
     this.fetchFearGreed();
     this.fetchHalvingCountdown();
+    this.fetchMinerCatalog();
     this.loadMinerNetworkCache();
     this.fetchMinerNetworkData();
     this.startBtcHoldersPolling();

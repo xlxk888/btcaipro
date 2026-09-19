@@ -9,11 +9,11 @@ Binance WS / Binance REST / OKX / CoinGecko / Alternative.me
                          ↓
                     adapters
                          ↓
-       normalization → freshness → confidence
+       normalization → provenance → freshness → confidence
                          ↓
         cache (Redis optional, memory fallback)
                          ↓
-             SQLite market snapshots
+       SQLite (local) / PostgreSQL (production)
                          ↓
    rule engine → dedup / cooldown / hysteresis
                          ↓
@@ -32,7 +32,9 @@ The backend uses only Node.js built-ins. Node 24 or newer is required because pe
 - `src/core/` — freshness, confidence, and snapshot construction.
 - `src/cache/` — in-memory cache and optional Redis adapter.
 - `src/engine/` — deterministic anomaly rules and event gate.
-- `src/store/` — SQLite store and migration; memory store for tests.
+- `src/store/` — repository interface, SQLite local adapter, PostgreSQL production adapter, and migrations.
+- `src/provenance/` — language-neutral source registry and normalized provenance.
+- `src/miners/` — independent miner catalog and tested local economics.
 - `src/worker/` — independent schedules, polling, stream ingestion and retention.
 - `src/app.js` — HTTP routes and static dashboard.
 - `test/` — network-independent fixtures and tests.
@@ -64,6 +66,7 @@ All configuration is optional; see `.env.example`.
 | `WORKER_ENABLED` | `true` | Run worker in the API process |
 | `MARKET_SYMBOLS` | `BTCUSDT,ETHUSDT` | Spot symbols; CoinGecko fallback currently maps BTC, ETH, SOL, BNB |
 | `DATABASE_PATH` | `./data/crypto-ai.sqlite` | Local SQLite file |
+| `DATABASE_URL` | empty | Select PostgreSQL when configured; never required for local development |
 | `REDIS_URL` | empty | Optional `redis://` or `rediss://` cache endpoint |
 | `SPOT_POLL_MS` | `30000` | REST recovery/refresh interval |
 | `DERIVATIVES_POLL_MS` | `60000` | OI/funding interval |
@@ -75,7 +78,9 @@ Never commit `.env`. Redis passwords and other credentials stay server-side and 
 
 ## Data model and provenance
 
-Every observation entering a snapshot contains `value`, `source`, `dataTime`, `receivedAt`, `stale`, and `confidence`, plus its symbol, market, metric, unit, interval, latency/status, priority, raw value and metadata when applicable. Freshness is classified as `fresh`, `delayed`, `stale`, or `unavailable` using separate windows for spot, derivatives, sentiment, valuation, daily macro and miner data. Confidence is an explainable rule score (`high`, `medium`, `low`) based on source priority, age, missing fields and optional multi-source agreement; it is not presented as a scientific probability.
+Every observation entering a snapshot contains `value`, `source`, `dataTime`, `receivedAt`, `stale`, and `confidence`, plus normalized `sourceId`, `sourceName`, `sourceType`, `sourceUrl`, `updatedAt`, `freshness`, `calculationMethod`, `fallbackSource`, and `provenance`. Freshness is classified as `fresh`, `delayed`, `stale`, or `unavailable` using separate windows for spot, derivatives, sentiment, valuation, daily macro and miner data. Confidence is an explainable rule score (`high`, `medium`, `low`) based on source priority, age, missing fields and optional multi-source agreement; it is not presented as a scientific probability.
+
+`getSourceHealthSummary()` is the sole health aggregation rule. Healthy primaries are green; working fallbacks and non-critical stale data are degraded but not red; disabled features are excluded; only unavailable user data is a red incident. The header, source detail panel, data-health card, and market radar all consume the API summary. The complete user-facing matrix is available at `/sources`.
 
 Snapshots retain the complete normalized inputs seen by the engine, including BTC/ETH price, 24-hour change and volume, OI, funding, Fear & Greed, local AHR999 estimate, and risk-quality flags. AHR999 records its formula version and inputs (current price, 200-day geometric mean, fitted price and days since genesis).
 
@@ -87,6 +92,8 @@ Snapshots retain the complete normalized inputs seen by the engine, including BT
 - Sentiment: Alternative.me Fear & Greed; failures produce no fabricated default.
 - Valuation: local AHR999 from 200 closed Binance daily candles; explicitly labeled as a local estimate.
 - Liquidations: adapter is deliberately disabled because no stable keyless aggregate source is configured. No values are synthesized.
+- Miner hardware: Crypto AI Miner Catalog, with official manufacturer URLs and explicit verified/unverified status.
+- Miner economics: local `difficulty_probability_v1` calculation using market price, mempool.space network inputs, hardware specs, reward/fee assumptions, and electricity cost.
 
 The UI requests `/api/market/snapshot` every 15 seconds. A valid, fresh backend snapshot takes priority for BTC, ETH, Fear & Greed, and AHR999. If the API is missing or fails, the pre-existing browser adapters continue operating. Other dashboard modules are unchanged.
 
@@ -112,16 +119,27 @@ Events store `eventId`, asset, type, direction, severity, time window, detection
 - `GET /api/events?limit=50&asset=BTCUSDT&type=price_move`
 - `GET /api/events/latest`
 - `GET /api/sources/status`
+- `GET /api/sources/definitions`
+- `GET /api/miners/catalog`
 
 The source observations returned by snapshot and quote endpoints retain timing, staleness, source and confidence fields.
 
 ## Storage, cache and operations
 
-SQLite tables are created by `src/store/migrations/001_init.sql`: `snapshots`, `events`, and `source_status`, with time and lookup indexes. WAL mode and a busy timeout are enabled. Snapshots and events are pruned on an independent six-hour schedule using the configured retention periods.
+SQLite tables are created by `src/store/migrations/001_init.sql`: `snapshots`, `events`, and `source_status`, with time and lookup indexes. WAL mode and a busy timeout are enabled. When `DATABASE_URL` exists, the repository factory selects PostgreSQL and runs its idempotent schema instead. Snapshots and events are pruned on an independent six-hour schedule using the configured retention periods.
 
 When `REDIS_URL` is configured, latest observations/snapshot, source health, worker lock and event state use Redis. A failed or absent Redis connection degrades to bounded process memory so development is not blocked. The worker separates spot REST, derivatives, low-frequency sentiment/valuation, snapshots and retention schedules; tasks do not overlap and failures use exponential backoff. The Binance stream reconnects with capped backoff. One source failure cannot terminate the worker.
 
 Structured logs cover server/worker lifecycle, source latency and failures, fallback, Redis degradation, retention, and generated anomalies. Secret-shaped fields are redacted.
+
+## Production boundary and documentation
+
+Vercel owns the frontend, static assets, and web delivery. A future VPS owns the Market Worker, WebSocket ingestion, scheduler, Event Engine, future News Worker, AI Router, and notifications. PostgreSQL owns persistence; Redis owns shared cache/locks/dedup. SQLite and process memory are local/test fallbacks, not the intended multi-process production architecture.
+
+- [`docs/DATA-SOURCES.md`](docs/DATA-SOURCES.md) — health semantics, provenance, holdings taxonomy, and the fuckbtc.com audit.
+- [`docs/MINER-DATA.md`](docs/MINER-DATA.md) — manufacturer catalog and shutdown-price formula.
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — Vercel/VPS boundary, PostgreSQL, Redis, Docker, and secrets.
+- [`docs/AI-ROADMAP.md`](docs/AI-ROADMAP.md) — optional single-provider/fallback design and canonical-event one-analysis fan-out rule.
 
 ## Current limits
 
@@ -130,5 +148,6 @@ Structured logs cover server/worker lifecycle, source latency and failures, fall
 - OI units are provider-native base-asset quantities; cross-provider derivatives normalization is future work.
 - Liquidation detection remains disabled until a reliable licensed or authenticated source is configured.
 - Redis implementation intentionally covers the small command set this service uses; it is optional.
-- SQLite targets a single-node deployment. A later multi-node service should migrate storage and use Redis for the shared worker lock.
-- Existing macro, equities, miner and holder modules remain browser-side in this phase.
+- PostgreSQL is implemented and testable but this phase does not connect to a real production database or deploy the example Compose stack.
+- Macro, equities, and holder ingestion remain browser-side; their provenance and trust labels are documented while backend migration remains future work.
+- Legacy miner specs without a directly verified exact official product page stay `unverified`; they are never promoted to verified by inference.

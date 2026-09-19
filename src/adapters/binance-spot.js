@@ -11,7 +11,7 @@ export class BinanceSpotAdapter extends MarketDataAdapter {
     const receivedAt = new Date().toISOString();
     return payload.flatMap(item => {
       const dataTime = new Date(Number(item.closeTime || Date.now())).toISOString();
-      const common = { symbol: item.symbol, market: 'crypto', kind: 'spot', source: 'Binance', sourcePriority: 'primary', dataTime, receivedAt, interval: '24h' };
+      const common = { symbol: item.symbol, market: 'crypto', kind: 'spot', source: 'Binance', sourceId: 'binance_spot_rest', sourceType: 'exchange', sourcePriority: 'primary', dataTime, receivedAt, interval: '24h' };
       return [
         { ...common, metric: 'price', value: item.lastPrice, unit: 'USDT' },
         { ...common, metric: 'change24h', value: item.priceChangePercent, unit: 'percent' },

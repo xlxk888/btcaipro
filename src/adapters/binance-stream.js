@@ -22,7 +22,7 @@ export class BinanceSpotStream {
       try {
         const item = JSON.parse(event.data)?.data;
         if (!item?.s) return;
-        const common = { symbol: item.s, market: 'crypto', kind: 'spot', source: 'Binance WebSocket', sourcePriority: 'primary', dataTime: new Date(Number(item.E || Date.now())).toISOString(), receivedAt: new Date().toISOString(), interval: '24h' };
+        const common = { symbol: item.s, market: 'crypto', kind: 'spot', source: 'Binance WebSocket', sourceId: 'binance_spot_ws', sourceType: 'exchange', sourcePriority: 'primary', dataTime: new Date(Number(item.E || Date.now())).toISOString(), receivedAt: new Date().toISOString(), interval: '24h' };
         this.onRows?.([
           { ...common, metric: 'price', value: item.c, unit: 'USDT' },
           { ...common, metric: 'change24h', value: item.P, unit: 'percent' },

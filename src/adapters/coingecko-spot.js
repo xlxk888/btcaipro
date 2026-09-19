@@ -14,7 +14,7 @@ export class CoinGeckoSpotAdapter extends MarketDataAdapter {
     return supported.flatMap(symbol => {
       const item = payload[IDS[symbol]];
       if (!item) return [];
-      const common = { symbol, market: 'crypto', kind: 'spot', source: 'CoinGecko', sourcePriority: 'fallback', dataTime: new Date(Number(item.last_updated_at) * 1000).toISOString(), receivedAt: new Date().toISOString(), interval: '24h' };
+      const common = { symbol, market: 'crypto', kind: 'spot', source: 'CoinGecko', sourceId: 'coingecko_spot', sourceType: 'market-data', sourcePriority: 'fallback', dataTime: new Date(Number(item.last_updated_at) * 1000).toISOString(), receivedAt: new Date().toISOString(), interval: '24h' };
       return [
         { ...common, metric: 'price', value: item.usd, unit: 'USD' },
         { ...common, metric: 'change24h', value: item.usd_24h_change, unit: 'percent' },

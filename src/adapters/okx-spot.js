@@ -14,7 +14,7 @@ export class OkxSpotAdapter extends MarketDataAdapter {
       const open = Number(item.open24h);
       const change = Number.isFinite(last) && Number.isFinite(open) && open > 0 ? ((last - open) / open) * 100 : null;
       const dataTime = new Date(Number(item.ts || Date.now())).toISOString();
-      const common = { symbol, market: 'crypto', kind: 'spot', source: 'OKX', sourcePriority: 'fallback', dataTime, receivedAt: new Date().toISOString(), interval: '24h' };
+      const common = { symbol, market: 'crypto', kind: 'spot', source: 'OKX', sourceId: 'okx_spot', sourceType: 'exchange', sourcePriority: 'fallback', dataTime, receivedAt: new Date().toISOString(), interval: '24h' };
       return [
         { ...common, metric: 'price', value: last, unit: 'USDT' },
         { ...common, metric: 'change24h', value: change, unit: 'percent' },

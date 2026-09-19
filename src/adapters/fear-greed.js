@@ -10,7 +10,7 @@ export class FearGreedAdapter extends MarketDataAdapter {
     if (!item || !Number.isFinite(Number(item.value))) throw new Error('Fear & Greed payload invalid');
     return [{
       symbol: 'MARKET', market: 'sentiment', kind: 'sentiment', metric: 'fearGreed', value: item.value,
-      unit: 'index', interval: 'daily', source: 'Alternative.me', sourcePriority: 'primary',
+      unit: 'index', interval: 'daily', source: 'Alternative.me', sourceId: 'fear_greed', sourceType: 'market-data', sourcePriority: 'primary',
       dataTime: new Date(Number(item.timestamp) * 1000).toISOString(), receivedAt: new Date().toISOString(),
       metadata: { classification: item.value_classification || null }
     }];

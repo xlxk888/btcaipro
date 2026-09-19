@@ -67,13 +67,13 @@ export class MarketWorker {
 
   async saveStatus(status) {
     const normalized = { id: status.id || status.source, kind: status.kind || 'spot', ...status };
-    this.store.saveSourceStatus(normalized);
+    await this.store.saveSourceStatus(normalized);
     await this.cache.set(`source:${normalized.id}`, JSON.stringify(normalized), 24 * 60 * 60_000);
   }
 
   async collectAdapter(adapter, ...args) {
     try { const rows = await adapter.run(...args); this.ingest(rows); return rows; }
-    finally { this.store.saveSourceStatus(adapter.status); }
+    finally { await this.store.saveSourceStatus(adapter.status); }
   }
 
   async collectSpot() {
@@ -96,24 +96,24 @@ export class MarketWorker {
       this.collectAdapter(this.adapters.valuation, this.observations.get(observationKey('BTCUSDT', 'price'))?.value)
     ]);
     if (results.every(result => result.status === 'rejected')) throw new Error('All low-frequency sources unavailable');
-    this.store.saveSourceStatus(this.adapters.liquidations.status);
+    await this.store.saveSourceStatus(this.adapters.liquidations.status);
   }
 
   async buildSnapshot() {
     if (!this.observations.size) return null;
     const snapshot = this.snapshotBuilder.build(this.observations);
-    const history = this.store.listSnapshots(120);
+    const history = await this.store.listSnapshots(120);
     const candidates = this.engine.detect(snapshot, history, { includeSignals: true });
     const events = [];
     for (const candidate of candidates) {
       const event = await this.gate.admit(candidate);
-      if (event) { this.store.saveEvent(event); events.push(event); this.logger?.warn('anomaly_event_created', { eventId: event.eventId, asset: event.asset, type: event.eventType, severity: event.severity }); }
+      if (event) { await this.store.saveEvent(event); events.push(event); this.logger?.warn('anomaly_event_created', { eventId: event.eventId, asset: event.asset, type: event.eventType, severity: event.severity }); }
     }
-    this.store.saveSnapshot(snapshot); this.lastSnapshotAt = snapshot.createdAt;
+    await this.store.saveSnapshot(snapshot); this.lastSnapshotAt = snapshot.createdAt;
     await this.cache.set('market:snapshot:latest', JSON.stringify(snapshot), Math.max(this.config.snapshotIntervalMs * 3, 60_000));
     return { snapshot, events };
   }
 
-  runRetention() { const result = this.store.prune({ snapshotDays: this.config.snapshotRetentionDays, eventDays: this.config.eventRetentionDays }); this.logger?.info('retention_complete', result); return result; }
+  async runRetention() { const result = await this.store.prune({ snapshotDays: this.config.snapshotRetentionDays, eventDays: this.config.eventRetentionDays }); this.logger?.info('retention_complete', result); return result; }
   status() { return { started: this.started, lastSnapshotAt: this.lastSnapshotAt, observations: this.observations.size, tasks: this.scheduler.status(), streamEnabled: Boolean(this.stream) }; }
 }

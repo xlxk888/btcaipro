@@ -27,7 +27,7 @@ export class Ahr999Adapter extends MarketDataAdapter {
     const result = calculateAhr999(closes, price, calculatedAt);
     return [{
       symbol: 'BTCUSDT', market: 'valuation', kind: 'valuation', metric: 'ahr999', value: result.value,
-      unit: 'index', interval: 'daily/200d', source: 'Local estimate from Binance daily closes', sourcePriority: 'local',
+      unit: 'index', interval: 'daily/200d', source: 'Local estimate from Binance daily closes', sourceId: 'ahr999_local', sourceType: 'local-calculation', sourcePriority: 'local', calculationMethod: AHR999_FORMULA_VERSION,
       dataTime: new Date(calculatedAt).toISOString(), receivedAt: new Date().toISOString(),
       metadata: { formulaVersion: AHR999_FORMULA_VERSION, inputs: { currentPrice: price, closeCount: closes.length, geoMean200: result.geoMean200, fittedPrice: result.fittedPrice, daysSinceGenesis: result.daysSinceGenesis } }
     }];
