@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "api/bitcoin/network.js": { "maxDuration": 15 }
+  },
   "rewrites": [
     { "source": "/sources", "destination": "/sources.html" }
   ]

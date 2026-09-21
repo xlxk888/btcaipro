@@ -30,18 +30,21 @@ function fixture(saved = new Map()) {
   };
 }
 
-const heightResponse = height => ({ ok: true, text: async () => String(height) });
+const networkResponse = (height, status = 'ok', updatedAt = Date.now()) => ({
+  ok: true,
+  json: async () => ({ height, source: status === 'fallback' ? 'Blockstream' : 'mempool.space', updatedAt, stale: status === 'stale', status })
+});
 
-test('halving height uses mempool primary and saves the last good height', async () => {
+test('halving height reads the server endpoint and saves the last good height', async () => {
   const saved = new Map();
   const app = fixture(saved);
   const requested = [];
   app.fetchWithSoftTimeout = async url => {
     requested.push(url);
-    return heightResponse(968000);
+    return networkResponse(968000);
   };
   await app.fetchHalvingCountdown();
-  assert.deepEqual(requested, ['https://mempool.space/api/blocks/tip/height']);
+  assert.deepEqual(requested, ['/api/bitcoin/network']);
   assert.equal(app.halvingCurrentHeight, 968000);
   assert.equal(app.halvingDaysRemaining, 570);
   assert.match(app.halvingEtaText, /^\d{4}-\d{2}-\d{2}$/);
@@ -49,11 +52,9 @@ test('halving height uses mempool primary and saves the last good height', async
   assert.equal(JSON.parse(saved.get(app.halvingHeightStorageKey)).height, 968000);
 });
 
-test('halving height uses Blockstream fallback without a red source error', async () => {
+test('halving height shows the server fallback without a red source error', async () => {
   const app = fixture();
-  app.fetchWithSoftTimeout = async url => url.includes('mempool.space')
-    ? { ok: false, status: 503 }
-    : heightResponse(968001);
+  app.fetchWithSoftTimeout = async () => networkResponse(968001, 'fallback');
   await app.fetchHalvingCountdown();
   assert.equal(app.halvingCurrentHeight, 968001);
   assert.equal(app.dataSources.mempool.status, '备用');
@@ -63,10 +64,9 @@ test('halving height uses Blockstream fallback without a red source error', asyn
   assert.equal(options.computed.sourceHealthText.call(app), '备用数据源运行中');
 });
 
-test('halving height preserves cached value as visibly old data when both sources fail', async () => {
-  const saved = new Map([['crypto_ai_halving_height_v1', JSON.stringify({ height: 968002, updatedAt: Date.now() - 3600000 })]]);
-  const app = fixture(saved);
-  app.fetchWithSoftTimeout = async url => ({ ok: false, status: url.includes('mempool.space') ? 503 : 429 });
+test('halving height displays server stale data without losing countdown values', async () => {
+  const app = fixture();
+  app.fetchWithSoftTimeout = async () => networkResponse(968002, 'stale', Date.now() - 3600000);
   await app.fetchHalvingCountdown();
   assert.equal(app.halvingCurrentHeight, 968002);
   assert.equal(app.dataSources.mempool.status, '旧数据');
@@ -85,7 +85,7 @@ test('halving height displays a saved value while live requests are pending', as
   const pending = app.fetchHalvingCountdown();
   assert.equal(app.halvingCurrentHeight, 968003);
   assert.match(app.halvingDataStatus, /旧数据 · 正在刷新/);
-  resolveRequest(heightResponse(968004));
+  resolveRequest(networkResponse(968004));
   await pending;
   assert.equal(app.halvingCurrentHeight, 968004);
   assert.equal(app.dataSources.mempool.status, '轮询');
@@ -93,7 +93,7 @@ test('halving height displays a saved value while live requests are pending', as
 
 test('halving height shows unavailable only without any valid provider or cached height', async () => {
   const app = fixture();
-  app.fetchWithSoftTimeout = async () => ({ ok: true, text: async () => 'not-a-height' });
+  app.fetchWithSoftTimeout = async () => networkResponse(null, 'unavailable');
   await app.fetchHalvingCountdown();
   assert.equal(app.halvingCurrentHeight, null);
   assert.equal(app.halvingDaysRemaining, null);
@@ -101,4 +101,14 @@ test('halving height shows unavailable only without any valid provider or cached
   assert.equal(app.sourceBadge(app.dataSources.mempool), 'bad');
   app.dataSourceList = [{ key: 'mempool', label: '异常', badge: 'bad', relevant: true, countsForHealth: true }];
   assert.equal(options.computed.sourceHealthText.call(app), '1 个数据源异常');
+});
+
+test('halving height keeps a browser saved value if the server endpoint is unavailable', async () => {
+  const saved = new Map([['crypto_ai_halving_height_v1', JSON.stringify({ height: 968005, updatedAt: Date.now() - 60000 })]]);
+  const app = fixture(saved);
+  app.fetchWithSoftTimeout = async () => ({ ok: false, status: 503 });
+  await app.fetchHalvingCountdown();
+  assert.equal(app.halvingCurrentHeight, 968005);
+  assert.equal(app.dataSources.mempool.status, '旧数据');
+  assert.match(app.halvingEtaText, /^\d{4}-\d{2}-\d{2}$/);
 });
