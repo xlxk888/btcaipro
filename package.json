@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env src/server.js",
     "worker": "node --env-file-if-exists=.env src/worker-runner.js",
+    "discovery:health": "node --env-file-if-exists=.env src/discovery/healthcheck.js",
     "test": "node --test",
     "check": "node --check src/server.js && node --check src/worker-runner.js"
   },

@@ -2,6 +2,7 @@
   "functions": {
     "api/bitcoin/network.js": { "maxDuration": 15 },
     "api/assets/search.js": { "maxDuration": 10 },
+    "api/assets/discovery-health.js": { "maxDuration": 10 },
     "api/assets/market.js": { "maxDuration": 15 },
     "api/monero/network.js": { "maxDuration": 15 }
   },

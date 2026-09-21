@@ -13,7 +13,7 @@ server.listen(runtime.config.port, runtime.config.host, async () => {
 const shutdown = async signal => {
   runtime.logger.info('server_stopping', { signal });
   await runtime.worker.stop();
-  runtime.discovery.stop();
+  await runtime.discovery.stop();
   server.close(async () => { await runtime.discovery.repository.close(); await runtime.store.close(); process.exit(0); });
 };
 process.once('SIGINT', () => void shutdown('SIGINT'));

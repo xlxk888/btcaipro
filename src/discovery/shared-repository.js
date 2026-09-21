@@ -6,17 +6,19 @@ import { DiscoveryRepository } from './repository.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'store', 'migrations');
 const poolKey = pool => `${pool.chain}:${pool.chain === 'solana' ? pool.poolAddress : pool.poolAddress.toLowerCase()}`;
+export const DISCOVERY_WORKER_STATE_KEY = '__discovery_worker__';
 
 export class SharedDiscoveryRepository extends DiscoveryRepository {
   constructor({ db, pool } = {}) {
     super(); this.db = db; this.pool = pool;
     this.savedAssets = new Map(); this.savedPools = new Map(); this.savedCursors = new Map();
   }
-  static async create({ databaseUrl = '', databasePath = path.resolve('data/crypto-ai.sqlite'), PoolClass } = {}) {
+  static async create({ databaseUrl = '', databasePath = path.resolve('data/crypto-ai.sqlite'), PoolClass, migrate = true } = {}) {
     if (databaseUrl) {
       const Pool = PoolClass || (await import('pg')).Pool;
       const pool = new Pool({ connectionString: databaseUrl, max: 5, connectionTimeoutMillis: 5000 });
-      await pool.query(fs.readFileSync(path.join(root, 'postgres', '002_discovery.sql'), 'utf8'));
+      try { if (migrate) await pool.query(fs.readFileSync(path.join(root, 'postgres', '002_discovery.sql'), 'utf8')); }
+      catch (error) { await pool.end(); throw error; }
       return new SharedDiscoveryRepository({ pool });
     }
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
@@ -27,6 +29,23 @@ export class SharedDiscoveryRepository extends DiscoveryRepository {
   }
   async rows(sql, params = []) {
     return this.pool ? (await this.pool.query(sql, params)).rows : this.db.prepare(sql).all(...params);
+  }
+  async health({ now = Date.now(), heartbeatMs = 180_000 } = {}) {
+    const [assetRows, poolRows, stateRows, checkpointRows] = await Promise.all([
+      this.rows('SELECT COUNT(*) AS count FROM discovered_assets'),
+      this.rows('SELECT COUNT(*) AS count FROM discovered_pools'),
+      this.rows(this.pool ? 'SELECT checkpoint FROM discovery_state WHERE state_key=$1' : 'SELECT checkpoint FROM discovery_state WHERE state_key=?', [DISCOVERY_WORKER_STATE_KEY]),
+      this.rows(`SELECT state_key, checkpoint, updated_at FROM discovery_state WHERE state_key <> '${DISCOVERY_WORKER_STATE_KEY}' AND state_key NOT LIKE '%:pending' ORDER BY updated_at DESC LIMIT 1`)
+    ]);
+    const raw = stateRows[0]?.checkpoint;
+    const state = raw ? typeof raw === 'string' ? JSON.parse(raw) : raw : {};
+    const last = checkpointRows[0];
+    const checkpoint = last ? { key: last.state_key, value: typeof last.checkpoint === 'string' ? JSON.parse(last.checkpoint) : last.checkpoint, updatedAt: Number(last.updated_at) } : null;
+    const workerRunning = state.running === true && Number.isFinite(state.heartbeatAt) && now >= state.heartbeatAt && now - state.heartbeatAt < heartbeatMs;
+    return { database: 'connected', workerRunning, lastCheckpoint: checkpoint,
+      lastSuccessfulScan: state.lastSuccessfulScan || null, indexedAssetCount: Number(assetRows[0]?.count || 0),
+      indexedPoolCount: Number(poolRows[0]?.count || 0), lastError: state.lastError || null,
+      status: workerRunning ? state.lastError ? 'degraded' : 'ok' : 'degraded' };
   }
   async load() {
     this.assets = new Map((await this.rows('SELECT asset_id, payload FROM discovered_assets')).map(row => [row.asset_id, typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload]));

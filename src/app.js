@@ -23,6 +23,10 @@ export function createApp({ store, cache, worker, discovery, nativeMarket, moner
       return send(response, result.status === 'invalid-query' || result.status === 'invalid-chain' ? 400 : 200, result,
         { ...cors, 'cache-control': 'public, max-age=0, s-maxage=60' });
     }
+    if (url.pathname === '/api/assets/discovery-health') {
+      try { return send(response, 200, await discovery.repository.health(), { ...cors, 'cache-control': 'no-store' }); }
+      catch (_) { return send(response, 200, { database: 'disconnected', workerRunning: false, status: 'degraded' }, { ...cors, 'cache-control': 'no-store' }); }
+    }
     if (url.pathname === '/api/assets/market') {
       const result = await nativeMarket.read(url.searchParams.get('assetId'));
       return send(response, result.status === 'unsupported' ? 400 : result.status === 'unavailable' ? 503 : 200, result,

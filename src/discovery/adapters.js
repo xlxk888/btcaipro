@@ -6,26 +6,35 @@ const MINT = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const wordAddress = hex => `0x${hex.slice(-40).toLowerCase()}`;
 
 export class ChainDiscoveryAdapter {
-  constructor({ chain, repository, fetchImpl = fetch, timeoutMs = 6_000 }) {
+  constructor({ chain, repository, fetchImpl = fetch, timeoutMs = 6_000, rpcUrls }) {
     this.chain = chain;
     this.repository = repository;
     this.fetchImpl = fetchImpl;
     this.timeoutMs = timeoutMs;
+    this.rpcUrls = rpcUrls?.length ? rpcUrls : [DISCOVERY_CHAINS[chain].rpc].filter(Boolean);
+    this.rpcIndex = 0;
   }
 
   async rpc(method, params = []) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
-    try {
-      const response = await this.fetchImpl(DISCOVERY_CHAINS[this.chain].rpc, {
-        method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), signal: controller.signal
-      });
-      if (!response.ok) throw new Error(`${this.chain} ${method}: HTTP ${response.status}`);
-      const payload = await response.json();
-      if (payload.error) throw new Error(`${this.chain} ${method}: ${payload.error.message}`);
-      return payload.result;
-    } finally { clearTimeout(timer); }
+    let lastError;
+    for (let attempt = 0; attempt < this.rpcUrls.length; attempt++) {
+      const index = (this.rpcIndex + attempt) % this.rpcUrls.length;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+      try {
+        const response = await this.fetchImpl(this.rpcUrls[index], {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`${this.chain} ${method}: HTTP ${response.status}`);
+        const payload = await response.json();
+        if (payload.error) throw new Error(`${this.chain} ${method}: ${payload.error.message}`);
+        this.rpcIndex = index;
+        return payload.result;
+      } catch (error) { lastError = error; }
+      finally { clearTimeout(timer); }
+    }
+    throw lastError || new Error(`${this.chain} RPC endpoint unavailable`);
   }
 }
 

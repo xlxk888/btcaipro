@@ -133,6 +133,14 @@ The DEX registry includes verified Uniswap V2 factories for Ethereum, Arbitrum, 
 
 The Vercel search function reads PostgreSQL directly, then uses a cached DEX market provider for candidates absent from the verified index. An external worker and shared PostgreSQL configuration must be provisioned before production discovery results become available. No market cap is inferred from FDV in discovery results.
 
+### Production connection and checks
+
+Use the existing Compose `worker` service on a persistent server and the same **reachable PostgreSQL database** in both its `DATABASE_URL` and Vercel Production's `DATABASE_URL`. The former internal Compose hostname `postgres` is not reachable from Vercel. `compose.production.example.yml` therefore requires an externally reachable PostgreSQL URL, preferably with TLS and network access restricted to the worker and Vercel. The optional `local-db` profile is only for local testing. The worker runs `npm run worker` with `DISCOVERY_ENABLED=true`; the backend has discovery disabled to avoid a second scanner. The worker performs the idempotent `002_discovery.sql` migration. The Vercel API only reads the tables, so it may use a separate read-only database role pointing to the same database. Do not commit real connection strings.
+
+Copy `.env.production.example` to a private `.env`, set `DATABASE_URL`, then run `docker compose --env-file .env -f compose.production.example.yml up -d --build backend worker redis` on the server. Configure Vercel Production `DATABASE_URL` with a reachable connection to that same database before deploying the matching code. Optional `DISCOVERY_RPC_URLS_<CHAIN>` variables accept comma-separated RPC endpoints and are tried in order; the worker retries failed chains with bounded backoff and resumes from persisted checkpoints. `MONERO_RPC_URLS` is optional and independent of XMR market quotes. No browser or Vercel request scans a chain.
+
+After deployment, check `/api/assets/discovery-health` for `database=connected`, `workerRunning=true`, last checkpoint, last successful scan, indexed asset/pool counts, and last error. A missing worker or one failed RPC is reported as `degraded` without breaking canonical search. Search PONS through `/api/assets/search?q=PONS&chain=robinhood`; an on-chain verified result must include chain ID 4663, contract and pool. The database must be reachable before this production check can pass.
+
 Monero is a native asset with canonical ID `monero`. Its server route `/api/assets/market?assetId=monero` reads CoinGecko, CoinPaprika, then CoinLore by fixed IDs, with shared server cache and last-good fallback. `/api/monero/network` reads only explicitly configured `MONERO_RPC_URLS` (comma-separated monerod endpoints); if none are configured it reports unavailable independently of XMR market data.
 
 ## Storage, cache and operations
