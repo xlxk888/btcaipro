@@ -257,3 +257,51 @@ test('market cap and logo lookup use five canonical IDs and never substitute FDV
   }
   assert.equal(app.watchedAssets[4].marketCap, null);
 });
+
+test('market cap fallback uses fixed canonical IDs without changing price or volume', async () => {
+  const app = fixture();
+  const cases = [
+    ['BTC', 'btc-bitcoin', 1_700_000_000_000],
+    ['ETH', 'eth-ethereum', 330_000_000_000],
+    ['UNI', 'uni-uniswap', 5_500_000_000],
+    ['HYPE', 'hype-hyperliquid', 21_000_000_000],
+    ['ZEC', 'zec-zcash', 25_000_000_000]
+  ];
+  app.watchedAssets = cases.map(([symbol]) => app.createKnownAsset(registry.search(symbol)));
+  app.watchedAssets.forEach((asset, index) => { asset.price = index + 1; asset.volume = index + 10; });
+  const requested = [];
+  app.fetchWithSoftTimeout = async url => {
+    requested.push(url);
+    if (url.includes('coingecko.com')) return { ok: false, status: 429 };
+    const [, id, marketCap] = cases.find(([, id]) => url.includes(`/tickers/${id}?`));
+    return { ok: true, json: async () => ({ id, last_updated: new Date().toISOString(), quotes: { USD: { market_cap: marketCap, fully_diluted_valuation: marketCap * 2 } } }) };
+  };
+  app.markSource = () => {};
+  app.evaluatePriceAlerts = () => {};
+  app.queueAssetUpdate = function queueAssetUpdate(id, patch) {
+    this.pendingUpdates[id] = patch;
+    this.flushQueuedUpdates();
+  };
+  await options.methods.refreshMarketCaps.call(app);
+  assert.equal(requested.length, 6);
+  cases.forEach(([symbol, id, cap], index) => {
+    assert.ok(requested.some(url => url.includes(`/tickers/${id}?`)));
+    const asset = app.watchedAssets[index];
+    assert.equal(asset.symbol, symbol);
+    assert.equal(asset.marketCap, cap);
+    assert.equal(asset.price, index + 1);
+    assert.equal(asset.volume, index + 10);
+  });
+});
+
+test('market cap fallback rejects mismatched provider ID and FDV-only records', async () => {
+  const app = fixture();
+  const uni = app.createKnownAsset(registry.search('UNI'));
+  app.watchedAssets = [uni];
+  app.fetchWithSoftTimeout = async url => url.includes('coingecko.com')
+    ? { ok: false, status: 429 }
+    : { ok: true, json: async () => ({ id: 'another-uniswap', last_updated: new Date().toISOString(), quotes: { USD: { market_cap: null, fully_diluted_valuation: 99_000_000_000 } } }) };
+  app.markSource = () => {};
+  await options.methods.refreshMarketCaps.call(app);
+  assert.equal(uni.marketCap, null);
+});

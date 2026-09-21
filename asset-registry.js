@@ -15,6 +15,7 @@
     { id: 'bitcoin', name: 'Bitcoin', type: 'bitcoin', chainId: null, nativeAsset: 'BTC', rpc: [], explorer: 'https://mempool.space', addressType: 'native-only', enabled: true, capabilities: { metadata: false, marketData: true, ordinals: false, runes: false } }
   ];
   const byChain = Object.fromEntries(chains.map(chain => [chain.id, chain]));
+  const marketCapFallbackIds = Object.freeze({ bitcoin: 'btc-bitcoin', ethereum: 'eth-ethereum', uniswap: 'uni-uniswap', hyperliquid: 'hype-hyperliquid', zcash: 'zec-zcash' });
 
   // A symbol is a search alias only. Market data is bound to this canonical ID.
   const canonical = [
@@ -60,6 +61,7 @@
     ['render-token', 'RENDER', 'Render', 'RENDERUSDT', 'render-token', 'canonical:render']
   ].map(([canonicalAssetId, symbol, name, pair, marketDataId, id]) => ({
     canonicalAssetId, symbol, name, pair, marketDataId, id,
+    marketCapFallbackId: marketCapFallbackIds[canonicalAssetId] || '',
     assetType: ['bitcoin:BTC', 'hyperliquid:HYPE'].includes(id) ? 'native' : 'canonical',
     network: id === 'bitcoin:BTC' ? 'Bitcoin' : id === 'hyperliquid:HYPE' ? 'Hyperliquid' : id === 'evm:1:native' ? 'Ethereum' : '全局资产',
     logoUrl: id === 'hyperliquid:HYPE' ? 'https://coin-images.coingecko.com/coins/images/50882/large/hyperliquid.jpg?1729431300' : ''

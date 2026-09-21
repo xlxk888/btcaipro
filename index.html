@@ -497,15 +497,14 @@
     }
     .bottom-notice-body { margin-top: 10px; display:grid; gap:8px; }
     .bottom-notice-desc { color:#8fa0ba; font-size:.74rem; }
-    .source-group-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
-    .source-group { min-width:0; padding:12px; border:1px solid rgba(96,165,250,.18); border-radius:10px; background:rgba(7,14,26,.45); }
-    .source-group h3 { margin:0 0 9px; color:#93c5fd; font-size:.73rem; font-weight:900; }
-    .source-items { display:flex; flex-wrap:wrap; gap:5px 12px; }
-    .source-item { color:#cbd5e1; font-size:.73rem; line-height:1.5; text-decoration:none; }
-    a.source-item:hover { color:#fff; text-decoration:underline; }
+    .source-group-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:18px 22px; padding:5px 0 2px; }
+    .source-group { min-width:0; }
+    .source-group h3 { margin:0 0 8px; color:#94a3b8; font-size:.7rem; font-weight:800; }
+    .source-items { display:flex; flex-wrap:wrap; gap:6px; }
+    .source-item { display:inline-flex; align-items:center; min-height:24px; max-width:100%; padding:3px 7px; border:1px solid rgba(96,165,250,.18); border-radius:6px; background:rgba(15,23,42,.42); color:#cbd5e1; font-size:.69rem; line-height:1.3; text-decoration:none; overflow-wrap:anywhere; }
+    a.source-item:hover { color:#fff; border-color:rgba(96,165,250,.45); background:rgba(30,41,59,.7); }
     @media(max-width:1100px) { .source-group-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
-    @media(max-width:650px) { .source-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .source-group:last-child { grid-column:1 / -1; } }
-    @media(max-width:390px) { .source-group-grid { grid-template-columns:1fr; } .source-group:last-child { grid-column:auto; } }
+    @media(max-width:650px) { .source-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:17px 12px; } .source-group:last-child { grid-column:1 / -1; } .sources-notice .bottom-notice-head { flex-wrap:wrap; } .sources-notice .bottom-notice-title { flex-basis:100%; } }
     .bottom-notice-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     .bottom-notice-item { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border:1px solid rgba(147,197,253,.16); border-radius:10px; background:rgba(7,14,26,.42); }
     .bottom-notice-copy { min-width:0; color:#cbd5e1; font-size:.78rem; line-height:1.45; overflow-wrap:anywhere; }
@@ -2565,7 +2564,7 @@
     </div>
   </div>
 
-  <div class="bottom-notice">
+  <div class="bottom-notice sources-notice">
     <div class="bottom-notice-head">
       <strong class="bottom-notice-title">数据与信息来源</strong>
       <a class="bottom-notice-link" href="/sources.html">查看完整来源与计算说明</a>
@@ -2603,6 +2602,7 @@ new Vue({
         { name: 'Binance', url: 'https://www.binance.com/', description: '加密资产现货与衍生品行情' },
         { name: 'OKX', url: 'https://www.okx.com/', description: '加密资产备用行情' },
         { name: 'CoinGecko', url: 'https://www.coingecko.com/', description: '资产图片、流通市值与备用行情' },
+        { name: 'CoinPaprika', url: 'https://coinpaprika.com/', description: '已核对资产 ID 的流通市值备用来源' },
         { name: 'DEX Screener', url: 'https://dexscreener.com/', description: '链上交易池行情' },
         { name: '腾讯行情', url: 'https://gu.qq.com/', description: '美股与传统市场公开报价' }
       ] },
@@ -4866,6 +4866,7 @@ new Vue({
       }, {});
       const ids = [...new Set(Object.values(idByAsset))];
       if (!ids.length) return;
+      const missingCapIds = new Set(Object.keys(idByAsset));
 
       try {
         const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids.map(encodeURIComponent).join(',')}&price_change_percentage=24h`;
@@ -4895,6 +4896,7 @@ new Vue({
             } else if (Number(item.market_cap) > 0) {
               patch.marketCap = Number(item.market_cap);
             }
+            if (patch.marketCap > 0) missingCapIds.delete(assetId);
             if (item.image) patch.logoUrl = item.image;
             if (Object.keys(patch).length) this.queueAssetUpdate(assetId, patch);
           }
@@ -4902,6 +4904,23 @@ new Vue({
       } catch (e) {
         this.markSource('coingecko', '异常', e);
       }
+      const fallbackAssets = this.watchedAssets.filter(asset => missingCapIds.has(asset.id)
+        && CryptoAIAssets.byCanonicalId[asset.canonicalAssetId]?.marketCapFallbackId);
+      await Promise.allSettled(fallbackAssets.map(asset => this.refreshMarketCapFallback(asset)));
+    },
+
+    async refreshMarketCapFallback(asset) {
+      const known = CryptoAIAssets.byCanonicalId[asset.canonicalAssetId];
+      const providerId = known?.marketCapFallbackId;
+      if (!providerId || asset.marketDataId !== known.marketDataId) return;
+      const res = await this.fetchWithSoftTimeout(`https://api.coinpaprika.com/v1/tickers/${encodeURIComponent(providerId)}?quotes=USD`, 8000);
+      if (!res.ok) return;
+      const item = await res.json();
+      const marketCap = Number(item.quotes?.USD?.market_cap);
+      const updatedAt = Date.parse(item.last_updated);
+      if (item.id !== providerId || !Number.isFinite(marketCap) || marketCap <= 0
+        || !Number.isFinite(updatedAt) || Math.abs(Date.now() - updatedAt) > 2 * 60 * 60 * 1000) return;
+      this.queueAssetUpdate(asset.id, { marketCap });
     },
 
     formatTimestamp(value) {
