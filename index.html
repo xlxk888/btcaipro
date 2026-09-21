@@ -35,7 +35,7 @@
     body { padding: clamp(14px, 2.5vw, 36px); overflow-x: hidden; -ms-overflow-style: none; }
     html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
-    #app { width: 100%; max-width: 1320px; margin-left: auto; margin-right: auto; overflow-x: clip; }
+    #app { width: calc(100% - 48px); max-width: 1240px; margin-inline: auto; overflow-x: clip; }
     .app-topbar {
       min-height: 56px;
       margin: 0 0 4px;
@@ -857,6 +857,7 @@
     .watch-price.up { color: #22c55e; }
     .watch-price.down { color: #ef4444; }
     .metric-cell { color: #cbd5e1; font-size: .76rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .market-cap-source { display: block; color: #8fa0ba; font-size: .62rem; font-weight: 500; line-height: 1.3; }
     .metric-label { display: none; color: #64748b; font-weight: 700; margin-right: 3px; }
     .market-cap-cell { color: #cbd5e1; font-weight: 800; }
     .source-pill {
@@ -1087,7 +1088,7 @@
         padding-right: 10px;
         padding-bottom: calc(96px + env(safe-area-inset-bottom));
       }
-      #app { overflow-x: hidden; }
+      #app { width: 100%; overflow-x: hidden; }
       .app-topbar {
         position: sticky;
         top: 0;
@@ -2178,7 +2179,7 @@
             <div class="watch-price" :class="asset.trend || (asset.changePct >= 0 ? 'up' : 'down')">{{ formatPrice(asset.price) }}</div>
             <div :class="asset.changePct >= 0 ? 'up' : 'down'">{{ formatPercent(asset.changePct) }}</div>
             <div class="metric-cell"><span class="metric-label">成交</span>{{ formatVolume(asset.volume24h) }}</div>
-            <div class="metric-cell market-cap-cell"><span class="metric-label">流通市值</span>{{ formatMarketCap(asset.marketCap) }}</div>
+            <div class="metric-cell market-cap-cell" :title="asset.marketCapDetail"><span class="metric-label">流通市值</span>{{ formatMarketCap(asset.marketCap) }}<small v-if="asset.marketCapSource" class="market-cap-source">{{ asset.marketCapSource }}</small></div>
             <div class="metric-cell time-cell"><span class="metric-label">时间</span>{{ assetTimeText(asset) }}<span v-if="asset.stale" class="data-stale-badge">旧数据</span></div>
             <div>
               <span class="source-pill" :class="asset.sourceType">{{ asset.source }}</span>
@@ -2604,6 +2605,7 @@ new Vue({
         { name: 'OKX', url: 'https://www.okx.com/', description: '加密资产备用行情' },
         { name: 'CoinGecko', url: 'https://www.coingecko.com/', description: '资产图片、流通市值与备用行情' },
         { name: 'CoinPaprika', url: 'https://coinpaprika.com/', description: '已核对资产 ID 的流通市值备用来源' },
+        { name: 'CoinLore', url: 'https://www.coinlore.com/', description: '已核对资产 ID 与流通量的市值备用来源' },
         { name: 'DEX Screener', url: 'https://dexscreener.com/', description: '链上交易池行情' },
         { name: '腾讯行情', url: 'https://gu.qq.com/', description: '美股与传统市场公开报价' }
       ] },
@@ -2640,6 +2642,8 @@ new Vue({
     fallbackPolling: false,
     marketCapTimer: null,
     marketCapRefreshTimer: null,
+    marketCapStorageKey: 'crypto_ai_market_caps_v1',
+    marketCapFallbackBlockedUntil: 0,
     holdersTimer: null,
     holdersRefreshing: false,
     holderDisclosureLastAttempt: 0,
@@ -4333,6 +4337,9 @@ new Vue({
         volume24h: null,
         circulatingSupply: null,
         marketCap: null,
+        marketCapSource: '',
+        marketCapDetail: '',
+        marketCapAt: 0,
         dexTxns: {},
         dexLiquidityUsd: null,
         dexPairAddress: '',
@@ -4378,7 +4385,32 @@ new Vue({
       asset.marketDataId = known.marketDataId;
       asset.displayName = known.name;
       asset.logoUrl = known.logoUrl || asset.logoUrl;
+      this.restoreMarketCapCache(asset);
       return asset;
+    },
+
+    restoreMarketCapCache(asset) {
+      try {
+        const cache = JSON.parse(localStorage.getItem(this.marketCapStorageKey) || '{}');
+        const entry = cache[asset.canonicalAssetId];
+        if (entry?.marketDataId !== asset.marketDataId || !['CoinGecko', 'CoinPaprika', 'CoinLore'].includes(entry?.source)
+          || !(Number(entry.marketCap) > 0) || !Number.isFinite(Number(entry.updatedAt)) || !(Number(entry.updatedAt) > 0)
+          || Date.now() - Number(entry.updatedAt) > 30 * 60 * 1000
+          || Number(entry.updatedAt) > Date.now()) return;
+        asset.marketCap = Number(entry.marketCap);
+        asset.marketCapAt = Number(entry.updatedAt);
+        asset.marketCapSource = `${entry.source} · 缓存`;
+        asset.marketCapDetail = `已核对 ${asset.marketDataId} 的流通市值；等待实时更新`;
+      } catch (e) {}
+    },
+
+    saveMarketCapCache(asset, marketCap, source, updatedAt) {
+      if (!(Number(marketCap) > 0) || !asset.canonicalAssetId || !asset.marketDataId) return;
+      try {
+        const cache = JSON.parse(localStorage.getItem(this.marketCapStorageKey) || '{}');
+        cache[asset.canonicalAssetId] = { marketDataId: asset.marketDataId, marketCap, source, updatedAt };
+        localStorage.setItem(this.marketCapStorageKey, JSON.stringify(cache));
+      } catch (e) {}
     },
 
     createDexAsset(address, chainId, metadata = {}) {
@@ -4684,10 +4716,10 @@ new Vue({
 
     async initWatchlistMarket() {
       this.loadWatchedAssets();
+      this.startMarketCapPolling();
       await this.loadBinanceSymbols();
       this.routeWatchedAssets();
       this.startFallbackPolling();
-      this.startMarketCapPolling();
     },
 
     async loadBinanceSymbols() {
@@ -4852,7 +4884,7 @@ new Vue({
     startMarketCapPolling() {
       if (this.marketCapTimer) clearInterval(this.marketCapTimer);
       this.refreshMarketCaps();
-      this.marketCapTimer = setInterval(() => this.refreshMarketCaps(), 60000);
+      this.marketCapTimer = setInterval(() => this.refreshMarketCaps(), 600000);
     },
 
     scheduleMarketCapRefresh() {
@@ -4873,11 +4905,12 @@ new Vue({
       const ids = [...new Set(Object.values(idByAsset))];
       if (!ids.length) return;
       const missingCapIds = new Set(Object.keys(idByAsset));
+      let primaryFailure = '未返回有效市值';
 
       try {
         const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids.map(encodeURIComponent).join(',')}&price_change_percentage=24h`;
         const res = await this.fetchWithSoftTimeout(url, 8000);
-        if (!res.ok) throw new Error('market cap failed');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const list = await res.json();
         if (!Array.isArray(list) || !list.length) {
           throw new Error('market cap no valid data');
@@ -4902,31 +4935,114 @@ new Vue({
             } else if (Number(item.market_cap) > 0) {
               patch.marketCap = Number(item.market_cap);
             }
-            if (patch.marketCap > 0) missingCapIds.delete(assetId);
+            if (patch.marketCap > 0) {
+              const updatedAt = Date.now();
+              missingCapIds.delete(assetId);
+              patch.marketCapAt = updatedAt;
+              patch.marketCapSource = 'CoinGecko';
+              patch.marketCapDetail = `canonical ID: ${idByAsset[assetId]}；${Number.isFinite(circulatingSupply) && circulatingSupply > 0 ? '流通量 × 行情价' : '供应商流通市值'}`;
+              this.saveMarketCapCache(asset, patch.marketCap, 'CoinGecko', updatedAt);
+            }
             if (item.image) patch.logoUrl = item.image;
             if (Object.keys(patch).length) this.queueAssetUpdate(assetId, patch);
           }
         });
       } catch (e) {
+        primaryFailure = e?.message || '请求失败';
         this.markSource('coingecko', '异常', e);
       }
       const fallbackAssets = this.watchedAssets.filter(asset => missingCapIds.has(asset.id)
         && CryptoAIAssets.byCanonicalId[asset.canonicalAssetId]?.marketCapFallbackId);
-      await Promise.allSettled(fallbackAssets.map(asset => this.refreshMarketCapFallback(asset)));
+      const liveFallbackAssets = fallbackAssets.filter(asset => {
+        if (!asset.marketCapAt || Date.now() - asset.marketCapAt >= 30 * 60 * 1000 || !(asset.marketCap > 0)) return true;
+        asset.marketCapSource = `${asset.marketCapSource.replace(/ · 缓存$/, '')} · 缓存`;
+        asset.marketCapDetail = `CoinGecko: ${primaryFailure}；使用最近 30 分钟已核对的流通市值`;
+        return false;
+      });
+      const results = await Promise.allSettled(liveFallbackAssets.map(asset => this.refreshMarketCapFallback(asset)));
+      const unresolved = liveFallbackAssets.filter((asset, index) => results[index].status !== 'fulfilled' || results[index].value !== 'ok');
+      const coinLoreResults = await this.refreshMarketCapCoinLore(unresolved);
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value === 'ok') return;
+        const asset = liveFallbackAssets[index];
+        if (coinLoreResults[asset.id] === 'ok') return;
+        if (asset.marketCapAt && Date.now() - asset.marketCapAt < 30 * 60 * 1000) {
+          asset.marketCapSource = `${asset.marketCapSource.replace(/ · 缓存$/, '')} · 缓存`;
+        } else {
+          asset.marketCap = null;
+          asset.circulatingSupply = null;
+          asset.marketCapSource = '市值源暂不可用';
+        }
+        asset.marketCapDetail = `CoinGecko: ${primaryFailure}；CoinPaprika: ${result.status === 'fulfilled' ? result.value : '请求失败'}；CoinLore: ${coinLoreResults[asset.id] || '无映射'}`;
+      });
+    },
+
+    async refreshMarketCapCoinLore(assets) {
+      const providerByCanonicalId = {
+        bitcoin: { id: '90', nameid: 'bitcoin' },
+        ethereum: { id: '80', nameid: 'ethereum' },
+        zcash: { id: '134', nameid: 'zcash' },
+        uniswap: { id: '47305', nameid: 'uniswap' },
+        hyperliquid: { id: '148109', nameid: 'hyperliquid' }
+      };
+      const eligible = assets.filter(asset => providerByCanonicalId[asset.canonicalAssetId]
+        && asset.marketDataId === CryptoAIAssets.byCanonicalId[asset.canonicalAssetId]?.marketDataId);
+      const results = Object.fromEntries(assets.map(asset => [asset.id, '无已核对资产 ID']));
+      if (!eligible.length) return results;
+      try {
+        const ids = [...new Set(eligible.map(asset => providerByCanonicalId[asset.canonicalAssetId].id))];
+        const url = `https://api.coinlore.net/api/ticker/?id=${ids.join(',')}`;
+        const res = await this.fetchWithSoftTimeout(url, 18000);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const list = await res.json();
+        if (!Array.isArray(list)) throw new Error('响应格式无效');
+        const byId = Object.fromEntries(list.map(item => [String(item.id), item]));
+        eligible.forEach(asset => {
+          const provider = providerByCanonicalId[asset.canonicalAssetId];
+          const item = byId[provider.id];
+          const marketCap = Number(item?.market_cap_usd);
+          const supply = Number(item?.csupply);
+          const price = Number(item?.price_usd);
+          if (!item || String(item.id) !== provider.id || item.nameid !== provider.nameid
+            || !(marketCap > 0) || !(supply > 0) || !(price > 0)
+            || Math.abs(marketCap - supply * price) / marketCap > 0.02) {
+            results[asset.id] = '资产 ID 或流通市值无效';
+            return;
+          }
+          const updatedAt = Date.now();
+          this.saveMarketCapCache(asset, marketCap, 'CoinLore', updatedAt);
+          this.queueAssetUpdate(asset.id, { marketCap, marketCapAt: updatedAt, marketCapSource: 'CoinLore · 备用', marketCapDetail: `canonical ID: ${asset.marketDataId}；备用 ID: ${provider.id}；流通量 × 美元价` });
+          results[asset.id] = 'ok';
+        });
+      } catch (e) {
+        eligible.forEach(asset => { results[asset.id] = e?.message || '请求失败'; });
+      }
+      return results;
     },
 
     async refreshMarketCapFallback(asset) {
       const known = CryptoAIAssets.byCanonicalId[asset.canonicalAssetId];
       const providerId = known?.marketCapFallbackId;
-      if (!providerId || asset.marketDataId !== known.marketDataId) return;
-      const res = await this.fetchWithSoftTimeout(`https://api.coinpaprika.com/v1/tickers/${encodeURIComponent(providerId)}?quotes=USD`, 8000);
-      if (!res.ok) return;
-      const item = await res.json();
-      const marketCap = Number(item.quotes?.USD?.market_cap);
-      const updatedAt = Date.parse(item.last_updated);
-      if (item.id !== providerId || !Number.isFinite(marketCap) || marketCap <= 0
-        || !Number.isFinite(updatedAt) || Math.abs(Date.now() - updatedAt) > 2 * 60 * 60 * 1000) return;
-      this.queueAssetUpdate(asset.id, { marketCap });
+      if (!providerId || asset.marketDataId !== known.marketDataId) return 'canonical ID 不匹配';
+      if (Date.now() < this.marketCapFallbackBlockedUntil) return '请求额度冷却中';
+      try {
+        const res = await this.fetchWithSoftTimeout(`https://api.coinpaprika.com/v1/tickers/${encodeURIComponent(providerId)}?quotes=USD`, 8000);
+        if (!res.ok) {
+          if (res.status === 402 || res.status === 429) this.marketCapFallbackBlockedUntil = Date.now() + 10 * 60 * 1000;
+          return `HTTP ${res.status}`;
+        }
+        const item = await res.json();
+        const marketCap = Number(item.quotes?.USD?.market_cap);
+        const providerUpdatedAt = Date.parse(item.last_updated);
+        if (item.id !== providerId || !Number.isFinite(marketCap) || marketCap <= 0
+          || !Number.isFinite(providerUpdatedAt) || Math.abs(Date.now() - providerUpdatedAt) > 2 * 60 * 60 * 1000) return '资产 ID 或流通市值无效';
+        const updatedAt = Date.now();
+        this.saveMarketCapCache(asset, marketCap, 'CoinPaprika', updatedAt);
+        this.queueAssetUpdate(asset.id, { marketCap, marketCapAt: updatedAt, marketCapSource: 'CoinPaprika · 备用', marketCapDetail: `canonical ID: ${known.marketDataId}；备用 ID: ${providerId}；供应商流通市值` });
+        return 'ok';
+      } catch (e) {
+        return e?.message || '请求失败';
+      }
     },
 
     formatTimestamp(value) {
@@ -5251,12 +5367,15 @@ new Vue({
       if (!item || !item.usd) throw new Error('coingecko no data');
       const price = Number(item.usd);
       if (!Number.isFinite(price) || price <= 0) throw new Error('coingecko invalid price');
+      const fallbackMarketCap = Number(item.usd_market_cap);
+      const marketCapAt = Date.now();
+      if (fallbackMarketCap > 0) this.saveMarketCapCache(asset, fallbackMarketCap, 'CoinGecko', marketCapAt);
 
       this.queueAssetUpdate(asset.id, {
         price,
         changePct: parseFloat(item.usd_24h_change),
         volume24h: parseFloat(item.usd_24h_vol),
-        ...(Number(item.usd_market_cap) > 0 ? { marketCap: Number(item.usd_market_cap) } : {}),
+        ...(fallbackMarketCap > 0 ? { marketCap: fallbackMarketCap, marketCapAt, marketCapSource: 'CoinGecko', marketCapDetail: `canonical ID: ${id}；供应商流通市值` } : {}),
         updateTime: this.formatTimestamp(item.last_updated_at ? item.last_updated_at * 1000 : Date.now()),
         dataTime: item.last_updated_at ? this.formatTimestamp(item.last_updated_at * 1000) : '',
         receivedAt: this.formatTimestamp(Date.now()),
