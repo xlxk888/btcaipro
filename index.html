@@ -32,7 +32,7 @@
       font-family: -apple-system, "PingFang SC", sans-serif;
       scrollbar-width: none;
     }
-    body { padding: 14px; overflow-x: hidden; -ms-overflow-style: none; }
+    body { padding: clamp(14px, 2.5vw, 36px); overflow-x: hidden; -ms-overflow-style: none; }
     html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
     #app { width: 100%; max-width: 1440px; margin: 0 auto; overflow-x: clip; }
@@ -497,8 +497,15 @@
     }
     .bottom-notice-body { margin-top: 10px; display:grid; gap:8px; }
     .bottom-notice-desc { color:#8fa0ba; font-size:.74rem; }
-    .source-brand-list { display:flex; flex-wrap:wrap; gap:7px; }
-    .source-brand-chip { display:inline-flex; align-items:center; min-height:27px; padding:4px 9px; border:1px solid rgba(96,165,250,.28); border-radius:999px; background:rgba(15,23,42,.65); color:#cbd5e1; font-size:.7rem; font-weight:800; line-height:1.2; }
+    .source-group-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+    .source-group { min-width:0; padding:12px; border:1px solid rgba(96,165,250,.18); border-radius:10px; background:rgba(7,14,26,.45); }
+    .source-group h3 { margin:0 0 9px; color:#93c5fd; font-size:.73rem; font-weight:900; }
+    .source-items { display:flex; flex-wrap:wrap; gap:5px 12px; }
+    .source-item { color:#cbd5e1; font-size:.73rem; line-height:1.5; text-decoration:none; }
+    a.source-item:hover { color:#fff; text-decoration:underline; }
+    @media(max-width:1100px) { .source-group-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media(max-width:650px) { .source-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .source-group:last-child { grid-column:1 / -1; } }
+    @media(max-width:390px) { .source-group-grid { grid-template-columns:1fr; } .source-group:last-child { grid-column:auto; } }
     .bottom-notice-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     .bottom-notice-item { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border:1px solid rgba(147,197,253,.16); border-radius:10px; background:rgba(7,14,26,.42); }
     .bottom-notice-copy { min-width:0; color:#cbd5e1; font-size:.78rem; line-height:1.45; overflow-wrap:anywhere; }
@@ -783,6 +790,10 @@
       cursor: pointer;
     }
     .watch-error { color: #fca5a5; font-size: .78rem; margin-bottom: 6px; }
+    .asset-candidates { display:grid; gap:6px; margin:0 0 9px; }
+    .asset-candidate { width:100%; text-align:left; padding:8px 10px; border:1px solid rgba(96,165,250,.35); border-radius:8px; background:#101d31; color:#e2e8f0; cursor:pointer; }
+    .asset-candidate:hover { border-color:#60a5fa; background:#172b49; }
+    .asset-candidate small { display:block; margin-top:3px; color:#91a4c0; overflow-wrap:anywhere; }
     .watch-hint { color: #8fa0ba; font-size: .75rem; margin-bottom: 10px; }
     .watch-table {
       flex: 1;
@@ -2103,17 +2114,25 @@
         <input
           class="asset-input"
           v-model.trim="assetInput"
-          :placeholder="selectedChainId === 'bitcoin' ? '输入 BTC；Bitcoin 地址不作 Token 合约' : '输入该链已映射资产名称，或合约/Mint 地址'"
+          :placeholder="selectedChainId === 'auto' ? '输入已收录资产名称/简称，或选择链后输入地址' : '输入已收录资产名称/简称，或该链合约/Mint 地址'"
+          @input="assetCandidates = []"
           autocomplete="off"
         />
         <select class="chain-select" v-model="selectedChainId">
+          <option value="auto">自动识别</option>
           <option v-for="chain in chainOptions" :key="chain.id" :value="chain.id">{{ chain.name }}</option>
         </select>
         <button class="add-btn" type="submit">添加币种</button>
       </form>
       <div class="watch-error" v-if="watchError">{{ watchError }}</div>
+      <div class="asset-candidates" v-if="assetCandidates.length" aria-label="请选择资产">
+        <button type="button" class="asset-candidate" v-for="candidate in assetCandidates" :key="candidate.id || `${candidate.chainId}:${candidate.contractAddress || candidate.mintAddress}`" @click="selectAssetCandidate(candidate)">
+          {{ candidate.name }} ({{ candidate.symbol }})
+          <small>{{ candidate.network }}{{ candidate.contractAddress || candidate.mintAddress ? ` · ${candidate.contractAddress || candidate.mintAddress}` : '' }}</small>
+        </button>
+      </div>
       <div class="watch-hint">
-        名称搜索仅匹配所选链的明确地址映射；未映射 Token 须输入合约/Mint 地址。{{ selectedChainHint }} 手机端点击打开K线，长按拖动排序，左滑删除。
+        已收录资产可直接按名称或简称添加；未收录 Token 须选择链并输入合约/Mint 地址。{{ selectedChainHint }} 手机端点击打开K线，长按拖动排序，左滑删除。
       </div>
 
       <div class="watch-table">
@@ -2549,11 +2568,16 @@
   <div class="bottom-notice">
     <div class="bottom-notice-head">
       <strong class="bottom-notice-title">数据与信息来源</strong>
-      <a class="bottom-notice-link" href="/sources">查看完整来源与计算说明</a>
+      <a class="bottom-notice-link" href="/sources.html">查看完整来源与计算说明</a>
     </div>
     <div class="bottom-notice-body">
-      <div class="source-brand-list" aria-label="数据来源">
-        <span class="source-brand-chip" v-for="brand in sourceBrands" :key="brand">{{ brand }}</span>
+      <div class="source-group-grid" aria-label="数据来源">
+        <section class="source-group" v-for="group in sourceGroups" :key="group.name">
+          <h3>{{ group.name }}</h3>
+          <div class="source-items">
+            <a class="source-item" v-for="source in group.sources" :key="source.name" :href="source.url" :title="source.description" target="_blank" rel="noopener noreferrer">{{ source.name }}</a>
+          </div>
+        </section>
       </div>
       <div class="bottom-notice-desc">部分指标由 Crypto AI 基于公开数据本地计算或估算；估算不会伪装成官方实时数据。</div>
     </div>
@@ -2572,9 +2596,28 @@ new Vue({
     ethPrice: 0, ethBase: 0,
     cryptoStatus: '正在初始化 ...',
     assetInput: '',
-    selectedChainId: 'ethereum',
+    selectedChainId: 'auto',
     chainOptions: CryptoAIAssets.chains.filter(chain => chain.enabled),
-    sourceBrands: ['Binance', 'OKX', 'CoinGecko', 'DEX Screener', '各链公开 RPC', 'Alternative.me', 'mempool.space', 'Cboe', 'U.S. Treasury', '腾讯行情', '官方披露'],
+    sourceGroups: [
+      { name: '市场行情', sources: [
+        { name: 'Binance', url: 'https://www.binance.com/', description: '加密资产现货与衍生品行情' },
+        { name: 'OKX', url: 'https://www.okx.com/', description: '加密资产备用行情' },
+        { name: 'CoinGecko', url: 'https://www.coingecko.com/', description: '资产图片、流通市值与备用行情' },
+        { name: 'DEX Screener', url: 'https://dexscreener.com/', description: '链上交易池行情' },
+        { name: '腾讯行情', url: 'https://gu.qq.com/', description: '美股与传统市场公开报价' }
+      ] },
+      { name: '链上数据', sources: [
+        { name: 'mempool.space', url: 'https://mempool.space/', description: '比特币链上区块与难度数据' },
+        { name: '各链公开 RPC', url: '/sources.html', description: '合约及 Mint 元数据核验，见完整来源说明' }
+      ] },
+      { name: '市场情绪', sources: [{ name: 'Alternative.me', url: 'https://alternative.me/crypto/fear-and-greed-index/', description: '恐惧与贪婪指数' }] },
+      { name: '传统金融 / 宏观', sources: [
+        { name: 'Cboe', url: 'https://www.cboe.com/tradable_products/vix/', description: 'VIX 官方信息' },
+        { name: 'U.S. Treasury', url: 'https://home.treasury.gov/resource-center/data-chart-center/interest-rates', description: '美国国债收益率' }
+      ] },
+      { name: '官方信息', sources: [{ name: '官方公司 / 监管机构公开披露', url: '/sources.html', description: '矿机资料与 BTC 持仓公开披露的口径说明' }] }
+    ],
+    assetCandidates: [],
     watchedAssets: [],
     watchError: '',
     ws: null,
@@ -2595,6 +2638,7 @@ new Vue({
     fallbackTimer: null,
     fallbackPolling: false,
     marketCapTimer: null,
+    marketCapRefreshTimer: null,
     holdersTimer: null,
     holdersRefreshing: false,
     holderDisclosureLastAttempt: 0,
@@ -2795,7 +2839,7 @@ new Vue({
   computed: {
     selectedChainHint() {
       const chain = CryptoAIAssets.byChain[this.selectedChainId];
-      if (!chain) return '';
+      if (!chain) return '自动识别仅用于已收录资产名称；地址需要先选择链。';
       if (chain.type === 'bitcoin') return 'Bitcoin 仅允许 BTC 原生资产。';
       if (chain.type === 'tron') return 'Tron 地址可校验；Token 资料与行情可能暂不可用。';
       return `${chain.name}：${chain.addressType === 'mint' ? '输入 SPL Mint' : '输入 Token 合约地址'}。`;
@@ -3114,7 +3158,8 @@ new Vue({
         return `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(this.chartAsset.tvSymbol)}`;
       }
       if (this.chartAsset.type === 'dex') {
-        return `https://dexscreener.com/${this.chartAsset.chainId}/${this.chartAsset.tokenAddress}`;
+        const marketChainId = CryptoAIAssets.byChain[this.chartAsset.chainId]?.marketChainId || this.chartAsset.chainId;
+        return `https://dexscreener.com/${marketChainId}/${this.chartAsset.tokenAddress}`;
       }
       const exchange = this.getChartExchange(this.chartAsset);
       const symbol = this.chartAsset.pair.replace(/[^A-Z0-9]/g, '');
@@ -3131,7 +3176,8 @@ new Vue({
       if (this.chartAsset.type === 'dex') {
         const intervalMap = { D: '1D', W: '1W', '12M': '1M', ALL: '1D' };
         const interval = intervalMap[this.chartInterval] || this.chartInterval || '15';
-        return `https://dexscreener.com/${this.chartAsset.chainId}/${this.chartAsset.tokenAddress}?embed=1&theme=dark&chart=1&trades=0&info=0&nav=0&tabs=0&branding=0&chartLeftToolbar=0&chartStudyTemplates=0&chartSaveDrawings=0&chartComparePairs=0&chartTimeframesToolbar=0&loadChartSettings=0&interval=${encodeURIComponent(interval)}${nonce}`;
+        const marketChainId = CryptoAIAssets.byChain[this.chartAsset.chainId]?.marketChainId || this.chartAsset.chainId;
+        return `https://dexscreener.com/${marketChainId}/${this.chartAsset.tokenAddress}?embed=1&theme=dark&chart=1&trades=0&info=0&nav=0&tabs=0&branding=0&chartLeftToolbar=0&chartStudyTemplates=0&chartSaveDrawings=0&chartComparePairs=0&chartTimeframesToolbar=0&loadChartSettings=0&interval=${encodeURIComponent(interval)}${nonce}`;
       }
       const exchange = this.getChartExchange(this.chartAsset);
       const symbol = this.chartAsset.pair.replace(/[^A-Z0-9]/g, '');
@@ -4320,7 +4366,13 @@ new Vue({
     },
 
     createKnownAsset(known) {
-      return this.createPairAsset(known.pair);
+      const asset = this.createPairAsset(known.pair);
+      asset.id = known.id;
+      asset.canonicalAssetId = known.canonicalAssetId;
+      asset.marketDataId = known.marketDataId;
+      asset.displayName = known.name;
+      asset.logoUrl = known.logoUrl || asset.logoUrl;
+      return asset;
     },
 
     createDexAsset(address, chainId, metadata = {}) {
@@ -4682,21 +4734,33 @@ new Vue({
     async addWatchAsset() {
       const raw = this.assetInput.trim();
       this.watchError = '';
+      this.assetCandidates = [];
       if (!raw) {
         this.watchError = '请输入已收录资产名称/简称，或所选链的合约地址。';
         return;
       }
-      const chain = CryptoAIAssets.byChain[this.selectedChainId];
-      const known = chain.type === 'bitcoin' ? CryptoAIAssets.search(raw) : null;
-      let asset;
-      if (known?.id === 'bitcoin:BTC') {
-        asset = this.createKnownAsset(known);
-      } else if (chain.type === 'bitcoin') {
-        this.watchError = 'Bitcoin 仅支持 BTC 原生资产；地址不是 Token 合约。';
+      const candidates = CryptoAIAssets.searchCandidates(raw, this.selectedChainId);
+      if (candidates.length > 1) {
+        this.assetCandidates = candidates;
+        this.watchError = '该名称/简称对应多个已收录资产，请从下方选择。';
         return;
+      }
+      const candidate = candidates[0];
+      let asset;
+      if (candidate?.canonicalAssetId) {
+        asset = this.createKnownAsset(candidate);
       } else {
-        const mapped = CryptoAIAssets.searchOnChain(raw, chain.id);
-        const address = this.isLikelyContract(raw) ? raw : mapped?.mintAddress || mapped?.contractAddress;
+        const chainId = candidate?.selectedChainId || this.selectedChainId;
+        const chain = CryptoAIAssets.byChain[chainId];
+        if (!chain) {
+          this.watchError = '请先选择对应链，再输入合约地址或 Mint 地址。';
+          return;
+        }
+        if (chain.type === 'bitcoin') {
+          this.watchError = 'Bitcoin 仅支持 BTC 原生资产；地址不是 Token 合约。';
+          return;
+        }
+        const address = candidate?.mintAddress || candidate?.contractAddress || (this.isLikelyContract(raw) ? raw : '');
         if (!address) {
           this.watchError = `${chain.name} 未收录该名称/简称；请输入该链合约/Mint 地址。`;
           return;
@@ -4721,6 +4785,22 @@ new Vue({
         }
       }
 
+      this.finishAddWatchAsset(asset);
+    },
+
+    async selectAssetCandidate(candidate) {
+      this.assetCandidates = [];
+      this.watchError = '';
+      if (candidate.canonicalAssetId) {
+        this.finishAddWatchAsset(this.createKnownAsset(candidate));
+      } else {
+        this.selectedChainId = candidate.selectedChainId;
+        this.assetInput = candidate.mintAddress || candidate.contractAddress;
+        await this.addWatchAsset();
+      }
+    },
+
+    finishAddWatchAsset(asset) {
       if (!asset.id || (!asset.pair && !asset.tokenAddress)) {
         this.watchError = '资产无法识别。';
         return;
@@ -4734,10 +4814,11 @@ new Vue({
 
       this.watchedAssets.unshift(asset);
       this.assetInput = '';
+      this.assetCandidates = [];
       this.saveWatchedAssets();
       this.routeWatchedAssets();
       this.startFallbackPolling();
-      this.refreshMarketCaps();
+      this.scheduleMarketCapRefresh();
       this.showToast(`${asset.symbol || asset.pair} 已添加`);
     },
 
@@ -4747,7 +4828,7 @@ new Vue({
       this.saveWatchedAssets();
       this.routeWatchedAssets();
       this.startFallbackPolling();
-      this.refreshMarketCaps();
+      this.scheduleMarketCapRefresh();
       this.showToast(`${removed ? removed.symbol : '币种'} 已删除`);
     },
 
@@ -4766,6 +4847,14 @@ new Vue({
       if (this.marketCapTimer) clearInterval(this.marketCapTimer);
       this.refreshMarketCaps();
       this.marketCapTimer = setInterval(() => this.refreshMarketCaps(), 60000);
+    },
+
+    scheduleMarketCapRefresh() {
+      if (this.marketCapRefreshTimer) clearTimeout(this.marketCapRefreshTimer);
+      this.marketCapRefreshTimer = setTimeout(() => {
+        this.marketCapRefreshTimer = null;
+        this.refreshMarketCaps();
+      }, 700);
     },
 
     async refreshMarketCaps() {
@@ -5165,8 +5254,9 @@ new Vue({
       await Promise.all(Object.keys(groups).map(async chainId => {
         try {
           const group = groups[chainId];
+          const marketChainId = CryptoAIAssets.byChain[chainId]?.marketChainId || chainId;
           const addresses = group.map(asset => asset.tokenAddress).join(',');
-          const res = await this.fetchWithSoftTimeout(`https://api.dexscreener.com/tokens/v1/${chainId}/${addresses}`, 8000);
+          const res = await this.fetchWithSoftTimeout(`https://api.dexscreener.com/tokens/v1/${marketChainId}/${addresses}`, 8000);
           if (!res.ok) throw new Error('dex failed');
           const pairs = await res.json();
           this.markSource('dex', '轮询');
@@ -5177,14 +5267,14 @@ new Vue({
               const baseAddress = pair.baseToken && pair.baseToken.address ? pair.baseToken.address.toLowerCase() : '';
               const price = Number(pair.priceUsd);
               const liquidity = Number(pair.liquidity && pair.liquidity.usd);
-              return pair.chainId === chainId && baseAddress === address
+              return pair.chainId === marketChainId && baseAddress === address
                 && Number.isFinite(price) && price > 0
                 && Number.isFinite(liquidity) && liquidity >= 0
                 && !!pair.pairAddress;
             });
             const quoteMatches = (pairs || []).filter(pair => {
               const quoteAddress = pair.quoteToken && pair.quoteToken.address ? pair.quoteToken.address.toLowerCase() : '';
-              return pair.chainId === chainId && quoteAddress === address;
+              return pair.chainId === marketChainId && quoteAddress === address;
             });
 
             const best = baseMatches.sort((a, b) => Number(b.liquidity.usd) - Number(a.liquidity.usd))[0];
@@ -6216,6 +6306,7 @@ new Vue({
     if (this.globalRequestTimer) clearTimeout(this.globalRequestTimer);
     if (this.fallbackTimer) clearInterval(this.fallbackTimer);
     if (this.marketCapTimer) clearInterval(this.marketCapTimer);
+    if (this.marketCapRefreshTimer) clearTimeout(this.marketCapRefreshTimer);
     if (this.holdersTimer) clearInterval(this.holdersTimer);
     this.intervalTimers.forEach(timer => clearInterval(timer));
     if (this.toastTimer) clearTimeout(this.toastTimer);

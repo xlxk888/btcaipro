@@ -55,7 +55,8 @@ test('dashboard assets and Sources page are served', async () => {
   const app = fixtureApp();
   for (const [url, expectedType, marker] of [
     ['/asset-registry.js', 'application/javascript', 'CryptoAIAssets'],
-    ['/sources', 'text/html', '多链支持范围']
+    ['/sources', 'text/html', '多链支持范围'],
+    ['/sources.html', 'text/html', '多链支持范围']
   ]) {
     let status; let headers; let body = '';
     await app({ url, method: 'GET' }, {

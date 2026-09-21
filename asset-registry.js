@@ -9,7 +9,8 @@
     { id: 'polygon', name: 'Polygon', type: 'evm', chainId: 137, nativeAsset: 'POL', rpc: ['https://polygon-rpc.com'], explorer: 'https://polygonscan.com', addressType: 'evm-contract', enabled: true, capabilities: { metadata: true, marketData: true } },
     { id: 'avalanche', name: 'Avalanche C-Chain', type: 'evm', chainId: 43114, nativeAsset: 'AVAX', rpc: ['https://api.avax.network/ext/bc/C/rpc'], explorer: 'https://snowtrace.io', addressType: 'evm-contract', enabled: true, capabilities: { metadata: true, marketData: true } },
     { id: 'robinhood', name: 'Robinhood Chain', type: 'evm', chainId: 4663, nativeAsset: 'ETH', rpc: ['https://rpc.mainnet.chain.robinhood.com'], explorer: 'https://robinhoodchain.blockscout.com', addressType: 'evm-contract', enabled: true, capabilities: { metadata: true, marketData: true, rateLimitedRpc: true } },
-    { id: 'solana', name: 'Solana', type: 'solana', chainId: null, nativeAsset: 'SOL', rpc: ['https://api.mainnet-beta.solana.com'], explorer: 'https://explorer.solana.com', addressType: 'mint', enabled: true, capabilities: { metadata: 'decimals-only', marketData: true } },
+    { id: 'hyperliquid', name: 'Hyperliquid / HyperEVM', type: 'evm', chainId: 999, nativeAsset: 'HYPE', rpc: ['https://rpc.hyperliquid.xyz/evm'], explorer: 'https://hyperevmscan.io', marketChainId: 'hyperevm', addressType: 'evm-contract', enabled: true, capabilities: { metadata: true, marketData: true } },
+    { id: 'solana', name: 'Solana', type: 'solana', chainId: null, nativeAsset: 'SOL', rpc: ['https://api.mainnet-beta.solana.com', 'https://solana-rpc.publicnode.com'], explorer: 'https://explorer.solana.com', addressType: 'mint', enabled: true, capabilities: { metadata: 'decimals-only', marketData: true } },
     { id: 'tron', name: 'Tron', type: 'tron', chainId: null, nativeAsset: 'TRX', rpc: [], explorer: 'https://tronscan.org', addressType: 'trc20-contract', enabled: true, capabilities: { metadata: false, marketData: false } },
     { id: 'bitcoin', name: 'Bitcoin', type: 'bitcoin', chainId: null, nativeAsset: 'BTC', rpc: [], explorer: 'https://mempool.space', addressType: 'native-only', enabled: true, capabilities: { metadata: false, marketData: true, ordinals: false, runes: false } }
   ];
@@ -57,33 +58,58 @@
     ['ethena', 'ENA', 'Ethena', 'ENAUSDT', 'ethena', 'canonical:ethena'],
     ['ondo-finance', 'ONDO', 'Ondo', 'ONDOUSDT', 'ondo-finance', 'canonical:ondo'],
     ['render-token', 'RENDER', 'Render', 'RENDERUSDT', 'render-token', 'canonical:render']
-  ].map(([canonicalAssetId, symbol, name, pair, marketDataId, id]) => ({ canonicalAssetId, symbol, name, pair, marketDataId, id, assetType: id === 'bitcoin:BTC' ? 'native' : 'canonical' }));
+  ].map(([canonicalAssetId, symbol, name, pair, marketDataId, id]) => ({
+    canonicalAssetId, symbol, name, pair, marketDataId, id,
+    assetType: ['bitcoin:BTC', 'hyperliquid:HYPE'].includes(id) ? 'native' : 'canonical',
+    network: id === 'bitcoin:BTC' ? 'Bitcoin' : id === 'hyperliquid:HYPE' ? 'Hyperliquid' : id === 'evm:1:native' ? 'Ethereum' : '全局资产',
+    logoUrl: id === 'hyperliquid:HYPE' ? 'https://coin-images.coingecko.com/coins/images/50882/large/hyperliquid.jpg?1729431300' : ''
+  }));
   const byAlias = new Map();
   canonical.forEach(asset => {
-    [asset.symbol, asset.name, asset.pair].forEach(alias => byAlias.set(alias.toUpperCase(), asset));
+    [asset.symbol, asset.name, asset.pair].forEach(alias => {
+      const key = alias.toUpperCase();
+      const matches = byAlias.get(key) || [];
+      if (!matches.includes(asset)) matches.push(asset);
+      byAlias.set(key, matches);
+    });
   });
   const byCanonicalId = Object.fromEntries(canonical.map(asset => [asset.canonicalAssetId, asset]));
   // Chain aliases require an explicit address. For EVM entries use a numeric chainId
   // and contractAddress (Robinhood Chain is 4663); Solana uses mintAddress.
   const chainAssets = Object.freeze([]);
+  function validChainAsset(asset, chain) {
+    if (!chain || chain.type === 'bitcoin') return false;
+    const address = chain.type === 'solana' ? asset.mintAddress : asset.contractAddress;
+    const matchingChain = chain.type === 'evm'
+      ? asset.chainId === chain.chainId
+      : asset.chainId === chain.id;
+    const validAddress = chain.type === 'evm'
+      ? /^0x[0-9a-fA-F]{40}$/.test(address || '')
+      : chain.type === 'solana'
+        ? /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address || '')
+        : /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address || '');
+    return matchingChain && validAddress;
+  }
   function searchOnChain(input, selectedChainId, entries = chainAssets) {
     const chain = byChain[selectedChainId];
-    if (!chain || chain.type === 'bitcoin') return null;
     const alias = input.trim().toUpperCase();
     const matches = entries.filter(asset => {
-      const address = chain.type === 'solana' ? asset.mintAddress : asset.contractAddress;
-      const matchingChain = chain.type === 'evm'
-        ? asset.chainId === chain.chainId
-        : asset.chainId === chain.id;
-      const validAddress = chain.type === 'evm'
-        ? /^0x[0-9a-fA-F]{40}$/.test(address || '')
-        : chain.type === 'solana'
-          ? /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address || '')
-          : /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address || '');
-      return matchingChain && validAddress
+      return validChainAsset(asset, chain)
         && [asset.symbol, asset.name].some(value => value?.trim().toUpperCase() === alias);
     });
     return matches.length === 1 ? matches[0] : null;
+  }
+  function searchCandidates(input, selectedChainId = 'auto', entries = chainAssets) {
+    const alias = input.trim().toUpperCase();
+    if (!alias) return [];
+    const known = byAlias.get(alias) || [];
+    const mapped = entries.flatMap(asset => {
+      const chain = chains.find(item => item.type === 'evm' ? item.chainId === asset.chainId : item.id === asset.chainId);
+      if (selectedChainId === 'auto' || (selectedChainId && chain?.id !== selectedChainId)) return [];
+      if (!validChainAsset(asset, chain) || ![asset.symbol, asset.name].some(value => value?.trim().toUpperCase() === alias)) return [];
+      return [{ ...asset, name: asset.name || asset.symbol, network: chain.name, selectedChainId: chain.id }];
+    });
+    return [...known, ...mapped];
   }
   const base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
@@ -167,18 +193,22 @@
         catch (_) { return false; }
       },
       async metadata(chain, address, fetcher) {
-        try {
-          const result = await rpc(chain.rpc[0], 'getAccountInfo', [address, { encoding: 'jsonParsed' }], fetcher);
-          const account = result.value;
-          const parsed = account?.data?.parsed;
-          if (parsed?.type !== 'mint' || !['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', 'TokenzQdBNbLqP5VEhdkAS6EPFqj8aJYjzc6XZxnGs'].includes(account?.owner)) throw new Error('地址不是 SPL Mint');
-          const decimals = Number(parsed.info.decimals);
-          if (!Number.isInteger(decimals) || decimals < 0 || decimals > 255) throw new Error('Mint decimals 无效');
-          return { decimals, metadataStatus: 'Mint 已核验；名称与简称来自行情源' };
-        } catch (error) {
-          if (error.message === '地址不是 SPL Mint' || error.message === 'Mint decimals 无效') throw error;
-          throw new Error(`Solana Mint 核验失败：${error.message}`);
+        let lastError;
+        for (const url of chain.rpc) {
+          try {
+            const result = await rpc(url, 'getAccountInfo', [address, { encoding: 'jsonParsed' }], fetcher);
+            const account = result.value;
+            const parsed = account?.data?.parsed;
+            if (parsed?.type !== 'mint' || !['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', 'TokenzQdBNbLqP5VEhdkAS6EPFqj8aJYjzc6XZxnGs'].includes(account?.owner)) throw new Error('地址不是 SPL Mint');
+            const decimals = Number(parsed.info.decimals);
+            if (!Number.isInteger(decimals) || decimals < 0 || decimals > 255) throw new Error('Mint decimals 无效');
+            return { decimals, metadataStatus: 'Mint 已核验；名称与简称来自行情源' };
+          } catch (error) {
+            if (error.message === '地址不是 SPL Mint' || error.message === 'Mint decimals 无效') throw error;
+            lastError = error;
+          }
         }
+        throw new Error(`Solana Mint 核验失败：${lastError?.message || 'RPC 不可用'}`);
       }
     },
     tron: {
@@ -200,5 +230,8 @@
     }
   };
 
-  root.CryptoAIAssets = Object.freeze({ chains, byChain, canonical, byCanonicalId, chainAssets, search: input => byAlias.get(input.trim().toUpperCase()), searchOnChain, identity, adapters });
+  root.CryptoAIAssets = Object.freeze({ chains, byChain, canonical, byCanonicalId, chainAssets, search: input => {
+    const matches = byAlias.get(input.trim().toUpperCase()) || [];
+    return matches.length === 1 ? matches[0] : null;
+  }, searchCandidates, searchOnChain, identity, adapters });
 })(typeof window !== 'undefined' ? window : globalThis);
