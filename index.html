@@ -2103,7 +2103,7 @@
         <input
           class="asset-input"
           v-model.trim="assetInput"
-          :placeholder="selectedChainId === 'bitcoin' ? '搜索已收录资产；Bitcoin 地址不作 Token 合约' : '搜索 BTC / ETH / UNI / HYPE，或输入所选链地址'"
+          :placeholder="selectedChainId === 'bitcoin' ? '输入 BTC；Bitcoin 地址不作 Token 合约' : '输入该链已映射资产名称，或合约/Mint 地址'"
           autocomplete="off"
         />
         <select class="chain-select" v-model="selectedChainId">
@@ -2113,7 +2113,7 @@
       </form>
       <div class="watch-error" v-if="watchError">{{ watchError }}</div>
       <div class="watch-hint">
-        已收录资产可用简称搜索；未收录 Token 须选链并输入合约/Mint 地址。{{ selectedChainHint }} 手机端点击打开K线，长按拖动排序，左滑删除。
+        名称搜索仅匹配所选链的明确地址映射；未映射 Token 须输入合约/Mint 地址。{{ selectedChainHint }} 手机端点击打开K线，长按拖动排序，左滑删除。
       </div>
 
       <div class="watch-table">
@@ -2796,7 +2796,7 @@ new Vue({
     selectedChainHint() {
       const chain = CryptoAIAssets.byChain[this.selectedChainId];
       if (!chain) return '';
-      if (chain.type === 'bitcoin') return 'Bitcoin 地址不作 Token 合约；已收录资产仍可用简称搜索。';
+      if (chain.type === 'bitcoin') return 'Bitcoin 仅允许 BTC 原生资产。';
       if (chain.type === 'tron') return 'Tron 地址可校验；Token 资料与行情可能暂不可用。';
       return `${chain.name}：${chain.addressType === 'mint' ? '输入 SPL Mint' : '输入 Token 合约地址'}。`;
     },
@@ -4687,35 +4687,38 @@ new Vue({
         return;
       }
       const chain = CryptoAIAssets.byChain[this.selectedChainId];
-      const known = CryptoAIAssets.search(raw);
+      const known = chain.type === 'bitcoin' ? CryptoAIAssets.search(raw) : null;
       let asset;
-      if (known) {
+      if (known?.id === 'bitcoin:BTC') {
         asset = this.createKnownAsset(known);
       } else if (chain.type === 'bitcoin') {
-        this.watchError = 'Bitcoin 仅支持已收录的 BTC 原生资产；地址不是 Token 合约。';
+        this.watchError = 'Bitcoin 仅支持 BTC 原生资产；地址不是 Token 合约。';
         return;
-      } else if (this.isLikelyContract(raw)) {
+      } else {
+        const mapped = CryptoAIAssets.searchOnChain(raw, chain.id);
+        const address = this.isLikelyContract(raw) ? raw : mapped?.mintAddress || mapped?.contractAddress;
+        if (!address) {
+          this.watchError = `${chain.name} 未收录该名称/简称；请输入该链合约/Mint 地址。`;
+          return;
+        }
         const adapter = CryptoAIAssets.adapters[chain.type];
-        const valid = await adapter.validate(raw, crypto.subtle);
+        const valid = await adapter.validate(address, crypto.subtle);
         if (!valid) {
           this.watchError = `地址格式不符合 ${chain.name} 的 ${chain.addressType} 要求。`;
           return;
         }
-        const identity = CryptoAIAssets.identity(chain, raw);
+        const identity = CryptoAIAssets.identity(chain, address);
         if (this.watchedAssets.some(item => item.id === identity)) {
-          this.watchError = `${this.shortAddress(raw)} 已在自选列表中。`;
+          this.watchError = `${this.shortAddress(address)} 已在自选列表中。`;
           return;
         }
         try {
-          const metadata = await adapter.metadata(chain, raw, fetch.bind(window));
-          asset = this.createDexAsset(raw, chain.id, metadata);
+          const metadata = await adapter.metadata(chain, address, fetch.bind(window));
+          asset = this.createDexAsset(address, chain.id, metadata);
         } catch (error) {
           this.watchError = error.message;
           return;
         }
-      } else {
-        this.watchError = '未收录的简称不能直接推断资产；请选择链并输入合约/Mint 地址。';
-        return;
       }
 
       if (!asset.id || (!asset.pair && !asset.tokenAddress)) {

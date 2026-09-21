@@ -19,7 +19,7 @@ vm.runInContext(inlineScript, context);
 const registry = context.CryptoAIAssets;
 
 function fixture() {
-  const app = { ...options.data, ...options.methods, pendingUpdates: {}, rafId: null };
+  const app = { ...options.data, ...options.methods, watchedAssets: [], pendingUpdates: {}, rafId: null };
   app.backendIsActive = () => false;
   app.showToast = () => {};
   app.routeWatchedAssets = () => {};
@@ -29,17 +29,52 @@ function fixture() {
   return app;
 }
 
-test('known search uses canonical identity; unknown ticker needs a contract', async () => {
+test('selected chain does not turn a global ticker into a chain asset', async () => {
   const app = fixture();
   app.assetInput = 'HYPE';
   await app.addWatchAsset();
-  assert.equal(app.watchedAssets[0].id, 'hyperliquid:HYPE');
-  assert.equal(app.watchedAssets[0].marketDataId, 'hyperliquid');
-  assert.equal(app.watchedAssets[0].displayName, 'Hyperliquid');
-  app.assetInput = 'MYSTERY';
+  assert.equal(app.watchedAssets.length, 0);
+  assert.match(app.watchError, /合约\/Mint 地址/);
+  app.selectedChainId = 'robinhood';
+  for (const symbol of ['PONS', 'STONK', '7777', 'SHROOM']) {
+    app.assetInput = symbol;
+    await app.addWatchAsset();
+    assert.equal(app.watchedAssets.length, 0);
+    assert.match(app.watchError, /Robinhood Chain 未收录/);
+  }
+  app.selectedChainId = 'bitcoin';
+  app.assetInput = 'ETH';
   await app.addWatchAsset();
-  assert.equal(app.watchedAssets.length, 1);
-  assert.match(app.watchError, /未收录/);
+  assert.equal(app.watchedAssets.length, 0);
+  app.assetInput = 'BTC';
+  await app.addWatchAsset();
+  assert.equal(app.watchedAssets[0].id, 'bitcoin:BTC');
+});
+
+test('chain alias needs an explicit address on that exact chain', () => {
+  const robinhoodAddress = `0x${'a'.repeat(40)}`;
+  const ethereumAddress = `0x${'b'.repeat(40)}`;
+  const mint = 'So11111111111111111111111111111111111111112';
+  const tronAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+  const entries = [
+    { chainId: 4663, contractAddress: robinhoodAddress, symbol: 'PONS' },
+    { chainId: 1, contractAddress: ethereumAddress, symbol: 'PONS' },
+    { chainId: 'solana', mintAddress: mint, symbol: 'PONS' },
+    { chainId: 'tron', contractAddress: tronAddress, symbol: 'PONS' },
+    { chainId: 4663, symbol: 'STONK' }
+  ];
+  assert.equal(registry.searchOnChain('PONS', 'robinhood', entries).contractAddress, robinhoodAddress);
+  assert.equal(registry.searchOnChain('PONS', 'ethereum', entries).contractAddress, ethereumAddress);
+  assert.equal(registry.searchOnChain('PONS', 'solana', entries).mintAddress, mint);
+  assert.equal(registry.searchOnChain('PONS', 'tron', entries).contractAddress, tronAddress);
+  assert.equal(registry.searchOnChain('PONS', 'base', entries), null);
+  assert.equal(registry.searchOnChain('PONS', 'robinhood', [
+    entries[0], { chainId: 4663, contractAddress: ethereumAddress, symbol: 'PONS' }
+  ]), null);
+  assert.equal(registry.searchOnChain('STONK', 'robinhood', entries), null);
+  assert.equal(registry.searchOnChain('PONS', 'bitcoin', entries), null);
+  assert.equal(registry.identity(registry.byChain.solana, mint), `solana:${mint}`);
+  assert.equal(registry.identity(registry.byChain.tron, tronAddress), `tron:${tronAddress}`);
 });
 
 test('chain and address form a unique identity', () => {

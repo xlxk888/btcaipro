@@ -63,6 +63,28 @@
     [asset.symbol, asset.name, asset.pair].forEach(alias => byAlias.set(alias.toUpperCase(), asset));
   });
   const byCanonicalId = Object.fromEntries(canonical.map(asset => [asset.canonicalAssetId, asset]));
+  // Chain aliases require an explicit address. For EVM entries use a numeric chainId
+  // and contractAddress (Robinhood Chain is 4663); Solana uses mintAddress.
+  const chainAssets = Object.freeze([]);
+  function searchOnChain(input, selectedChainId, entries = chainAssets) {
+    const chain = byChain[selectedChainId];
+    if (!chain || chain.type === 'bitcoin') return null;
+    const alias = input.trim().toUpperCase();
+    const matches = entries.filter(asset => {
+      const address = chain.type === 'solana' ? asset.mintAddress : asset.contractAddress;
+      const matchingChain = chain.type === 'evm'
+        ? asset.chainId === chain.chainId
+        : asset.chainId === chain.id;
+      const validAddress = chain.type === 'evm'
+        ? /^0x[0-9a-fA-F]{40}$/.test(address || '')
+        : chain.type === 'solana'
+          ? /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address || '')
+          : /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address || '');
+      return matchingChain && validAddress
+        && [asset.symbol, asset.name].some(value => value?.trim().toUpperCase() === alias);
+    });
+    return matches.length === 1 ? matches[0] : null;
+  }
   const base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
   function decodeBase58(value) {
@@ -178,5 +200,5 @@
     }
   };
 
-  root.CryptoAIAssets = Object.freeze({ chains, byChain, canonical, byCanonicalId, search: input => byAlias.get(input.trim().toUpperCase()), identity, adapters });
+  root.CryptoAIAssets = Object.freeze({ chains, byChain, canonical, byCanonicalId, chainAssets, search: input => byAlias.get(input.trim().toUpperCase()), searchOnChain, identity, adapters });
 })(typeof window !== 'undefined' ? window : globalThis);
