@@ -35,7 +35,7 @@
     body { padding: clamp(14px, 2.5vw, 36px); overflow-x: hidden; -ms-overflow-style: none; }
     html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
-    #app { width: 100%; max-width: 1440px; margin: 0 auto; overflow-x: clip; }
+    #app { width: 100%; max-width: 1320px; margin-left: auto; margin-right: auto; overflow-x: clip; }
     .app-topbar {
       min-height: 56px;
       margin: 0 0 4px;
@@ -2349,6 +2349,7 @@
         区块 <strong style="color:#e2e8f0;">{{ halvingCurrentHeight !== null ? halvingCurrentHeight.toLocaleString() : '--' }}</strong> / <strong style="color:#e2e8f0;">{{ halvingTargetHeight.toLocaleString() }}</strong><br />
         奖励 3.125 → <strong style="color:#e2e8f0;">1.5625 BTC</strong> · 预计 <strong style="color:#e2e8f0;" :style="halvingEtaText.includes('失败') ? 'color:#ef4444' : ''">{{ halvingEtaText }}</strong>
       </div>
+      <div class="halving-line">数据：{{ halvingDataStatus }}</div>
       <div class="bar">
         <div :style="{ width: halvingProgressPct + '%' }"></div>
       </div>
@@ -2650,6 +2651,7 @@ new Vue({
     holderStorageKey: 'crypto_ai_entity_holder_snapshot_v1',
     holderHistoryStorageKey: 'crypto_ai_entity_holder_history_v2',
     minerStorageKey: 'crypto_ai_miner_network_v1',
+    halvingHeightStorageKey: 'crypto_ai_halving_height_v1',
     stockInput: '',
     touchGesture: null,
     touchSuppressClick: false,
@@ -2801,6 +2803,8 @@ new Vue({
     halvingCurrentHeight: null,
     halvingDaysRemaining: null,
     halvingEtaText: '--',
+    halvingDataStatus: '等待区块高度',
+    halvingHeightUpdatedAt: null,
     halvingProgressPct: 0,
     minerDifficulty: 0,
     minerHashrateEh: '',
@@ -2936,7 +2940,8 @@ new Vue({
       const bad = list.filter(item => item.badge === 'bad').length;
       if (bad) return `${bad} 个数据源异常`;
       if (list.some(item => item.fallbackActive)) return '备用数据源运行中';
-      const delayed = list.some(item => ['延迟', '日线'].includes(item.label));
+      if (list.some(item => item.label === '备用')) return '备用数据源运行中';
+      const delayed = list.some(item => ['延迟', '日线'].includes(item.label) || (item.label === '旧数据' && item.badge === 'warn'));
       if (delayed) return '部分数据延迟';
       const waiting = list.some(item => item.badge === 'idle' || (this.dataSources[item.key] && !this.dataSources[item.key].lastUpdate));
       if (waiting) return '部分数据等待';
@@ -3449,8 +3454,9 @@ new Vue({
       if (source.disabled || ['待接入', '未启用', '暂停', '等待', '连接中', '重连中', '轮询中', '列表已读取', '等待推送', '等待数据'].includes(source.status)) return 'idle';
       const label = this.sourceDisplayLabel(source);
       if (label === '异常') return 'bad';
+      if (source === this.dataSources.mempool && label === '旧数据' && Number.isSafeInteger(this.halvingCurrentHeight)) return 'warn';
       if (label === '旧数据') return 'bad';
-      if (['延迟', '日线'].includes(label)) return 'warn';
+      if (['延迟', '日线', '备用'].includes(label)) return 'warn';
       if (['等待', '暂停', '连接中', '重连中', '轮询中', '列表已读取', '等待推送', '等待数据'].includes(label)) return 'idle';
       return 'ok';
     },
@@ -6207,37 +6213,92 @@ new Vue({
       this.fetchOptionalGlobalIndicators();
     },
 
-    async fetchHalvingCountdown() {
+    applyHalvingHeight(height) {
+      this.halvingCurrentHeight = height;
+      const remainingBlocks = Math.max(0, this.halvingTargetHeight - height);
+      const remainingSeconds = remainingBlocks * 10 * 60;
+      this.halvingDaysRemaining = Math.ceil(remainingSeconds / 86400);
+      const eta = new Date(Date.now() + remainingSeconds * 1000);
+      const pad = n => String(n).padStart(2, '0');
+      this.halvingEtaText = `${eta.getFullYear()}-${pad(eta.getMonth() + 1)}-${pad(eta.getDate())}`;
+      const progressPct = ((height - 840000) / (this.halvingTargetHeight - 840000)) * 100;
+      this.halvingProgressPct = Math.max(0, Math.min(100, progressPct)).toFixed(2);
+    },
+
+    readHalvingHeightCache() {
+      if (Number.isSafeInteger(this.halvingCurrentHeight) && this.halvingCurrentHeight > 0
+        && Number.isFinite(this.halvingHeightUpdatedAt)) {
+        return { height: this.halvingCurrentHeight, updatedAt: this.halvingHeightUpdatedAt };
+      }
       try {
+        const saved = JSON.parse(localStorage.getItem(this.halvingHeightStorageKey) || 'null');
+        const height = Number(saved?.height);
+        const updatedAt = Number(saved?.updatedAt);
+        if (Number.isSafeInteger(height) && height > 0 && Number.isFinite(updatedAt)
+          && updatedAt > 0 && updatedAt <= Date.now()) return { height, updatedAt };
+      } catch (_) { /* Storage can be unavailable; live requests still work. */ }
+      return null;
+    },
+
+    async fetchHalvingHeight(url) {
+      const res = await this.fetchWithSoftTimeout(url, 12000);
+      if (!res.ok) throw new Error(`${url} HTTP ${res.status}`);
+      const raw = (await res.text()).trim();
+      if (!/^\d+$/.test(raw)) throw new Error(`${url} height invalid`);
+      const height = Number(raw);
+      if (!Number.isSafeInteger(height) || height <= 0) throw new Error(`${url} height invalid`);
+      return height;
+    },
+
+    async fetchHalvingCountdown() {
+      const cachedAtStart = this.readHalvingHeightCache();
+      if (cachedAtStart && this.halvingCurrentHeight === null) {
+        this.applyHalvingHeight(cachedAtStart.height);
+        this.halvingHeightUpdatedAt = cachedAtStart.updatedAt;
+        this.halvingDataStatus = '旧数据 · 正在刷新';
+        this.markSource('mempool', '旧数据');
+        this.dataSources.mempool.lastUpdate = cachedAtStart.updatedAt;
+      } else {
         this.dataSources.mempool.status = '轮询中';
         this.dataSources.mempool.lastAttempt = Date.now();
-        const res = await this.fetchWithSoftTimeout('https://mempool.space/api/blocks/tip/height', 8000);
-        if (!res.ok) throw new Error(`Mempool ${res.status}`);
-        
-        const heightStr = await res.text();
-        const height = parseInt(heightStr.trim(), 10);
-        if (!Number.isFinite(height)) throw new Error('Mempool height invalid');
-
-        this.halvingTargetHeight = 1050000; 
-        this.halvingCurrentHeight = height;
-
-        const remainingBlocks = Math.max(0, this.halvingTargetHeight - height);
-        const remainingSeconds = remainingBlocks * 10 * 60; 
-        this.halvingDaysRemaining = Math.ceil(remainingSeconds / 86400);
-
-        const eta = new Date(Date.now() + remainingSeconds * 1000);
-        const pad = n => String(n).padStart(2, '0');
-        this.halvingEtaText = `${eta.getFullYear()}-${pad(eta.getMonth() + 1)}-${pad(eta.getDate())}`;
-
-        const epochStart = 840000; 
-        const epochEnd = 1050000;
-        const progressPct = ((height - epochStart) / (epochEnd - epochStart)) * 100;
-        this.halvingProgressPct = Math.max(0, Math.min(100, progressPct)).toFixed(2);
-        this.markSource('mempool', '轮询');
-      } catch (error) {
-        this.halvingEtaText = '节点连接失败';
-        this.markSource('mempool', '异常', error);
       }
+      let height;
+      let fallback = false;
+      let primaryError;
+      try {
+        height = await this.fetchHalvingHeight('https://mempool.space/api/blocks/tip/height');
+      } catch (error) {
+        primaryError = error;
+        try {
+          height = await this.fetchHalvingHeight('https://blockstream.info/api/blocks/tip/height');
+          fallback = true;
+        } catch (fallbackError) {
+          const cached = this.readHalvingHeightCache();
+          if (cached) {
+            this.applyHalvingHeight(cached.height);
+            this.halvingHeightUpdatedAt = cached.updatedAt;
+            this.halvingDataStatus = '旧数据 · 两个节点请求失败';
+            this.markSource('mempool', '旧数据', fallbackError);
+            this.dataSources.mempool.lastUpdate = cached.updatedAt;
+          } else {
+            this.halvingCurrentHeight = null;
+            this.halvingDaysRemaining = null;
+            this.halvingEtaText = '节点连接失败';
+            this.halvingDataStatus = 'mempool.space 与 Blockstream 均不可用';
+            this.markSource('mempool', '异常', fallbackError);
+          }
+          this.dataSources.mempool.lastErrorMessage = `${primaryError.message}; ${fallbackError.message}`;
+          return;
+        }
+      }
+      this.applyHalvingHeight(height);
+      this.halvingHeightUpdatedAt = Date.now();
+      this.halvingDataStatus = fallback ? 'Blockstream 备用 · mempool.space 不可用' : 'mempool.space 实时';
+      try {
+        localStorage.setItem(this.halvingHeightStorageKey, JSON.stringify({ height, updatedAt: this.halvingHeightUpdatedAt }));
+      } catch (_) { /* Live data remains available without storage. */ }
+      this.markSource('mempool', fallback ? '备用' : '轮询', null, { success: true });
+      this.dataSources.mempool.lastErrorMessage = fallback ? primaryError.message : '';
     },
 
     async fetchFearGreed() {
