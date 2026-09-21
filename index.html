@@ -2396,6 +2396,7 @@
         <span>{{ profitableMinerCount }} 台盈利 / {{ miners.length }} 台</span>
       </div>
       <div class="miner-scroll-hint">{{ minerDataStatus }}<span v-if="minerHashrateEh"> · 全网算力 {{ minerHashrateEh }} EH/s</span></div>
+      <div class="miner-scroll-hint">规格目录：{{ minerCatalogStatus }}</div>
       <div class="miner-scroll-hint">规格：厂商官方资料 / 未核验明确标记 · 网络：mempool.space · BTC：行情主源及 fallback · 关机价：Crypto AI 本地计算</div>
       <div class="miner-scroll-hint">{{ minersExpanded ? '已展开全部矿机' : '框内可上下滑动查看全部矿机' }}</div>
     </div>
@@ -2802,6 +2803,7 @@ new Vue({
     minerHashrateEh: '',
     minerDataStale: true,
     minerDataStatus: '正在同步全网难度 ...',
+    minerCatalogStatus: '内置数据运行中',
     minerElectricityUsd: 0.06,
     minerBlockReward: 3.125,
     miners: [
@@ -3222,11 +3224,26 @@ new Vue({
       return Date.now() < this.backendActiveUntil;
     },
 
+    markBackendNotEnabled() {
+      this.backendActiveUntil = 0;
+      this.backendSourceStatusLoaded = false;
+      this.backendSourceSummary = null;
+      const source = this.dataSources.backend;
+      source.status = '未启用';
+      source.disabled = true;
+      source.enabled = false;
+      source.errorCount = 0;
+    },
+
     async fetchBackendSnapshot() {
       this.dataSources.backend.lastAttempt = Date.now();
       this.fetchBackendSourceStatus();
       try {
         const response = await this.fetchWithSoftTimeout('/api/market/snapshot', 3500);
+        if (response.status === 404) {
+          this.markBackendNotEnabled();
+          return;
+        }
         if (!response.ok) throw new Error(`Backend snapshot ${response.status}`);
         const payload = await response.json();
         const snapshot = payload && payload.data;
@@ -3280,6 +3297,11 @@ new Vue({
     async fetchBackendSourceStatus() {
       try {
         const response = await this.fetchWithSoftTimeout('/api/sources/status', 3500);
+        if (response.status === 404) {
+          this.backendSourceStatusLoaded = false;
+          this.backendSourceSummary = null;
+          return;
+        }
         if (!response.ok) throw new Error(`Backend source status ${response.status}`);
         const payload = await response.json();
         if (!payload || !payload.summary || !Array.isArray(payload.summary.sources)) throw new Error('Backend source status invalid');
@@ -3360,14 +3382,18 @@ new Vue({
     },
 
     sourceIsRelevant(key) {
+      if (key === 'backend') {
+        if (this.dataSources.backend.disabled) return false;
+        return !this.watchedAssets.some(asset => ['BTCUSDT', 'ETHUSDT'].includes(asset.pair) && Number(asset.price) > 0 && !asset.stale);
+      }
+      if (this.dataSources[key] && this.dataSources[key].optional) return false;
       if (key === 'okx') return this.watchedAssets.some(asset => asset.type === 'cex' && asset.sourceType !== 'binance');
       if (key === 'dex') return this.watchedAssets.some(asset => asset.type === 'dex');
       if (key === 'tencentStocks') return this.stocks.length > 0;
       if (key === 'binance') return this.watchedAssets.some(asset => asset.type === 'cex' && asset.binanceEligible);
       if (key === 'coingecko') {
-        return this.watchedAssets.some(asset => asset.type === 'cex' && (
-          asset.sourceType === 'coingecko' || !!this.cgIdMap[this.baseFromPair(asset.pair).toLowerCase()]
-        ));
+        return this.watchedAssets.some(asset => asset.type === 'cex' && asset.sourceType === 'coingecko'
+          && (asset.stale || !(Number(asset.price) > 0)));
       }
       return true;
     },
@@ -3754,9 +3780,10 @@ new Vue({
           source: miner.manufacturer,
           sourceUrl: miner.officialSource
         }));
+        this.minerCatalogStatus = 'Catalog API 已更新';
         this.updateMinerShutdownPrices();
       } catch (_) {
-        this.minerDataStatus = '矿机 catalog 暂不可用，保留内置最后已知规格';
+        this.minerCatalogStatus = '内置数据运行中';
       }
     },
 
@@ -5636,6 +5663,54 @@ new Vue({
       return `${year}-${month}-${day}`;
     },
 
+    isUsMarketHoliday(dateText) {
+      const year = Number(dateText.slice(0, 4));
+      const iso = date => date.toISOString().slice(0, 10);
+      const observed = (holidayYear, month, day) => {
+        const date = new Date(Date.UTC(holidayYear, month - 1, day));
+        if (date.getUTCDay() === 6) date.setUTCDate(date.getUTCDate() - 1);
+        if (date.getUTCDay() === 0) date.setUTCDate(date.getUTCDate() + 1);
+        return iso(date);
+      };
+      const nthWeekday = (month, weekday, nth) => {
+        const date = new Date(Date.UTC(year, month - 1, 1));
+        date.setUTCDate(1 + (weekday - date.getUTCDay() + 7) % 7 + (nth - 1) * 7);
+        return iso(date);
+      };
+      const lastMonday = month => {
+        const date = new Date(Date.UTC(year, month, 0));
+        date.setUTCDate(date.getUTCDate() - (date.getUTCDay() + 6) % 7);
+        return iso(date);
+      };
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k + 7) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const easterMonth = Math.floor((h + l - 7 * m + 114) / 31);
+      const easterDay = (h + l - 7 * m + 114) % 31 + 1;
+      const goodFriday = new Date(Date.UTC(year, easterMonth - 1, easterDay - 2));
+      return [
+        observed(year, 1, 1), observed(year + 1, 1, 1),
+        nthWeekday(1, 1, 3), nthWeekday(2, 1, 3), iso(goodFriday),
+        lastMonday(5), observed(year, 6, 19), observed(year, 7, 4),
+        nthWeekday(9, 1, 1), nthWeekday(11, 4, 4), observed(year, 12, 25)
+      ].includes(dateText);
+    },
+
+    previousUsMarketDate(dateText) {
+      let previous = this.previousBusinessDate(dateText);
+      while (this.isUsMarketHoliday(previous)) previous = this.previousBusinessDate(previous);
+      return previous;
+    },
+
     async fetchFrankfurterQuote(source) {
       const current = await this.fetchFrankfurterSnapshot();
       const price = Number(current && current.rates && current.rates[source.currency]);
@@ -5838,17 +5913,28 @@ new Vue({
       return timestamp;
     },
 
-    applyVixFreshness(quote) {
+    applyVixFreshness(quote, now = Date.now()) {
       const timestamp = this.parseMarketTimestamp(quote && quote.updatedAt);
-      const weekday = new Intl.DateTimeFormat('en-US', {
+      const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
         timeZone: 'America/New_York',
-        weekday: 'short'
-      }).format(new Date());
-      const maxAge = weekday === 'Sat' || weekday === 'Sun'
-        ? 3 * 24 * 60 * 60 * 1000
-        : 24 * 60 * 60 * 1000;
-      const age = Number.isFinite(timestamp) ? Math.max(0, Date.now() - timestamp) : Infinity;
-      return Object.assign({}, quote, { stale: !Number.isFinite(age) || age > maxAge });
+        weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+      }).formatToParts(new Date(now)).map(part => [part.type, part.value]));
+      const today = `${parts.year}-${parts.month}-${parts.day}`;
+      const minute = Number(parts.hour) * 60 + Number(parts.minute);
+      const nonTradingDay = ['Sat', 'Sun'].includes(parts.weekday) || this.isUsMarketHoliday(today);
+      const closed = nonTradingDay || minute < 570 || minute >= 960;
+      const expectedDate = nonTradingDay || minute < 570
+        ? this.previousUsMarketDate(today)
+        : today;
+      const quoteDate = String(quote && quote.updatedAt || '').slice(0, 10);
+      const age = Number.isFinite(timestamp) ? Math.max(0, now - timestamp) : Infinity;
+      const fresh = /^\d{4}-\d{2}-\d{2}$/.test(quoteDate)
+        && quoteDate >= expectedDate && age <= 4 * 24 * 60 * 60 * 1000;
+      return Object.assign({}, quote, {
+        stale: !fresh,
+        mode: fresh && closed ? '休市收盘' : quote.mode
+      });
     },
 
     async fetchOptionalGlobalSource(source) {
