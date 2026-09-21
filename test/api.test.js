@@ -50,3 +50,20 @@ test('API rejects writes and unknown routes', async () => {
   assert.equal((await invoke(fixtureApp(), '/api/events', 'POST')).status, 405);
   assert.equal((await invoke(fixtureApp(), '/missing')).status, 404);
 });
+
+test('dashboard assets and Sources page are served', async () => {
+  const app = fixtureApp();
+  for (const [url, expectedType, marker] of [
+    ['/asset-registry.js', 'application/javascript', 'CryptoAIAssets'],
+    ['/sources', 'text/html', '多链支持范围']
+  ]) {
+    let status; let headers; let body = '';
+    await app({ url, method: 'GET' }, {
+      writeHead(code, values) { status = code; headers = values; },
+      end(value = '') { body += value.toString(); }
+    });
+    assert.equal(status, 200);
+    assert.match(headers['content-type'], new RegExp(expectedType));
+    assert.ok(body.includes(marker));
+  }
+});

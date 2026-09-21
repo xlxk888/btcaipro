@@ -51,6 +51,10 @@ export function createApp({ store, cache, worker, config, startedAt = Date.now()
       const body = fs.readFileSync(path.join(root, 'sources.html'));
       response.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-length': body.length }); return response.end(body);
     }
+    if (url.pathname === '/asset-registry.js') {
+      const body = fs.readFileSync(path.join(root, 'asset-registry.js'));
+      response.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8', 'content-length': body.length }); return response.end(body);
+    }
     return send(response, 404, { error: 'not_found' }, cors);
   };
 }

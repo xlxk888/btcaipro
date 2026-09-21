@@ -497,6 +497,8 @@
     }
     .bottom-notice-body { margin-top: 10px; display:grid; gap:8px; }
     .bottom-notice-desc { color:#8fa0ba; font-size:.74rem; }
+    .source-brand-list { display:flex; flex-wrap:wrap; gap:7px; }
+    .source-brand-chip { display:inline-flex; align-items:center; min-height:27px; padding:4px 9px; border:1px solid rgba(96,165,250,.28); border-radius:999px; background:rgba(15,23,42,.65); color:#cbd5e1; font-size:.7rem; font-weight:800; line-height:1.2; }
     .bottom-notice-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     .bottom-notice-item { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border:1px solid rgba(147,197,253,.16); border-radius:10px; background:rgba(7,14,26,.42); }
     .bottom-notice-copy { min-width:0; color:#cbd5e1; font-size:.78rem; line-height:1.45; overflow-wrap:anywhere; }
@@ -2101,17 +2103,17 @@
         <input
           class="asset-input"
           v-model.trim="assetInput"
-          placeholder="输入 BTC、ETH、BTCUSDT 或合约地址"
+          :placeholder="selectedChainId === 'bitcoin' ? '搜索已收录资产；Bitcoin 地址不作 Token 合约' : '搜索 BTC / ETH / UNI / HYPE，或输入所选链地址'"
           autocomplete="off"
         />
         <select class="chain-select" v-model="selectedChainId">
-          <option v-for="chain in chainOptions" :key="chain.id" :value="chain.id">{{ chain.label }}</option>
+          <option v-for="chain in chainOptions" :key="chain.id" :value="chain.id">{{ chain.name }}</option>
         </select>
         <button class="add-btn" type="submit">添加币种</button>
       </form>
       <div class="watch-error" v-if="watchError">{{ watchError }}</div>
       <div class="watch-hint">
-        简称默认匹配 USDT 交易对；手机端点击打开K线，长按拖动排序，左滑删除。
+        已收录资产可用简称搜索；未收录 Token 须选链并输入合约/Mint 地址。{{ selectedChainHint }} 手机端点击打开K线，长按拖动排序，左滑删除。
       </div>
 
       <div class="watch-table">
@@ -2152,7 +2154,7 @@
               <div v-else class="token-fallback">{{ asset.symbol.slice(0, 1) || '?' }}</div>
               <div class="token-copy">
                 <div class="token-symbol">{{ asset.symbol }}</div>
-                <div class="muted">{{ asset.type === 'dex' ? asset.shortAddress : asset.displayName }}</div>
+                <div class="muted">{{ asset.type === 'dex' ? `${asset.displayName} · ${asset.shortAddress}` : asset.displayName }}</div>
               </div>
             </div>
             <div class="watch-price" :class="asset.trend || (asset.changePct >= 0 ? 'up' : 'down')">{{ formatPrice(asset.price) }}</div>
@@ -2163,6 +2165,7 @@
             <div>
               <span class="source-pill" :class="asset.sourceType">{{ asset.source }}</span>
               <div class="muted" v-if="asset.status">{{ asset.status }}</div>
+              <div class="muted" v-if="asset.metadataStatus">{{ asset.metadataStatus }}</div>
             </div>
             <div class="action-cell">
               <button class="sort-btn" type="button" @click.stop="moveWatchAsset(index, -1)" :disabled="index === 0" title="上移">↑</button>
@@ -2549,7 +2552,9 @@
       <a class="bottom-notice-link" href="/sources">查看完整来源与计算说明</a>
     </div>
     <div class="bottom-notice-body">
-      <div class="bottom-notice-desc">Binance · OKX · CoinGecko · Alternative.me · mempool.space · Cboe · U.S. Treasury · 腾讯行情 · 官方公司/监管机构公开资料</div>
+      <div class="source-brand-list" aria-label="数据来源">
+        <span class="source-brand-chip" v-for="brand in sourceBrands" :key="brand">{{ brand }}</span>
+      </div>
       <div class="bottom-notice-desc">部分指标由 Crypto AI 基于公开数据本地计算或估算；估算不会伪装成官方实时数据。</div>
     </div>
   </div>
@@ -2558,6 +2563,7 @@
 
 </div>
 
+<script src="/asset-registry.js"></script>
 <script>
 new Vue({
   el: '#app',
@@ -2567,13 +2573,8 @@ new Vue({
     cryptoStatus: '正在初始化 ...',
     assetInput: '',
     selectedChainId: 'ethereum',
-    chainOptions: [
-      { id: 'ethereum', label: 'Ethereum' },
-      { id: 'bsc', label: 'BSC' },
-      { id: 'arbitrum', label: 'Arbitrum' },
-      { id: 'polygon', label: 'Polygon' },
-      { id: 'solana', label: 'Solana' }
-    ],
+    chainOptions: CryptoAIAssets.chains.filter(chain => chain.enabled),
+    sourceBrands: ['Binance', 'OKX', 'CoinGecko', 'DEX Screener', '各链公开 RPC', 'Alternative.me', 'mempool.space', 'Cboe', 'U.S. Treasury', '腾讯行情', '官方披露'],
     watchedAssets: [],
     watchError: '',
     ws: null,
@@ -2663,48 +2664,6 @@ new Vue({
       { label: '年线', value: '12M' },
       { label: '全部', value: 'ALL' }
     ],
-    cgIdMap: {
-      btc: 'bitcoin',
-      eth: 'ethereum',
-      usdt: 'tether',
-      usdc: 'usd-coin',
-      dai: 'dai',
-      fdusd: 'first-digital-usd',
-      tusd: 'true-usd',
-      bnb: 'binancecoin',
-      sol: 'solana',
-      hype: 'hyperliquid',
-      xmr: 'monero',
-      doge: 'dogecoin',
-      xrp: 'ripple',
-      ada: 'cardano',
-      avax: 'avalanche-2',
-      dot: 'polkadot',
-      link: 'chainlink',
-      ton: 'the-open-network',
-      trx: 'tron',
-      matic: 'matic-network',
-      pol: 'polygon-ecosystem-token',
-      arb: 'arbitrum',
-      op: 'optimism',
-      pepe: 'pepe',
-      shib: 'shiba-inu',
-      uni: 'uniswap',
-      aave: 'aave',
-      ltc: 'litecoin',
-      bch: 'bitcoin-cash',
-      etc: 'ethereum-classic',
-      atom: 'cosmos',
-      near: 'near',
-      apt: 'aptos',
-      sui: 'sui',
-      fil: 'filecoin',
-      inj: 'injective-protocol',
-      wif: 'dogwifcoin',
-      ena: 'ethena',
-      ondo: 'ondo-finance',
-      render: 'render-token'
-    },
     ahrValue: '--',
     fgValue: null, fgText: '数据加载中', fgColor: '#94a3b8',
     fgStale: true,
@@ -2834,6 +2793,13 @@ new Vue({
     gaugeChart: null
   },
   computed: {
+    selectedChainHint() {
+      const chain = CryptoAIAssets.byChain[this.selectedChainId];
+      if (!chain) return '';
+      if (chain.type === 'bitcoin') return 'Bitcoin 地址不作 Token 合约；已收录资产仍可用简称搜索。';
+      if (chain.type === 'tron') return 'Tron 地址可校验；Token 资料与行情可能暂不可用。';
+      return `${chain.name}：${chain.addressType === 'mint' ? '输入 SPL Mint' : '输入 Token 合约地址'}。`;
+    },
     btcTrend() { return this.btcPrice >= this.btcBase ? 'up' : 'down'; },
     ethTrend() { return this.ethPrice >= this.ethBase ? 'up' : 'down'; },
     btcAssetStale() {
@@ -4277,9 +4243,7 @@ new Vue({
 
     isLikelyContract(raw) {
       const value = raw.trim();
-      const evmAddress = /^0x[a-fA-F0-9]{40}$/.test(value);
-      const solAddress = this.selectedChainId === 'solana' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(value);
-      return evmAddress || solAddress;
+      return value.startsWith('0x') || /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(value);
     },
 
     shortAddress(address) {
@@ -4290,10 +4254,7 @@ new Vue({
     getCoinLogoUrl(symbol) {
       const aliases = { WBTC: 'btc', WETH: 'eth' };
       const key = (aliases[symbol] || symbol || '').toLowerCase();
-      if (key === 'hype') {
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#031f1d"/><circle cx="32" cy="32" r="28" fill="#102926" stroke="#46e6c4" stroke-width="4"/><path d="M12 32c0-9.2 5.4-15.6 13.2-15.6 5.7 0 8.7 3.4 11.3 7.1 2.4 3.5 4.5 6.1 9.2 6.1 2.7 0 5-.9 7.2-2.6v4.7c0 9.2-5.4 15.6-13.2 15.6-5.7 0-8.7-3.4-11.3-7.1-2.4-3.5-4.5-6.1-9.2-6.1-2.7 0-5 .9-7.2 2.6V32z" fill="#9afbe7"/></svg>`;
-        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-      }
+      if (key === 'hype') return '';
       return key ? `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/${key}.png` : '';
     },
 
@@ -4306,8 +4267,11 @@ new Vue({
         displayName: '',
         pair: '',
         marketSymbol: '',
+        canonicalAssetId: '',
+        marketDataId: '',
         chainId: '',
         tokenAddress: '',
+        metadataStatus: '',
         shortAddress: '',
         logoUrl: '',
         logoBroken: false,
@@ -4340,33 +4304,42 @@ new Vue({
     createPairAsset(pair) {
       const symbol = pair.toUpperCase();
       const base = this.baseFromPair(symbol);
+      const known = CryptoAIAssets.search(symbol);
       return this.createEmptyAsset({
-        id: `cex:${symbol}`,
+        id: known ? known.id : `cex:${symbol}`,
         type: 'cex',
         input: symbol,
         symbol: base,
-        displayName: `${base}/${this.quoteFromPair(symbol)}`,
+        displayName: known ? known.name : `${base}/${this.quoteFromPair(symbol)}`,
         pair: symbol,
         marketSymbol: symbol,
+        canonicalAssetId: known?.canonicalAssetId || '',
+        marketDataId: known?.marketDataId || '',
         logoUrl: this.getCoinLogoUrl(base)
       });
     },
 
-    createDexAsset(address, chainId) {
-      const normalized = chainId === 'solana' ? address.trim() : address.trim().toLowerCase();
+    createKnownAsset(known) {
+      return this.createPairAsset(known.pair);
+    },
+
+    createDexAsset(address, chainId, metadata = {}) {
+      const chain = CryptoAIAssets.byChain[chainId];
+      const normalized = chain.type === 'evm' ? address.trim().toLowerCase() : address.trim();
       return this.createEmptyAsset({
-        id: `dex:${chainId}:${normalized.toLowerCase()}`,
+        id: CryptoAIAssets.identity(chain, normalized),
         type: 'dex',
         input: normalized,
-        symbol: 'TOKEN',
-        displayName: chainId,
+        symbol: metadata.symbol || 'TOKEN',
+        displayName: metadata.name || chain.name,
         pair: `${chainId}:${this.shortAddress(normalized)}`,
         chainId,
         tokenAddress: normalized,
         shortAddress: this.shortAddress(normalized),
+        metadataStatus: metadata.metadataStatus || '待核验',
         source: '链上行情',
         sourceType: 'dex',
-        status: '轮询 10s'
+        status: chain.capabilities.marketData ? '轮询 10s' : '行情暂不可用'
       });
     },
 
@@ -4384,16 +4357,19 @@ new Vue({
 
       this.watchedAssets = configs.slice(0, 60).map(item => {
         if (item.type === 'dex' && item.tokenAddress && item.chainId) {
-          return this.createDexAsset(item.tokenAddress, item.chainId);
+          const chain = CryptoAIAssets.byChain[item.chainId];
+          if (!chain || chain.type === 'bitcoin') return null;
+          return this.createDexAsset(item.tokenAddress, item.chainId, item.metadata || {});
         }
-        return this.createPairAsset(item.pair || this.normalizePairInput(item.input || ''));
-      }).filter(asset => asset.pair || asset.tokenAddress);
+        const known = CryptoAIAssets.byCanonicalId[item.canonicalAssetId] || CryptoAIAssets.search(item.pair || item.input || '');
+        return known ? this.createKnownAsset(known) : this.createPairAsset(item.pair || this.normalizePairInput(item.input || ''));
+      }).filter(asset => asset && (asset.pair || asset.tokenAddress));
     },
 
     saveWatchedAssets() {
       const payload = this.watchedAssets.map(asset => asset.type === 'dex'
-        ? { type: 'dex', chainId: asset.chainId, tokenAddress: asset.tokenAddress }
-        : { type: 'cex', pair: asset.pair }
+        ? { type: 'dex', chainId: asset.chainId, tokenAddress: asset.tokenAddress, metadata: { name: asset.displayName, symbol: asset.symbol, metadataStatus: asset.metadataStatus } }
+        : { type: 'cex', pair: asset.pair, canonicalAssetId: asset.canonicalAssetId }
       );
       localStorage.setItem(this.storageKey, JSON.stringify(payload));
     },
@@ -4703,20 +4679,47 @@ new Vue({
       this.pollFallbackAssets();
     },
 
-    addWatchAsset() {
+    async addWatchAsset() {
       const raw = this.assetInput.trim();
       this.watchError = '';
       if (!raw) {
-        this.watchError = '请输入币种简称、交易对或合约地址。';
+        this.watchError = '请输入已收录资产名称/简称，或所选链的合约地址。';
+        return;
+      }
+      const chain = CryptoAIAssets.byChain[this.selectedChainId];
+      const known = CryptoAIAssets.search(raw);
+      let asset;
+      if (known) {
+        asset = this.createKnownAsset(known);
+      } else if (chain.type === 'bitcoin') {
+        this.watchError = 'Bitcoin 仅支持已收录的 BTC 原生资产；地址不是 Token 合约。';
+        return;
+      } else if (this.isLikelyContract(raw)) {
+        const adapter = CryptoAIAssets.adapters[chain.type];
+        const valid = await adapter.validate(raw, crypto.subtle);
+        if (!valid) {
+          this.watchError = `地址格式不符合 ${chain.name} 的 ${chain.addressType} 要求。`;
+          return;
+        }
+        const identity = CryptoAIAssets.identity(chain, raw);
+        if (this.watchedAssets.some(item => item.id === identity)) {
+          this.watchError = `${this.shortAddress(raw)} 已在自选列表中。`;
+          return;
+        }
+        try {
+          const metadata = await adapter.metadata(chain, raw, fetch.bind(window));
+          asset = this.createDexAsset(raw, chain.id, metadata);
+        } catch (error) {
+          this.watchError = error.message;
+          return;
+        }
+      } else {
+        this.watchError = '未收录的简称不能直接推断资产；请选择链并输入合约/Mint 地址。';
         return;
       }
 
-      const asset = this.isLikelyContract(raw)
-        ? this.createDexAsset(raw, this.selectedChainId)
-        : this.createPairAsset(this.normalizePairInput(raw));
-
       if (!asset.id || (!asset.pair && !asset.tokenAddress)) {
-        this.watchError = '格式无法识别，请输入 BTC、BTCUSDT 或有效合约地址。';
+        this.watchError = '资产无法识别。';
         return;
       }
 
@@ -4765,8 +4768,7 @@ new Vue({
     async refreshMarketCaps() {
       const idByAsset = this.watchedAssets.reduce((acc, asset) => {
         if (asset.type !== 'cex') return acc;
-        const base = this.baseFromPair(asset.pair).toLowerCase();
-        const id = this.cgIdMap[base];
+        const id = asset.marketDataId;
         if (id) acc[asset.id] = id;
         return acc;
       }, {});
@@ -4778,7 +4780,7 @@ new Vue({
         const res = await this.fetchWithSoftTimeout(url, 8000);
         if (!res.ok) throw new Error('market cap failed');
         const list = await res.json();
-        if (!Array.isArray(list) || !list.some(item => Number(item.current_price) > 0)) {
+        if (!Array.isArray(list) || !list.length) {
           throw new Error('market cap no valid data');
         }
         this.markSource('coingecko', '轮询');
@@ -4792,13 +4794,13 @@ new Vue({
             const asset = this.watchedAssets.find(row => row.id === assetId);
             const displayPrice = asset ? Number(asset.price) : NaN;
             const cgPrice = Number(item.current_price);
-            const circulatingSupply = Number(item.circulating_supply);
+            const circulatingSupply = item.circulating_supply == null ? NaN : Number(item.circulating_supply);
             const priceForMarketCap = Number.isFinite(displayPrice) && displayPrice > 0 ? displayPrice : cgPrice;
             const patch = {};
-            if (Number.isFinite(circulatingSupply)) patch.circulatingSupply = circulatingSupply;
-            if (Number.isFinite(circulatingSupply) && Number.isFinite(priceForMarketCap)) {
+            if (Number.isFinite(circulatingSupply) && circulatingSupply > 0) patch.circulatingSupply = circulatingSupply;
+            if (Number.isFinite(circulatingSupply) && circulatingSupply > 0 && Number.isFinite(priceForMarketCap) && priceForMarketCap > 0) {
               patch.marketCap = priceForMarketCap * circulatingSupply;
-            } else if (Number.isFinite(Number(item.market_cap))) {
+            } else if (Number(item.market_cap) > 0) {
               patch.marketCap = Number(item.market_cap);
             }
             if (item.image) patch.logoUrl = item.image;
@@ -4842,7 +4844,7 @@ new Vue({
     },
 
     formatMarketCap(value) {
-      return this.formatVolume(value);
+      return Number(value) > 0 ? this.formatVolume(value) : '--';
     },
 
     formatBtc(value) {
@@ -4994,8 +4996,17 @@ new Vue({
         const asset = this.watchedAssets.find(item => item.id === id);
         if (!asset) return;
         const next = updates[id];
-        if (this.backendIsActive() && ['BTCUSDT', 'ETHUSDT'].includes(asset.pair) && next.sourceType !== 'backend') return;
-        const newPrice = Number(next.price);
+        if (this.backendIsActive() && ['BTCUSDT', 'ETHUSDT'].includes(asset.pair) && next.sourceType !== 'backend') {
+          if (next.marketCap > 0 || next.circulatingSupply > 0 || next.logoUrl) {
+            Object.assign(asset, {
+              ...(next.marketCap > 0 ? { marketCap: next.marketCap } : {}),
+              ...(next.circulatingSupply > 0 ? { circulatingSupply: next.circulatingSupply } : {}),
+              ...(next.logoUrl ? { logoUrl: next.logoUrl, logoBroken: false } : {})
+            });
+          }
+          return;
+        }
+        const newPrice = next.price == null ? NaN : Number(next.price);
 
         if (Number.isFinite(newPrice)) {
           const oldPrice = Number(asset.price);
@@ -5006,7 +5017,7 @@ new Vue({
             const changePct = Number(next.changePct);
             next.trend = Number.isFinite(changePct) && changePct < 0 ? 'down' : 'up';
           }
-          const supply = Number.isFinite(Number(next.circulatingSupply))
+          const supply = Number(next.circulatingSupply) > 0
             ? Number(next.circulatingSupply)
             : Number(asset.circulatingSupply);
           if (Number.isFinite(supply) && supply > 0) {
@@ -5112,8 +5123,7 @@ new Vue({
     },
 
     async pollCoinGeckoAsset(asset) {
-      const base = this.baseFromPair(asset.pair).toLowerCase();
-      const id = this.cgIdMap[base];
+      const id = asset.marketDataId;
       if (!id) throw new Error('coingecko id missing');
 
       const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(id)}&vs_currencies=usd&include_market_cap=true&include_24hr_change=true&include_24hr_vol=true&include_last_updated_at=true`;
@@ -5129,7 +5139,7 @@ new Vue({
         price,
         changePct: parseFloat(item.usd_24h_change),
         volume24h: parseFloat(item.usd_24h_vol),
-        marketCap: parseFloat(item.usd_market_cap),
+        ...(Number(item.usd_market_cap) > 0 ? { marketCap: Number(item.usd_market_cap) } : {}),
         updateTime: this.formatTimestamp(item.last_updated_at ? item.last_updated_at * 1000 : Date.now()),
         dataTime: item.last_updated_at ? this.formatTimestamp(item.last_updated_at * 1000) : '',
         receivedAt: this.formatTimestamp(Date.now()),
@@ -5143,7 +5153,7 @@ new Vue({
 
     async pollDexAssets(assets) {
       if (!assets.length) return;
-      const groups = assets.reduce((acc, asset) => {
+      const groups = assets.filter(asset => CryptoAIAssets.byChain[asset.chainId]?.capabilities.marketData).reduce((acc, asset) => {
         acc[asset.chainId] = acc[asset.chainId] || [];
         acc[asset.chainId].push(asset);
         return acc;
@@ -5164,14 +5174,14 @@ new Vue({
               const baseAddress = pair.baseToken && pair.baseToken.address ? pair.baseToken.address.toLowerCase() : '';
               const price = Number(pair.priceUsd);
               const liquidity = Number(pair.liquidity && pair.liquidity.usd);
-              return baseAddress === address
+              return pair.chainId === chainId && baseAddress === address
                 && Number.isFinite(price) && price > 0
                 && Number.isFinite(liquidity) && liquidity >= 0
                 && !!pair.pairAddress;
             });
             const quoteMatches = (pairs || []).filter(pair => {
               const quoteAddress = pair.quoteToken && pair.quoteToken.address ? pair.quoteToken.address.toLowerCase() : '';
-              return quoteAddress === address;
+              return pair.chainId === chainId && quoteAddress === address;
             });
 
             const best = baseMatches.sort((a, b) => Number(b.liquidity.usd) - Number(a.liquidity.usd))[0];
@@ -5198,16 +5208,17 @@ new Vue({
             const quoteToken = best.quoteToken || {};
             const token = baseToken;
             const quote = quoteToken;
-            const symbol = token.symbol || asset.symbol;
+            const verifiedMetadata = asset.metadataStatus === '链上已核验';
+            const symbol = verifiedMetadata ? asset.symbol : (token.symbol || asset.symbol);
             this.queueAssetUpdate(asset.id, {
               symbol,
-              displayName: token.name || asset.displayName,
+              displayName: verifiedMetadata ? asset.displayName : (token.name || asset.displayName),
               pair: `${symbol}/${quote.symbol || 'USD'}`,
-              logoUrl: (best.info && best.info.imageUrl) || asset.logoUrl || this.getCoinLogoUrl(symbol),
+              logoUrl: (best.info && best.info.imageUrl) || asset.logoUrl,
               price: parseFloat(best.priceUsd),
               changePct: parseFloat(best.priceChange && best.priceChange.h24),
               volume24h: parseFloat(best.volume && best.volume.h24),
-              marketCap: parseFloat(best.marketCap || best.fdv),
+              marketCap: Number(best.marketCap) > 0 ? Number(best.marketCap) : null,
               dexTxns: best.txns || {},
               dexLiquidityUsd: parseFloat(best.liquidity && best.liquidity.usd),
               dexPairAddress: best.pairAddress || '',
