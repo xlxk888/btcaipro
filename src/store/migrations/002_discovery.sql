@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS discovered_assets (asset_id TEXT PRIMARY KEY, chain TEXT NOT NULL, chain_id TEXT, contract_address TEXT, mint_address TEXT, name TEXT, symbol TEXT, decimals INTEGER, discovered_at INTEGER, verified_on_chain INTEGER NOT NULL, source TEXT, updated_at INTEGER NOT NULL, payload TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_discovered_assets_chain_symbol ON discovered_assets(chain, symbol);
+CREATE TABLE IF NOT EXISTS discovered_pools (pool_id TEXT PRIMARY KEY, chain TEXT NOT NULL, pool_address TEXT NOT NULL, dex TEXT, token0 TEXT, token1 TEXT, created_block INTEGER, liquidity REAL, volume REAL, first_swap_at INTEGER, last_swap_at INTEGER, updated_at INTEGER NOT NULL, payload TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS discovery_state (state_key TEXT PRIMARY KEY, checkpoint TEXT NOT NULL, updated_at INTEGER NOT NULL);

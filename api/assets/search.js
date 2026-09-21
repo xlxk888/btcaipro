@@ -1,38 +1,29 @@
-import { getCache } from '@vercel/functions';
-import { DiscoveryRepository } from '../../src/discovery/repository.js';
+import { SharedDiscoveryRepository } from '../../src/discovery/shared-repository.js';
 import { createAssetSearchService, DexMarketProvider } from '../../src/discovery/search.js';
 
-// The serverless reader never scans chains. A shared discovery worker must
-// publish an index snapshot to this namespace before onchain results appear.
 let service;
-let lastSnapshotAt = 0;
-let cache;
 let repository;
-function initialize() {
-  if (service) return;
-  cache = getCache({ namespace: 'asset-discovery' });
-  repository = new DiscoveryRepository();
-  service = createAssetSearchService({ repository, provider: new DexMarketProvider() });
+let initialization;
+async function initialize() {
+  if (service) return service;
+  initialization ||= (async () => {
+    if (process.env.VERCEL && !process.env.DATABASE_URL) throw new Error('Shared discovery DATABASE_URL is required in production');
+    repository = await SharedDiscoveryRepository.create({ databaseUrl: process.env.DATABASE_URL || '', databasePath: process.env.DATABASE_PATH });
+    service = createAssetSearchService({ repository, provider: new DexMarketProvider() });
+    return service;
+  })().catch(error => { initialization = null; throw error; });
+  return initialization;
 }
 
 export default {
   async fetch(request) {
     if (request.method !== 'GET') return Response.json({ error: 'method_not_allowed' }, { status: 405 });
-    initialize();
+    try { await initialize(); } catch (_) { return Response.json({ error: 'discovery_index_unavailable' }, { status: 503 }); }
     const url = new URL(request.url);
     const q = url.searchParams.get('q') || '';
     const chain = url.searchParams.get('chain') || 'auto';
-    if (Date.now() - lastSnapshotAt > 60_000) {
-      try {
-        const snapshot = await cache.get('index-v1');
-        if (snapshot?.assets && snapshot?.pools) {
-          repository.assets = new Map(snapshot.assets);
-          repository.pools = new Map(snapshot.pools);
-        }
-      } catch (_) { /* A warm instance keeps its last verified index. */ }
-      lastSnapshotAt = Date.now();
-    }
-    const result = await service.search(q, chain);
+    let result;
+    try { result = await service.search(q, chain); } catch (_) { return Response.json({ error: 'discovery_index_unavailable' }, { status: 503 }); }
     return Response.json(result, {
       status: result.status === 'ok' ? 200 : 400,
       headers: { 'Cache-Control': 'public, max-age=0, s-maxage=60' }

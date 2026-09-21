@@ -14,7 +14,7 @@ const shutdown = async signal => {
   runtime.logger.info('server_stopping', { signal });
   await runtime.worker.stop();
   runtime.discovery.stop();
-  server.close(async () => { await runtime.store.close(); process.exit(0); });
+  server.close(async () => { await runtime.discovery.repository.close(); await runtime.store.close(); process.exit(0); });
 };
 process.once('SIGINT', () => void shutdown('SIGINT'));
 process.once('SIGTERM', () => void shutdown('SIGTERM'));

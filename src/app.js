@@ -12,7 +12,7 @@ const send = (response, status, payload, headers = {}) => {
   response.end(body);
 };
 
-export function createApp({ store, cache, worker, discovery, config, startedAt = Date.now() }) {
+export function createApp({ store, cache, worker, discovery, nativeMarket, moneroNetwork, config, startedAt = Date.now() }) {
   return async function app(request, response) {
     const url = new URL(request.url, 'http://localhost');
     const cors = config.corsOrigin ? { 'access-control-allow-origin': config.corsOrigin } : {};
@@ -22,6 +22,15 @@ export function createApp({ store, cache, worker, discovery, config, startedAt =
       const result = await discovery.search.search(url.searchParams.get('q'), url.searchParams.get('chain') || 'auto');
       return send(response, result.status === 'invalid-query' || result.status === 'invalid-chain' ? 400 : 200, result,
         { ...cors, 'cache-control': 'public, max-age=0, s-maxage=60' });
+    }
+    if (url.pathname === '/api/assets/market') {
+      const result = await nativeMarket.read(url.searchParams.get('assetId'));
+      return send(response, result.status === 'unsupported' ? 400 : result.status === 'unavailable' ? 503 : 200, result,
+        { ...cors, 'cache-control': 'public, max-age=0, s-maxage=60' });
+    }
+    if (url.pathname === '/api/monero/network') {
+      const result = await moneroNetwork.readNetwork();
+      return send(response, result.status === 'ok' ? 200 : 503, result, cors);
     }
     if (url.pathname === '/api/health') return send(response, 200, { status: 'ok', service: 'crypto-ai-market', now: new Date().toISOString(), uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000), worker: worker?.status() || { started: false }, cache: cache.status(), database: { state: 'healthy', backend: store.constructor.name } }, cors);
     if (url.pathname === '/api/market/snapshot') {

@@ -4743,6 +4743,13 @@ new Vue({
 
     routeWatchedAssets() {
       this.watchedAssets.forEach(asset => {
+        if (asset.canonicalAssetId === 'monero') {
+          asset.binanceEligible = false;
+          asset.source = asset.sourceType === 'native-market' ? asset.source : '服务器行情';
+          asset.sourceType = 'native-market';
+          asset.status = Number(asset.price) > 0 ? asset.status : '等待 Monero 行情';
+          return;
+        }
         if (asset.type === 'dex') {
           asset.binanceEligible = false;
           asset.source = '链上行情';
@@ -4911,7 +4918,7 @@ new Vue({
 
     async refreshMarketCaps() {
       const idByAsset = this.watchedAssets.reduce((acc, asset) => {
-        if (asset.type !== 'cex') return acc;
+        if (asset.type !== 'cex' || asset.canonicalAssetId === 'monero') return acc;
         const id = asset.marketDataId;
         if (id) acc[asset.id] = id;
         return acc;
@@ -5322,6 +5329,7 @@ new Vue({
     },
 
     async pollCexFallback(asset) {
+      if (asset.canonicalAssetId === 'monero') return this.pollNativeMarketAsset(asset);
       try {
         await this.pollOkxAsset(asset);
       } catch (okxError) {
@@ -5337,6 +5345,28 @@ new Vue({
             stale: Number(asset.price) > 0
           });
         }
+      }
+    },
+
+    async pollNativeMarketAsset(asset) {
+      try {
+        const response = await this.fetchWithSoftTimeout('/api/assets/market?assetId=monero', 8000);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (data.assetId !== 'monero' || !(Number(data.price) > 0)) throw new Error('Monero canonical quote unavailable');
+        this.queueAssetUpdate(asset.id, {
+          price: data.price, changePct: data.change24h, volume24h: data.volume24h,
+          marketCap: Number(data.marketCap) > 0 ? data.marketCap : null,
+          marketCapAt: data.updatedAt, marketCapSource: data.marketCapSource || '',
+          marketCapDetail: data.marketCap ? `canonical ID: monero；${data.marketCapSource} 流通市值` : '来源未返回可核对的流通市值',
+          updateTime: this.formatTimestamp(data.updatedAt), dataTime: data.dataTime ? this.formatTimestamp(Date.parse(data.dataTime)) : '',
+          receivedAt: this.formatTimestamp(Date.parse(data.receivedAt) || Date.now()), stale: Boolean(data.stale),
+          source: data.source + (data.status === 'fallback' ? ' · 备用' : ''), sourceType: 'native-market',
+          status: data.status === 'cached' ? '最近数据 / 缓存' : data.status === 'fallback' ? '备用数据' : '服务器行情'
+        });
+      } catch (_) {
+        this.queueAssetUpdate(asset.id, { status: Number(asset.price) > 0 ? '最近数据 / 缓存' : 'Monero 行情暂不可用',
+          stale: Number(asset.price) > 0, source: Number(asset.price) > 0 ? asset.source : '无可用源', sourceType: 'native-market' });
       }
     },
 

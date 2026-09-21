@@ -1,7 +1,9 @@
 {
   "functions": {
     "api/bitcoin/network.js": { "maxDuration": 15 },
-    "api/assets/search.js": { "maxDuration": 10 }
+    "api/assets/search.js": { "maxDuration": 10 },
+    "api/assets/market.js": { "maxDuration": 15 },
+    "api/monero/network.js": { "maxDuration": 15 }
   },
   "rewrites": [
     { "source": "/sources", "destination": "/sources.html" }

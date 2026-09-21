@@ -12,11 +12,16 @@ export class DexMarketProvider {
     this.now = now;
     this.ttlMs = ttlMs;
     this.cache = new Map();
+    this.inFlight = new Map();
   }
   async search(q, chain = 'auto') {
     const key = `${chain}:${q.toLowerCase()}`;
     const cached = this.cache.get(key);
     if (cached && cached.expires > this.now()) return cached.items;
+    if (!this.inFlight.has(key)) this.inFlight.set(key, this.fetchSearch(q, chain, key).finally(() => this.inFlight.delete(key)));
+    return this.inFlight.get(key);
+  }
+  async fetchSearch(q, chain, key) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4000);
     try {
@@ -66,9 +71,10 @@ export function createAssetSearchService({ repository, provider = new DexMarketP
         .map(item => ({ ...item, chain: item.network, source: 'canonical-registry', verifiedOnChain: item.assetType === 'native' }));
       // Preserve canonical global search behavior; discovered assets always require exact chain identity.
       if (canonical.length) return { candidates: canonical, status: 'ok' };
-      const indexed = repository.search(q, chain);
+      const index = repository.readIndex ? await repository.readIndex(q, chain) : repository;
+      const indexed = index.search(q, chain);
       let fallback = [];
-      try { fallback = await provider.search(q, chain); } catch (_) { /* Own index survives provider outages. */ }
+      if (!indexed.length || (q.length <= 3 && indexed.length < 2)) try { fallback = await provider.search(q, chain); } catch (_) { /* Own index survives provider outages. */ }
       const byId = new Map();
       for (const candidate of [...fallback, ...indexed, ...canonical]) byId.set(candidate.id, candidate);
       return { candidates: [...byId.values()].sort((a, b) => {

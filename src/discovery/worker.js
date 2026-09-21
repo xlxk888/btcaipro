@@ -1,13 +1,23 @@
 import path from 'node:path';
 import { DiscoveryRepository } from './repository.js';
+import { SharedDiscoveryRepository } from './shared-repository.js';
 import { EvmDiscoveryAdapter, SolanaDiscoveryAdapter, TronDiscoveryAdapter } from './adapters.js';
 import { DISCOVERY_CHAINS } from './registry.js';
 import { createAssetSearchService, DexMarketProvider } from './search.js';
 
-export async function createDiscoveryRuntime({ file = path.resolve('data/asset-discovery.json'), fetchImpl = fetch,
+export async function createDiscoveryRuntime({ file = path.resolve('data/asset-discovery.json'), databaseUrl, databasePath, repository: suppliedRepository, fetchImpl = fetch,
   chains = Object.keys(DISCOVERY_CHAINS), intervalMs = 60_000, logger } = {}) {
   chains ||= Object.keys(DISCOVERY_CHAINS);
-  const repository = await new DiscoveryRepository({ file }).load();
+  const repository = suppliedRepository || (databaseUrl !== undefined || databasePath !== undefined
+    ? await SharedDiscoveryRepository.create({ databaseUrl, databasePath }) : new DiscoveryRepository({ file }));
+  if (!suppliedRepository) await repository.load();
+  if (repository instanceof SharedDiscoveryRepository && !databaseUrl && !repository.assets.size) {
+    const previous = await new DiscoveryRepository({ file }).load();
+    for (const asset of previous.assets.values()) repository.upsertAsset(asset);
+    for (const pool of previous.pools.values()) repository.upsertPool(pool);
+    for (const [key, checkpoint] of previous.cursors) repository.cursors.set(key, checkpoint);
+    if (previous.assets.size || previous.cursors.size) await repository.persist();
+  }
   const adapters = chains.map(chain => chain === 'solana'
     ? new SolanaDiscoveryAdapter({ chain, repository, fetchImpl })
     : chain === 'tron' ? new TronDiscoveryAdapter({ chain, repository, fetchImpl })

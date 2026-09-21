@@ -62,8 +62,8 @@
   ].map(([canonicalAssetId, symbol, name, pair, marketDataId, id]) => ({
     canonicalAssetId, symbol, name, pair, marketDataId, id,
     marketCapFallbackId: marketCapFallbackIds[canonicalAssetId] || '',
-    assetType: ['bitcoin:BTC', 'hyperliquid:HYPE'].includes(id) ? 'native' : 'canonical',
-    network: id === 'bitcoin:BTC' ? 'Bitcoin' : id === 'hyperliquid:HYPE' ? 'Hyperliquid' : id === 'evm:1:native' ? 'Ethereum' : '全局资产',
+    assetType: ['bitcoin:BTC', 'hyperliquid:HYPE', 'canonical:monero'].includes(id) ? 'native' : 'canonical',
+    network: id === 'bitcoin:BTC' ? 'Bitcoin' : id === 'hyperliquid:HYPE' ? 'Hyperliquid' : id === 'canonical:monero' ? 'Monero' : id === 'evm:1:native' ? 'Ethereum' : '全局资产',
     logoUrl: id === 'hyperliquid:HYPE' ? 'https://coin-images.coingecko.com/coins/images/50882/large/hyperliquid.jpg?1729431300' : ''
   }));
   const byAlias = new Map();
