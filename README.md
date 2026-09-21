@@ -113,6 +113,7 @@ Events store `eventId`, asset, type, direction, severity, time window, detection
 
 ## API
 
+- `GET /api/assets/search?q=PONS&chain=robinhood` (canonical, shared onchain index, then DEX market suggestions)
 - `GET /api/health`
 - `GET /api/market/snapshot`
 - `GET /api/market/quotes?symbols=BTCUSDT,ETHUSDT`
@@ -123,6 +124,14 @@ Events store `eventId`, asset, type, direction, severity, time window, detection
 - `GET /api/miners/catalog`
 
 The source observations returned by snapshot and quote endpoints retain timing, staleness, source and confidence fields.
+
+## Local token and pool discovery
+
+Run `DISCOVERY_ENABLED=true WORKER_ENABLED=false DISCOVERY_CHAINS=robinhood npm start` to run one server-side indexer for the selected chains. Omit `DISCOVERY_CHAINS` to monitor every configured chain. The index is stored in the ignored `data/asset-discovery.json`, survives browser sessions and server restarts, and is shared by all clients of this server. Chain RPC polling never runs in the browser or in `/api/assets/search`.
+
+The DEX registry includes verified Uniswap V2 factories for Ethereum, Arbitrum, Base, Polygon, Avalanche and Robinhood, PancakeSwap V2 on BSC, and Uniswap V3 on Robinhood. The EVM worker checks factory creation events, live liquidity, swaps, and ERC20 contract metadata. A bounded provider seed lets the worker check older Robinhood pools against their factory on chain. Raydium CPMM on Solana checks a bounded recent transaction window, pool state, vault balances, swaps and SPL mints; it is not a complete historical or high-throughput Solana indexer. Names and market figures require a matching DEX market record. HyperEVM awaits a confirmed DEX factory; Tron remains limited; Bitcoin is excluded from token discovery. The public Solana RPC may rate limit indexing.
+
+The Vercel search function reads a shared Runtime Cache index if an external publisher has supplied one and can return explicitly unverified DEX suggestions. This local phase does not schedule or deploy a Vercel index publisher; a production deployment of the search function alone will not contain the local worker's onchain index. No market cap is inferred from FDV in discovery results.
 
 ## Storage, cache and operations
 

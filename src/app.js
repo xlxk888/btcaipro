@@ -12,12 +12,17 @@ const send = (response, status, payload, headers = {}) => {
   response.end(body);
 };
 
-export function createApp({ store, cache, worker, config, startedAt = Date.now() }) {
+export function createApp({ store, cache, worker, discovery, config, startedAt = Date.now() }) {
   return async function app(request, response) {
     const url = new URL(request.url, 'http://localhost');
     const cors = config.corsOrigin ? { 'access-control-allow-origin': config.corsOrigin } : {};
     if (request.method === 'OPTIONS') { response.writeHead(204, { ...cors, 'access-control-allow-methods': 'GET, OPTIONS' }); return response.end(); }
     if (request.method !== 'GET') return send(response, 405, { error: 'method_not_allowed' }, cors);
+    if (url.pathname === '/api/assets/search') {
+      const result = await discovery.search.search(url.searchParams.get('q'), url.searchParams.get('chain') || 'auto');
+      return send(response, result.status === 'invalid-query' || result.status === 'invalid-chain' ? 400 : 200, result,
+        { ...cors, 'cache-control': 'public, max-age=0, s-maxage=60' });
+    }
     if (url.pathname === '/api/health') return send(response, 200, { status: 'ok', service: 'crypto-ai-market', now: new Date().toISOString(), uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000), worker: worker?.status() || { started: false }, cache: cache.status(), database: { state: 'healthy', backend: store.constructor.name } }, cors);
     if (url.pathname === '/api/market/snapshot') {
       let snapshot = null; const cached = await cache.get('market:snapshot:latest');

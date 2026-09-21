@@ -3,6 +3,8 @@ data/*.sqlite
 data/*.sqlite-shm
 data/*.sqlite-wal
 data/*.jsonl
+data/asset-discovery.json
+data/asset-discovery.json.*.tmp
 coverage/
 node_modules/
 npm-debug.log*

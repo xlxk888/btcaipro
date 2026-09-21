@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
 import { MemoryCache } from '../src/cache/memory-cache.js';
 import { MemoryEventStore } from '../src/store/memory-store.js';
+import { DiscoveryRepository } from '../src/discovery/repository.js';
+import { createAssetSearchService } from '../src/discovery/search.js';
 
 function fixtureApp() {
   const store = new MemoryEventStore(); const cache = new MemoryCache();
@@ -10,7 +12,8 @@ function fixtureApp() {
   store.saveEvent({ eventId: 'e1', asset: 'BTCUSDT', eventType: 'price_move', severity: 'high', detectedAt: '2026-01-01T00:00:01Z' });
   store.saveSourceStatus({ id: 'fixture', state: 'healthy' });
   const worker = { status: () => ({ started: true }) };
-  return createApp({ store, cache, worker, config: { corsOrigin: '' } });
+  const discovery = { search: createAssetSearchService({ repository: new DiscoveryRepository(), provider: { async search() { return []; } } }) };
+  return createApp({ store, cache, worker, discovery, config: { corsOrigin: '' } });
 }
 
 async function invoke(app, url, method = 'GET') {
@@ -44,6 +47,13 @@ test('events and latest event APIs return durable events', async () => {
 test('source status API exposes adapter health', async () => {
   const result = await invoke(fixtureApp(), '/api/sources/status');
   assert.equal(result.json.data[0].id, 'fixture');
+});
+
+test('asset search endpoint serves canonical assets without ticker lookup on an exchange', async () => {
+  const result = await invoke(fixtureApp(), '/api/assets/search?q=UNI');
+  assert.equal(result.status, 200);
+  assert.equal(result.json.candidates[0].canonicalAssetId, 'uniswap');
+  assert.equal((await invoke(fixtureApp(), '/api/assets/search?q=')).status, 400);
 });
 
 test('API rejects writes and unknown routes', async () => {

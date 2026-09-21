@@ -2114,7 +2114,7 @@
         <input
           class="asset-input"
           v-model.trim="assetInput"
-          :placeholder="selectedChainId === 'auto' ? '输入已收录资产名称/简称，或选择链后输入地址' : '输入已收录资产名称/简称，或该链合约/Mint 地址'"
+          :placeholder="selectedChainId === 'auto' ? '搜索资产名称/简称，或选择链后输入地址' : '搜索该链资产名称/简称，或输入合约/Mint 地址'"
           @input="assetCandidates = []"
           autocomplete="off"
         />
@@ -2128,11 +2128,11 @@
       <div class="asset-candidates" v-if="assetCandidates.length" aria-label="请选择资产">
         <button type="button" class="asset-candidate" v-for="candidate in assetCandidates" :key="candidate.id || `${candidate.chainId}:${candidate.contractAddress || candidate.mintAddress}`" @click="selectAssetCandidate(candidate)">
           {{ candidate.name }} ({{ candidate.symbol }})
-          <small>{{ candidate.network }}{{ candidate.contractAddress || candidate.mintAddress ? ` · ${candidate.contractAddress || candidate.mintAddress}` : '' }}</small>
+          <small>{{ candidate.network || CryptoAIAssets.byChain[candidate.chain]?.name }}{{ candidate.contractAddress || candidate.mintAddress ? ` · ${candidate.contractAddress || candidate.mintAddress}` : '' }}{{ candidate.dex ? ` · ${candidate.dex}` : '' }}{{ candidate.liquidity ? ` · 流动性 $${Number(candidate.liquidity).toLocaleString()}` : '' }}{{ candidate.source === 'onchain-index' ? ' · 链上已核验' : '' }}{{ candidate.source === 'dex-market-unverified' ? ' · 池资料待链上核验' : '' }}</small>
         </button>
       </div>
       <div class="watch-hint">
-        已收录资产可直接按名称或简称添加；未收录 Token 须选择链并输入合约/Mint 地址。{{ selectedChainHint }} 手机端点击打开K线，长按拖动排序，左滑删除。
+        已收录资产可直接添加；链上发现资产须确认链及合约。未找到时可选择链并输入合约/Mint 地址。{{ selectedChainHint }} 手机端点击打开K线，长按拖动排序，左滑删除。
       </div>
 
       <div class="watch-table">
@@ -4777,7 +4777,21 @@ new Vue({
         this.watchError = '请输入已收录资产名称/简称，或所选链的合约地址。';
         return;
       }
-      const candidates = CryptoAIAssets.searchCandidates(raw, this.selectedChainId);
+      let candidates = CryptoAIAssets.searchCandidates(raw, this.selectedChainId);
+      let fromDiscovery = false;
+      if (!candidates.length && !this.isLikelyContract(raw)) {
+        try {
+          const response = await this.fetchWithSoftTimeout(`/api/assets/search?q=${encodeURIComponent(raw)}&chain=${encodeURIComponent(this.selectedChainId)}`, 4500);
+          if (response.ok) { candidates = (await response.json()).candidates || []; fromDiscovery = true; }
+        } catch (_) { /* Manual address entry remains available if discovery is offline. */ }
+      }
+      if (fromDiscovery && candidates.length && !candidates[0].canonicalAssetId) {
+        this.assetCandidates = candidates.map(item => ({ ...item, selectedChainId: item.selectedChainId || item.chain }));
+        this.watchError = candidates.length > 1
+          ? '找到多个链上资产，请按链和合约地址选择。'
+          : '找到链上资产，请核对链、合约和交易池后选择。';
+        return;
+      }
       if (candidates.length > 1) {
         this.assetCandidates = candidates;
         this.watchError = '该名称/简称对应多个已收录资产，请从下方选择。';
@@ -4832,7 +4846,7 @@ new Vue({
       if (candidate.canonicalAssetId) {
         this.finishAddWatchAsset(this.createKnownAsset(candidate));
       } else {
-        this.selectedChainId = candidate.selectedChainId;
+        this.selectedChainId = candidate.selectedChainId || candidate.chain;
         this.assetInput = candidate.mintAddress || candidate.contractAddress;
         await this.addWatchAsset();
       }
