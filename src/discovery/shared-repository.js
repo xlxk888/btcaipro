@@ -72,7 +72,7 @@ export class SharedDiscoveryRepository extends DiscoveryRepository {
       const pools = await this.rows(pg
         ? 'SELECT pool_id,payload FROM discovered_pools WHERE chain=$1 AND (token0=$2 OR token1=$2) LIMIT 100'
         : 'SELECT pool_id,payload FROM discovered_pools WHERE chain=? AND (token0=? OR token1=?) LIMIT 100',
-      [asset.chain, token, token]);
+      pg ? [asset.chain, token] : [asset.chain, token, token]);
       for (const row of pools) result.pools.set(row.pool_id, typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload);
     }
     return result;

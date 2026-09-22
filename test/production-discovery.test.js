@@ -15,6 +15,12 @@ class SharedPgPool {
   static data = { assets: new Map(), pools: new Map(), state: new Map() };
   constructor() { this.data = SharedPgPool.data; }
   async query(sql, args = []) {
+    const bindCount = Math.max(0, ...[...sql.matchAll(/\$(\d+)/g)].map(match => Number(match[1])));
+    if (bindCount !== args.length) {
+      const error = new Error('bind message supplies a different number of parameters');
+      error.code = '08P01';
+      throw error;
+    }
     if (sql.includes('CREATE TABLE')) return { rows: [] };
     if (sql.startsWith('INSERT INTO discovered_assets')) {
       this.data.assets.set(args[0], { asset_id: args[0], chain: args[1], payload: JSON.parse(args[12]) }); return { rows: [] };
@@ -50,6 +56,24 @@ class SharedPgPool {
   }
   async end() {}
 }
+
+test('PostgreSQL readIndex binds pool lookup correctly and returns the PONS pool', async () => {
+  SharedPgPool.data = { assets: new Map(), pools: new Map(), state: new Map() };
+  const repository = await SharedDiscoveryRepository.create({ databaseUrl: 'postgres://test/shared', PoolClass: SharedPgPool });
+  try {
+    repository.upsertAsset({ chain: 'robinhood', chainId: 4663, contractAddress: PONS,
+      name: 'Pons', symbol: 'PONS', verifiedOnChain: true });
+    repository.upsertPool({ chain: 'robinhood', poolAddress, token0: PONS, token1: address('a'),
+      verifiedOnChain: true, liquidityPositive: true, firstSwapAt: 123 });
+    await repository.persist();
+    const index = await repository.readIndex('PONS', 'robinhood');
+    assert.equal(index.assets.size, 1);
+    assert.equal(index.pools.size, 1);
+    assert.equal(index.search('PONS')[0].poolAddress, poolAddress);
+  } finally {
+    await repository.close();
+  }
+});
 
 test('persistent worker writes PostgreSQL and Vercel handler reads the same PONS, AI and checkpoints', async () => {
   SharedPgPool.data = { assets: new Map(), pools: new Map(), state: new Map() };
