@@ -88,6 +88,10 @@ export function createApp({ store, cache, worker, discovery, nativeMarket, moner
       const body = fs.readFileSync(path.join(root, 'asset-registry.js'));
       response.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8', 'content-length': body.length }); return response.end(body);
     }
+    if (url.pathname === '/stock-token-search.js') {
+      const body = fs.readFileSync(path.join(root, 'stock-token-search.js'));
+      response.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8', 'content-length': body.length }); return response.end(body);
+    }
     return send(response, 404, { error: 'not_found' }, cors);
   };
 }

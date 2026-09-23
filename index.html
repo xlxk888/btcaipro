@@ -793,6 +793,17 @@
     .asset-candidate { width:100%; text-align:left; padding:8px 10px; border:1px solid rgba(96,165,250,.35); border-radius:8px; background:#101d31; color:#e2e8f0; cursor:pointer; }
     .asset-candidate:hover { border-color:#60a5fa; background:#172b49; }
     .asset-candidate small { display:block; margin-top:3px; color:#91a4c0; overflow-wrap:anywhere; }
+    .asset-candidate.stock-token-result { border-color: rgba(34,197,94,.42); }
+    .asset-candidate.stock-token-result:hover { border-color:#22c55e; background:#102b28; }
+    .asset-candidate-main { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .asset-candidate-price { color:#86efac; font-weight:900; white-space:nowrap; }
+    .asset-section-tabs, .stock-panel-tabs { display:flex; align-items:center; gap:7px; margin:0 0 10px; }
+    .asset-section-tab, .stock-panel-tab {
+      min-height:32px; padding:5px 11px; border:1px solid rgba(72,99,150,.55); border-radius:8px;
+      background:#0a111f; color:#91a4c0; font-size:.76rem; font-weight:900; cursor:pointer;
+    }
+    .asset-section-tab.active, .stock-panel-tab.active { border-color:#3b82f6; background:#14284a; color:#dbeafe; }
+    .stock-panel-tab.tokens.active { border-color:#22c55e; background:#102b28; color:#bbf7d0; }
     .watch-hint { color: #8fa0ba; font-size: .75rem; margin-bottom: 10px; }
     .watch-table {
       flex: 1;
@@ -2110,12 +2121,16 @@
         <span>自选币行情</span>
         <span class="status-pill" :class="wsStatus">{{ wsStatusText }}</span>
       </h2>
+      <nav class="asset-section-tabs" aria-label="资产类型">
+        <button class="asset-section-tab active" type="button">Crypto</button>
+        <button class="asset-section-tab" type="button" @click="showStockTokens">Stock Tokens</button>
+      </nav>
       <form class="add-form" @submit.prevent="addWatchAsset">
         <input
           class="asset-input"
           v-model.trim="assetInput"
           :placeholder="selectedChainId === 'auto' ? '搜索资产名称/简称，或选择链后输入地址' : '搜索该链资产名称/简称，或输入合约/Mint 地址'"
-          @input="assetCandidates = []"
+          @input="handleAssetSearchInput"
           autocomplete="off"
         />
         <select class="chain-select" v-model="selectedChainId">
@@ -2126,9 +2141,19 @@
       </form>
       <div class="watch-error" v-if="watchError">{{ watchError }}</div>
       <div class="asset-candidates" v-if="assetCandidates.length" aria-label="请选择资产">
-        <button type="button" class="asset-candidate" v-for="candidate in assetCandidates" :key="candidate.id || `${candidate.chainId}:${candidate.contractAddress || candidate.mintAddress}`" @click="selectAssetCandidate(candidate)">
-          {{ candidate.name }} ({{ candidate.symbol }})
-          <small>{{ candidate.network || CryptoAIAssets.byChain[candidate.chain]?.name }}{{ candidate.contractAddress || candidate.mintAddress ? ` · ${candidate.contractAddress || candidate.mintAddress}` : '' }}{{ candidate.dex ? ` · ${candidate.dex}` : '' }}{{ candidate.liquidity ? ` · 流动性 $${Number(candidate.liquidity).toLocaleString()}` : '' }}{{ candidate.source === 'onchain-index' ? ' · 链上已核验' : '' }}{{ candidate.source === 'dex-market-unverified' ? ' · 池资料待链上核验' : '' }}</small>
+        <button type="button" class="asset-candidate" :class="{ 'stock-token-result': candidate.candidateType?.startsWith('stock_token') }" v-for="candidate in assetCandidates" :key="assetCandidateKey(candidate)" @click="selectAssetCandidate(candidate)">
+          <template v-if="candidate.candidateType === 'stock_token_market'">
+            <span class="asset-candidate-main"><strong>{{ candidate.displaySymbol }}</strong><span class="asset-candidate-price">{{ candidate.price ? '$' + Number(candidate.price).toLocaleString(undefined, { maximumFractionDigits: 4 }) : '暂无价格' }}</span></span>
+            <small>{{ candidate.underlyingName }} / {{ candidate.underlyingSymbol }} · {{ candidate.venue }} · {{ candidate.issuer }} · {{ candidate.sourceType === 'exchange' ? 'Exchange Price' : 'Issuer Reference' }}</small>
+          </template>
+          <template v-else-if="candidate.candidateType === 'stock_token_category'">
+            <span class="asset-candidate-main"><strong>{{ candidate.symbol }}</strong><span>查看栏目</span></span>
+            <small>{{ candidate.name }} · 筛选当前真实市场</small>
+          </template>
+          <template v-else>
+            {{ candidate.name }} ({{ candidate.symbol }})
+            <small>{{ candidate.network || CryptoAIAssets.byChain[candidate.chain]?.name }}{{ candidate.contractAddress || candidate.mintAddress ? ` · ${candidate.contractAddress || candidate.mintAddress}` : '' }}{{ candidate.dex ? ` · ${candidate.dex}` : '' }}{{ candidate.liquidity ? ` · 流动性 $${Number(candidate.liquidity).toLocaleString()}` : '' }}{{ candidate.source === 'onchain-index' ? ' · 链上已核验' : '' }}{{ candidate.source === 'dex-market-unverified' ? ' · 池资料待链上核验' : '' }}</small>
+          </template>
         </button>
       </div>
       <div class="watch-hint">
@@ -2227,11 +2252,57 @@
 
     </div>
 
-    <div class="card span-3 stocks-card">
+    <div id="stock-market-card" class="card span-3 stocks-card">
       <h2>
-        <span>股票代币</span>
-        <span class="module-status" :class="stockTokenHealth.errors ? 'warn' : 'ok'">{{ stockTokenHealth.active }} 个市场</span>
+        <span>{{ stockPanelMode === 'stocks' ? '美股' : '股票代币' }}</span>
+        <span v-if="stockPanelMode === 'stocks'" class="module-status" :class="usMarketInfo.badge">{{ usMarketInfo.label }}</span>
+        <span v-else class="module-status" :class="stockTokenHealth.errors ? 'warn' : 'ok'">{{ stockTokenHealth.active }} 个市场</span>
       </h2>
+      <nav class="stock-panel-tabs" aria-label="股票栏目">
+        <button class="stock-panel-tab" :class="{ active: stockPanelMode === 'stocks' }" type="button" @click="selectStockPanel('stocks')">美股</button>
+        <button class="stock-panel-tab tokens" :class="{ active: stockPanelMode === 'tokens' }" type="button" @click="selectStockPanel('tokens')">股票代币 / Stock Tokens</button>
+      </nav>
+
+      <template v-if="stockPanelMode === 'stocks'">
+        <div class="stock-market-box">
+          <div class="market-state-item"><span>行情含义</span><strong>{{ usMarketInfo.desc }}</strong></div>
+          <div class="market-state-item"><span>本地时间</span><strong>{{ formatClock(clockNow) }}</strong></div>
+          <div class="market-state-item"><span>US Eastern Time</span><strong>{{ usMarketInfo.etTime }}</strong></div>
+        </div>
+        <form class="stock-form" @submit.prevent="addStock">
+          <input class="stock-input" v-model.trim="stockInput" placeholder="添加股票，如 AAPL" autocomplete="off" />
+          <button class="stock-add-btn" type="submit">添加</button>
+        </form>
+        <div class="stock-hint">传统股票行情；手机端点击可打开K线。</div>
+        <div class="scroll stock-list">
+          <div v-for="(stock, index) in stocks" :key="stock.symbol" class="stable-row stock-row" title="点击打开美股K线" @click="handleStockClick(stock)">
+            <div class="stable-left">
+              <span class="stock-symbol">{{ stock.symbol }}</span>
+              <div class="stock-left-info">
+                <div class="stock-name">{{ stock.name }}</div>
+                <div class="muted stock-time">{{ stockTimeText(stock) }}<span v-if="stock.stale" class="data-stale-badge">旧数据</span></div>
+                <div class="stock-type">{{ stockTypeLabel(stock) }}</div>
+              </div>
+            </div>
+            <div class="stock-meta">
+              <div class="stock-val" :class="stock.trend || (stock.changePct >= 0 ? 'up' : 'down')">{{ stockPriceText(stock) }}</div>
+              <div class="stock-change" :class="stock.changePct >= 0 ? 'up' : 'down'">{{ stock.price === '--' ? '--' : (stock.changePct >= 0 ? '+' : '') + stock.changePct.toFixed(2) + '%' }}</div>
+            </div>
+            <div class="stock-actions">
+              <button class="sort-btn" type="button" @click.stop="moveStock(index, -1)" :disabled="index === 0" title="上移">↑</button>
+              <button class="sort-btn" type="button" @click.stop="moveStock(index, 1)" :disabled="index === stocks.length - 1" title="下移">↓</button>
+              <button class="delete-btn" type="button" @click.stop="removeStock(stock.symbol)" title="删除">×</button>
+            </div>
+            <div class="stock-mobile-meta">
+              <span>美东：{{ usMarketInfo.etTime }}</span><span>{{ usMarketInfo.desc }}</span>
+              <span>{{ stockTimeText(stock) }}<span v-if="stock.stale" class="data-stale-badge">旧数据</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="muted stocks-footer"><span>{{ usMarketInfo.footer }}</span><span>{{ stockStatus }}</span></div>
+      </template>
+
+      <template v-else>
       <div class="stock-market-box">
         <div class="market-state-item">
           <span>股票 / ETF</span>
@@ -2246,9 +2317,13 @@
           <strong>{{ stockTokenHealth.lastDiscoveryAt ? formatTimestamp(stockTokenHealth.lastDiscoveryAt) : '--' }}</strong>
         </div>
       </div>
+      <form class="stock-form" @submit.prevent>
+        <input class="stock-input" v-model.trim="stockTokenQuery" placeholder="搜索 CRCLX、AAPL、股票代币、ETF" autocomplete="off" />
+        <button class="stock-add-btn" type="button" @click="stockTokenQuery = ''">显示全部</button>
+      </form>
       <div class="stock-hint">交易所市场显示真实现货成交价；发行方参考价明确标注，不含股票永续。</div>
       <div class="scroll stock-list">
-        <div v-for="market in stockTokenMarkets" :key="market.canonicalId" class="stable-row stock-row">
+        <div v-for="market in filteredStockTokenMarkets" :key="market.canonicalId" class="stable-row stock-row">
             <div class="stable-left">
               <span class="stock-symbol">{{ market.displaySymbol }}</span>
               <div class="stock-left-info">
@@ -2275,12 +2350,13 @@
               <span>{{ formatTimestamp(market.lastUpdated) }}<span v-if="market.stale" class="data-stale-badge">旧数据</span></span>
             </div>
         </div>
-        <div v-if="!stockTokenMarkets.length" class="empty-state">{{ stockTokenStatus }}</div>
+        <div v-if="!filteredStockTokenMarkets.length" class="empty-state">{{ stockTokenQuery ? '没有匹配的股票代币市场' : stockTokenStatus }}</div>
       </div>
       <div class="muted stocks-footer">
         <span>来源：交易所现货 API</span>
         <span>{{ stockTokenStatus }}</span>
       </div>
+      </template>
       <div class="list-scroll-hint">列表内可上下滚动查看更多</div>
     </div>
 
@@ -2552,6 +2628,7 @@
 </div>
 
 <script src="asset-registry.js"></script>
+<script src="stock-token-search.js"></script>
 <script>
 new Vue({
   el: '#app',
@@ -2750,6 +2827,8 @@ new Vue({
     stockStatus: '等待刷新',
     stockRefreshMs: 60000,
     stockTokenMarkets: [],
+    stockPanelMode: 'tokens',
+    stockTokenQuery: '',
     stockTokenStatus: '等待后台 registry',
     stockTokenHealth: { active: 0, withPrice: 0, stale: 0, stocks: 0, etfs: 0, errors: 0, lastDiscoveryAt: null },
     stockRequestPending: false,
@@ -2811,6 +2890,9 @@ new Vue({
     gaugeChart: null
   },
   computed: {
+    filteredStockTokenMarkets() {
+      return CryptoAIStockTokenSearch.filter(this.stockTokenMarkets, this.stockTokenQuery);
+    },
     selectedChainHint() {
       const chain = CryptoAIAssets.byChain[this.selectedChainId];
       if (!chain) return '自动识别仅用于已收录资产名称；地址需要先选择链。';
@@ -4750,6 +4832,14 @@ new Vue({
         this.watchError = '请输入已收录资产名称/简称，或所选链的合约地址。';
         return;
       }
+      const stockTokenCandidates = this.stockTokenCandidates(raw);
+      if (stockTokenCandidates.length && this.selectedChainId === 'auto') {
+        this.assetCandidates = stockTokenCandidates;
+        this.watchError = stockTokenCandidates[0].candidateType === 'stock_token_category'
+          ? '找到股票代币栏目，点击进入。'
+          : `找到 ${stockTokenCandidates.length} 个股票代币市场，请按交易所、发行方和来源选择。`;
+        return;
+      }
       let candidates = CryptoAIAssets.searchCandidates(raw, this.selectedChainId);
       let fromDiscovery = false;
       if (!candidates.length && !this.isLikelyContract(raw)) {
@@ -4816,6 +4906,18 @@ new Vue({
     async selectAssetCandidate(candidate) {
       this.assetCandidates = [];
       this.watchError = '';
+      if (candidate.candidateType === 'stock_token_category') {
+        this.stockTokenQuery = candidate.filter;
+        this.assetInput = '';
+        this.showStockTokens();
+        return;
+      }
+      if (candidate.candidateType === 'stock_token_market') {
+        this.stockTokenQuery = candidate.underlyingSymbol || candidate.displaySymbol;
+        this.assetInput = '';
+        this.showStockTokens();
+        return;
+      }
       if (candidate.canonicalAssetId) {
         this.finishAddWatchAsset(this.createKnownAsset(candidate));
       } else {
@@ -4823,6 +4925,28 @@ new Vue({
         this.assetInput = candidate.mintAddress || candidate.contractAddress;
         await this.addWatchAsset();
       }
+    },
+
+    assetCandidateKey(candidate) {
+      return candidate.id || `${candidate.chainId}:${candidate.contractAddress || candidate.mintAddress}`;
+    },
+
+    stockTokenCandidates(query) {
+      return CryptoAIStockTokenSearch.search(this.stockTokenMarkets, query);
+    },
+
+    handleAssetSearchInput() {
+      this.watchError = '';
+      this.assetCandidates = this.selectedChainId === 'auto' ? this.stockTokenCandidates(this.assetInput) : [];
+    },
+
+    selectStockPanel(mode) {
+      this.stockPanelMode = mode === 'stocks' ? 'stocks' : 'tokens';
+    },
+
+    showStockTokens() {
+      this.stockPanelMode = 'tokens';
+      this.$nextTick(() => document.getElementById('stock-market-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     },
 
     finishAddWatchAsset(asset) {
@@ -5573,6 +5697,7 @@ new Vue({
           stale: Number(health.stale || 0), stocks: Number(health.stocks || 0), etfs: Number(health.etfs || 0),
           errors: Array.isArray(health.errors) ? health.errors.length : 0, lastDiscoveryAt: health.lastDiscoveryAt || null };
         this.stockTokenStatus = `${payload.count} 个真实市场 · ${new Date().toLocaleTimeString()}`;
+        if (this.assetInput) this.handleAssetSearchInput();
       } catch (error) {
         this.stockTokenStatus = this.stockTokenMarkets.length ? '后台异常 · 保留旧数据' : '股票代币 registry 暂不可用';
         this.stockTokenMarkets = this.stockTokenMarkets.map(market => ({ ...market, stale: true }));

@@ -6,6 +6,7 @@ import { webcrypto } from 'node:crypto';
 
 const root = new URL('../', import.meta.url);
 const registrySource = fs.readFileSync(new URL('asset-registry.js', root), 'utf8');
+const stockTokenSearchSource = fs.readFileSync(new URL('stock-token-search.js', root), 'utf8');
 const html = fs.readFileSync(new URL('index.html', root), 'utf8');
 const inlineScript = html.split('<script>')[1].split('</script>')[0];
 let options;
@@ -15,6 +16,7 @@ const context = vm.createContext({
   requestAnimationFrame(callback) { callback(); return 1; }
 });
 vm.runInContext(registrySource, context);
+vm.runInContext(stockTokenSearchSource, context);
 vm.runInContext(inlineScript, context);
 const registry = context.CryptoAIAssets;
 

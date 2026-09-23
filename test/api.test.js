@@ -65,6 +65,7 @@ test('dashboard assets and Sources page are served', async () => {
   const app = fixtureApp();
   for (const [url, expectedType, marker] of [
     ['/asset-registry.js', 'application/javascript', 'CryptoAIAssets'],
+    ['/stock-token-search.js', 'application/javascript', 'CryptoAIStockTokenSearch'],
     ['/sources', 'text/html', '多链支持范围'],
     ['/sources.html', 'text/html', '多链支持范围']
   ]) {

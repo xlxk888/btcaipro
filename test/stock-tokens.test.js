@@ -10,6 +10,7 @@ import { StockTokenWorker } from '../src/stock-tokens/worker.js';
 import { createStockTokenMarketsHandler } from '../api/stock-tokens/markets.js';
 import { createStockTokenRefreshHandler } from '../api/stock-tokens/refresh.js';
 import '../asset-registry.js';
+import '../stock-token-search.js';
 
 const response = value => ({ ok: true, async json() { return value; } });
 
@@ -158,4 +159,25 @@ test('stock-token work does not change canonical crypto identities', () => {
     assert.ok(matches.every(asset => asset.assetType !== 'stock_token' && asset.assetType !== 'etf_token'));
   }
   assert.equal(classifyStockToken({ name: 'PONS', marketType: 'spot', baseAsset: 'PONS' }), null);
+});
+
+test('global UI search finds stock tokens by token, underlying and category aliases', () => {
+  const markets = [
+    createStockTokenMarket({ productType: 'xstocks', name: 'Circle xStock', venue: 'Gate',
+      exchangeSymbol: 'CRCLX_USDT', baseAsset: 'CRCLX', quoteAsset: 'USDT', price: 95, lastUpdated: 2_000 }),
+    createStockTokenMarket({ productType: 'stock_token', name: 'Circle Robinhood Token', underlyingTicker: 'CRCL',
+      issuer: 'Robinhood Assets (Jersey)', venue: 'Robinhood Chain', exchangeSymbol: 'CRCL', baseAsset: 'CRCL',
+      quoteAsset: 'USD', price: 95, sourceType: 'issuer_reference', verified: true, lastUpdated: 2_000 }),
+    createStockTokenMarket({ productType: 'stock_token', assetType: 'etf_token', name: 'SPY ETF Token',
+      underlyingTicker: 'SPY', venue: 'Robinhood Chain', exchangeSymbol: 'SPY', baseAsset: 'SPY',
+      quoteAsset: 'USD', price: 700, verified: true, lastUpdated: 2_000 })
+  ];
+  assert.equal(globalThis.CryptoAIStockTokenSearch.search(markets, 'CRCLX').length, 1);
+  assert.equal(globalThis.CryptoAIStockTokenSearch.search(markets, 'CRCL').length, 2);
+  assert.equal(globalThis.CryptoAIStockTokenSearch.search(markets, '股票代币')[0].candidateType, 'stock_token_category');
+  assert.equal(globalThis.CryptoAIStockTokenSearch.filter(markets, 'Tokenized ETF').length, 1);
+  assert.equal(globalThis.CryptoAIStockTokenSearch.search(markets, 'BTC').length, 0);
+  assert.equal(globalThis.CryptoAIStockTokenSearch.search(markets, 'UNI').length, 0);
+  assert.equal(globalThis.CryptoAIStockTokenSearch.search(markets, 'ZEC').length, 0);
+  assert.equal(globalThis.CryptoAIStockTokenSearch.search(markets, 'XMR').length, 0);
 });
