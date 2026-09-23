@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { classifyStockToken, createStockTokenMarket, inferUnderlyingSymbol } from '../src/stock-tokens/model.js';
-import { GateStockTokenAdapter, RobinhoodStockTokenAdapter } from '../src/stock-tokens/adapters.js';
+import { BybitStockTokenAdapter, GateStockTokenAdapter, RobinhoodStockTokenAdapter } from '../src/stock-tokens/adapters.js';
 import { MemoryStockTokenRepository, SharedStockTokenRepository } from '../src/stock-tokens/repository.js';
 import { StockTokenWorker } from '../src/stock-tokens/worker.js';
 import { createStockTokenMarketsHandler } from '../api/stock-tokens/markets.js';
@@ -39,6 +39,22 @@ test('discovery finds exactly 15 metadata-backed stock tokens among 100 markets'
   const markets = await new GateStockTokenAdapter({ fetchImpl, retries: 0 }).discover(1_000);
   assert.equal(markets.length, 15);
   assert.ok(markets.every(market => market.marketType === 'spot' && market.sourceType === 'exchange'));
+});
+
+test('Bybit discovery falls back to its documented alternate mainnet host', async () => {
+  const calls = [];
+  const fetchImpl = async url => {
+    calls.push(url);
+    if (url.startsWith('https://api.bybit.com')) return { ok: false, status: 403, async json() { return {}; } };
+    if (url.includes('instruments-info')) return response({ retCode: 0, result: { list: [{ symbol: 'AAPLXUSDT',
+      symbolType: 'xstocks', fullName: 'Apple xStock', underlyingTicker: 'AAPL', baseCoin: 'AAPLX', quoteCoin: 'USDT', status: 'Trading' }] } });
+    return response({ retCode: 0, time: 2_000, result: { list: [{ symbol: 'AAPLXUSDT', lastPrice: '200',
+      price24hPcnt: '0.01', turnover24h: '1000' }] } });
+  };
+  const markets = await new BybitStockTokenAdapter({ fetchImpl, retries: 0 }).discover(2_000);
+  assert.equal(markets.length, 1);
+  assert.equal(markets[0].underlyingSymbol, 'AAPL');
+  assert.ok(calls.some(url => url.startsWith('https://api.bytick.com')));
 });
 
 test('Robinhood registry preserves contract identity and labels issuer pricing as reference data', async () => {

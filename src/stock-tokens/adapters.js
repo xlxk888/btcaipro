@@ -29,9 +29,19 @@ class StockTokenAdapter {
 export class BybitStockTokenAdapter extends StockTokenAdapter {
   constructor(options = {}) { super({ id: 'bybit-xstocks', venue: 'Bybit', ...options }); }
   async discover(now = Date.now()) {
-    const instrumentsUrl = 'https://api.bybit.com/v5/market/instruments-info?category=spot&symbolType=xstocks';
-    const tickersUrl = 'https://api.bybit.com/v5/market/tickers?category=spot';
-    const [instruments, tickers] = await Promise.all([this.json(instrumentsUrl), this.json(tickersUrl)]);
+    let instruments, tickers, lastError;
+    // Both hosts are documented Bybit mainnet endpoints. The alternate host
+    // helps with DNS/CDN incidents, but does not bypass regional restrictions.
+    for (const host of ['https://api.bybit.com', 'https://api.bytick.com']) {
+      try {
+        [instruments, tickers] = await Promise.all([
+          this.json(`${host}/v5/market/instruments-info?category=spot&symbolType=xstocks`),
+          this.json(`${host}/v5/market/tickers?category=spot`)
+        ]);
+        break;
+      } catch (error) { lastError = error; }
+    }
+    if (!instruments || !tickers) throw lastError;
     if (instruments.retCode !== 0 || tickers.retCode !== 0) throw new Error('Bybit API rejected stock-token discovery');
     const quoteBySymbol = new Map((tickers.result?.list || []).map(item => [item.symbol, item]));
     return (instruments.result?.list || []).map(item => {
