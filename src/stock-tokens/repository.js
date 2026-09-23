@@ -83,24 +83,58 @@ export class SharedStockTokenRepository extends MemoryStockTokenRepository {
     return this;
   }
   async persist() {
+    if (this.pool) {
+      const markets = [...this.markets.values()].map(market => ({
+        market_id: market.canonicalId, venue: market.venue, issuer: market.issuer,
+        underlying_symbol: market.underlyingSymbol, asset_type: market.assetType,
+        market_status: market.marketStatus, price: market.price, last_updated: market.lastUpdated,
+        payload: market
+      }));
+      const states = [...this.providers.values()].map(state => ({
+        provider: state.provider, endpoint: state.endpoint || null, status: state.status,
+        discovered: state.discovered || 0, last_discovery_at: state.lastDiscoveryAt || null,
+        last_price_update_at: state.lastPriceUpdateAt || null, error: state.error || null,
+        updated_at: state.updatedAt || Date.now()
+      }));
+      if (markets.length) await this.pool.query(`
+        INSERT INTO stock_token_markets
+          (market_id, venue, issuer, underlying_symbol, asset_type, market_status, price, last_updated, payload)
+        SELECT market_id, venue, issuer, underlying_symbol, asset_type, market_status, price, last_updated, payload
+        FROM jsonb_to_recordset($1::jsonb) AS row(
+          market_id TEXT, venue TEXT, issuer TEXT, underlying_symbol TEXT, asset_type TEXT,
+          market_status TEXT, price DOUBLE PRECISION, last_updated BIGINT, payload JSONB)
+        ON CONFLICT(market_id) DO UPDATE SET venue=excluded.venue, issuer=excluded.issuer,
+          underlying_symbol=excluded.underlying_symbol, asset_type=excluded.asset_type,
+          market_status=excluded.market_status, price=excluded.price,
+          last_updated=excluded.last_updated, payload=excluded.payload`, [JSON.stringify(markets)]);
+      if (states.length) await this.pool.query(`
+        INSERT INTO stock_token_state
+          (provider, endpoint, status, discovered, last_discovery_at, last_price_update_at, error, updated_at)
+        SELECT provider, endpoint, status, discovered, last_discovery_at, last_price_update_at, error, updated_at
+        FROM jsonb_to_recordset($1::jsonb) AS row(
+          provider TEXT, endpoint TEXT, status TEXT, discovered INTEGER, last_discovery_at BIGINT,
+          last_price_update_at BIGINT, error JSONB, updated_at BIGINT)
+        ON CONFLICT(provider) DO UPDATE SET endpoint=excluded.endpoint, status=excluded.status,
+          discovered=excluded.discovered, last_discovery_at=excluded.last_discovery_at,
+          last_price_update_at=excluded.last_price_update_at, error=excluded.error,
+          updated_at=excluded.updated_at`, [JSON.stringify(states)]);
+      return;
+    }
     if (this.db) this.db.exec('BEGIN IMMEDIATE');
     try {
       for (const market of this.markets.values()) {
         const values = [market.canonicalId, market.venue, market.issuer, market.underlyingSymbol,
           market.assetType, market.marketStatus, market.price, market.lastUpdated, JSON.stringify(market)];
-        if (this.pool) await this.pool.query('INSERT INTO stock_token_markets VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(market_id) DO UPDATE SET venue=excluded.venue,issuer=excluded.issuer,underlying_symbol=excluded.underlying_symbol,asset_type=excluded.asset_type,market_status=excluded.market_status,price=excluded.price,last_updated=excluded.last_updated,payload=excluded.payload', values);
-        else this.db.prepare('INSERT OR REPLACE INTO stock_token_markets VALUES(?,?,?,?,?,?,?,?,?)').run(...values);
+        this.db.prepare('INSERT OR REPLACE INTO stock_token_markets VALUES(?,?,?,?,?,?,?,?,?)').run(...values);
       }
       for (const state of this.providers.values()) {
         const values = [state.provider, state.endpoint || null, state.status, state.discovered || 0,
           state.lastDiscoveryAt || null, state.lastPriceUpdateAt || null,
           state.error ? JSON.stringify(state.error) : null, state.updatedAt || Date.now()];
-        if (this.pool) await this.pool.query('INSERT INTO stock_token_state VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(provider) DO UPDATE SET endpoint=excluded.endpoint,status=excluded.status,discovered=excluded.discovered,last_discovery_at=excluded.last_discovery_at,last_price_update_at=excluded.last_price_update_at,error=excluded.error,updated_at=excluded.updated_at', values);
-        else this.db.prepare('INSERT OR REPLACE INTO stock_token_state VALUES(?,?,?,?,?,?,?,?)').run(...values);
+        this.db.prepare('INSERT OR REPLACE INTO stock_token_state VALUES(?,?,?,?,?,?,?,?)').run(...values);
       }
       if (this.db) this.db.exec('COMMIT');
     } catch (error) { if (this.db) this.db.exec('ROLLBACK'); throw error; }
   }
   async close() { if (this.pool) await this.pool.end(); else this.db.close(); }
 }
-

@@ -6,9 +6,10 @@ export function createStockTokenRefreshHandler({
   databaseUrl = process.env.DATABASE_URL,
   cronSecret = process.env.CRON_SECRET,
   repositoryFactory = () => SharedStockTokenRepository.create({ databaseUrl, migrate: true }),
-  workerFactory = repository => new StockTokenWorker({
+  adapterFactory = () => createStockTokenAdapters({ timeoutMs: 6_000, retries: 1 }),
+  workerFactory = (repository, adapters) => new StockTokenWorker({
     repository,
-    adapters: createStockTokenAdapters({ timeoutMs: 6_000, retries: 1 })
+    adapters
   })
 } = {}) {
   return {
@@ -22,8 +23,14 @@ export function createStockTokenRefreshHandler({
       let repository;
       const startedAt = Date.now();
       try {
+        const provider = new URL(request.url).searchParams.get('provider');
+        const available = adapterFactory();
+        const adapters = provider ? available.filter(adapter => adapter.id === provider) : available;
+        if (provider && adapters.length === 0) {
+          return Response.json({ error: 'unknown_stock_token_provider', provider }, { status: 400 });
+        }
         repository = await repositoryFactory();
-        const providers = await workerFactory(repository).poll();
+        const providers = await workerFactory(repository, adapters).poll();
         return Response.json({
           ok: true,
           durationMs: Date.now() - startedAt,

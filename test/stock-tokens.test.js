@@ -103,20 +103,36 @@ test('scheduled refresh authenticates when configured, polls providers and close
   repository.close = async () => { closed = true; };
   const handler = createStockTokenRefreshHandler({
     databaseUrl: 'configured', cronSecret: 'secret', repositoryFactory: async () => repository,
-    workerFactory: value => ({ async poll() {
+    adapterFactory: () => [{ id: 'test-provider' }],
+    workerFactory: (value, adapters) => ({ async poll() {
       assert.equal(value, repository);
+      assert.equal(adapters[0].id, 'test-provider');
       await value.saveProviderState('test-provider', { status: 'ok', discovered: 0, lastDiscoveryAt: 1, updatedAt: 1 });
       return [{ provider: 'test-provider', status: 'ok', discovered: 0 }];
     } })
   });
   const denied = await handler.fetch(new Request('https://example.test/api/stock-tokens/refresh'));
   assert.equal(denied.status, 401);
-  const result = await handler.fetch(new Request('https://example.test/api/stock-tokens/refresh', {
+  const result = await handler.fetch(new Request('https://example.test/api/stock-tokens/refresh?provider=test-provider', {
     headers: { authorization: 'Bearer secret' }
   }));
   assert.equal(result.status, 200);
   assert.equal((await result.json()).providers[0].status, 'ok');
   assert.equal(closed, true);
+});
+
+test('PostgreSQL stock-token persistence uses bounded bulk upserts', async () => {
+  const calls = [];
+  const pool = { async query(sql, params) { calls.push({ sql, params }); }, async end() {} };
+  const repository = new SharedStockTokenRepository({ pool });
+  const market = createStockTokenMarket({ productType: 'xstocks', name: 'Circle xStock', venue: 'Gate',
+    exchangeSymbol: 'CRCLX_USDT', baseAsset: 'CRCLX', quoteAsset: 'USDT', price: 95, lastUpdated: 2_000 });
+  repository.markets.set(market.canonicalId, market);
+  repository.providers.set('gate-stock-tokens', { provider: 'gate-stock-tokens', status: 'ok', discovered: 1, updatedAt: 2_000 });
+  await repository.persist();
+  assert.equal(calls.length, 2);
+  assert.match(calls[0].sql, /jsonb_to_recordset/);
+  assert.equal(JSON.parse(calls[0].params[0])[0].market_id, market.canonicalId);
 });
 
 test('stock-token work does not change canonical crypto identities', () => {

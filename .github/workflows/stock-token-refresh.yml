@@ -25,4 +25,16 @@ jobs:
           if [ -n "$STOCK_TOKEN_CRON_SECRET" ]; then
             args+=(--header "Authorization: Bearer $STOCK_TOKEN_CRON_SECRET")
           fi
-          curl "${args[@]}" https://btcaipro.vercel.app/api/stock-tokens/refresh
+          providers=(bybit-xstocks gate-stock-tokens robinhood-stock-tokens okx-stock-tokens kraken-stock-tokens)
+          successes=0
+          for provider in "${providers[@]}"; do
+            if curl "${args[@]}" "https://btcaipro.vercel.app/api/stock-tokens/refresh?provider=$provider"; then
+              successes=$((successes + 1))
+            else
+              echo "Provider refresh failed: $provider" >&2
+            fi
+          done
+          if [ "$successes" -eq 0 ]; then
+            echo "Every stock-token provider refresh failed" >&2
+            exit 1
+          fi
