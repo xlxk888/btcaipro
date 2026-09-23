@@ -366,7 +366,7 @@
       box-shadow: inset 0 -18px 18px -22px rgba(148,163,184,.45);
     }
     .stock-list::-webkit-scrollbar { width: 0; height: 0; display: none; }
-    .stock-row { min-width: 0; display: grid; grid-template-columns: 54px minmax(0, 1fr) minmax(96px, auto) 84px; padding: 6px 8px; margin: 0; min-height: 54px; gap: 8px; cursor: pointer; }
+    .stock-row { min-width: 0; display: grid; grid-template-columns: 54px minmax(0, 1fr) minmax(108px, auto) 128px; padding: 8px 10px; margin: 0; min-height: 68px; gap: 10px; cursor: pointer; }
     .stock-row:hover { background: rgba(15,23,42,.72); }
     .stock-row:nth-child(7) { grid-column: auto; }
     .stock-row .stable-left { display: contents; }
@@ -399,8 +399,7 @@
     .stock-token-watch-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; color:#d1fae5; font-size:.74rem; font-weight:900; }
     .stock-token-watch-count { color:#86efac; font-size:.66rem; }
     .stock-token-watch-empty { color:#8fa0ba; font-size:.68rem; line-height:1.45; }
-    .stock-token-watch-list { display:grid; gap:7px; max-height:180px; overflow-y:auto; scrollbar-width:none; }
-    .stock-token-watch-list::-webkit-scrollbar { display:none; }
+    .stock-token-watch-list { display:grid; gap:7px; max-height:none; overflow:visible; }
     .stock-token-watch-list > .stock-row { grid-template-columns:60px minmax(0,1fr) minmax(96px,auto); grid-template-areas:"symbol info price" "meta meta meta"; }
     .stock-token-watch-details { grid-area:meta; display:grid; gap:5px; color:#a7b5ca; font-size:.7rem; overflow-wrap:anywhere; }
     .stock-token-watch-actions { display:flex; gap:8px; align-items:center; }
@@ -409,11 +408,15 @@
     .stock-token-source-line { color:#a7b5ca; font-size:.66rem; line-height:1.35; overflow-wrap:anywhere; }
     .stock-token-price-kind { display:inline-flex; align-items:center; min-height:19px; margin-top:3px; padding:1px 6px; border:1px solid rgba(34,197,94,.36); border-radius:999px; color:#86efac; background:rgba(34,197,94,.09); font-size:.58rem; font-weight:900; white-space:nowrap; }
     .stock-token-price-kind.reference { border-color:rgba(250,204,21,.4); color:#fde68a; background:rgba(245,158,11,.1); }
-    .stock-token-market-actions { min-width:96px; flex-direction:column; align-items:flex-end; gap:4px; color:#8fa0ba; font-size:.63rem; }
+    .stock-token-market-actions { width:128px; min-width:128px; height:100%; flex-direction:column; align-items:stretch; justify-content:center; gap:6px; padding-left:10px; border-left:1px solid rgba(72,99,150,.28); color:#8fa0ba; font-size:.63rem; text-align:right; }
+    .stock-token-volume { min-height:16px; display:flex; align-items:center; justify-content:flex-end; white-space:nowrap; }
     .stock-token-action { min-height:27px; padding:3px 8px; border:1px solid rgba(34,197,94,.45); border-radius:7px; background:rgba(34,197,94,.11); color:#bbf7d0; font-size:.64rem; font-weight:900; cursor:pointer; white-space:nowrap; }
     .stock-token-action:hover { border-color:#22c55e; background:rgba(34,197,94,.2); }
     .stock-token-action.remove { border-color:rgba(248,113,113,.42); background:rgba(239,68,68,.1); color:#fecaca; }
     .stock-token-action:disabled { border-color:rgba(148,163,184,.2); background:rgba(15,23,42,.5); color:#64748b; cursor:default; }
+    .stock-token-market-button { width:100%; height:36px; min-height:36px; padding:0 12px; border-radius:8px; font-size:.7rem; }
+    .stock-token-market-button.selected { border-color:rgba(148,163,184,.34); background:rgba(51,65,85,.34); color:#a7b5ca; box-shadow:none; }
+    .stock-token-market-button.selected:hover { border-color:rgba(148,163,184,.34); background:rgba(51,65,85,.34); }
     .stock-token-mobile-action { display:none; }
     .stock-token-add-form { grid-template-columns:minmax(0,1fr) 86px; }
     .stock-token-add-panel { margin-bottom:14px; min-width:0; }
@@ -1243,8 +1246,8 @@
         font-size: .63rem;
         line-height: 1.35;
       }
-      .stock-token-mobile-action { display:flex; align-items:center; justify-content:flex-start; margin-top:3px; }
-      .stock-token-mobile-action .stock-token-action { min-height:34px; }
+      .stock-token-mobile-action { display:flex; align-items:center; justify-content:flex-end; margin-top:6px; padding-top:7px; border-top:1px solid rgba(72,99,150,.22); }
+      .stock-token-mobile-action .stock-token-market-button { width:112px; min-width:112px; height:40px; min-height:40px; }
       .log-container { min-height: 120px; }
       .global-card { width: 100%; max-width: 100%; min-width: 0; }
       .global-card:not(.expanded) .news-container {
@@ -2008,8 +2011,8 @@
       .stock-token-row .stock-left-info .stock-type,
       .stock-token-row .stock-left-info .stock-token-price-kind { display:none; }
       .stock-token-row .stock-mobile-meta { overflow-wrap:anywhere; }
-      .stock-token-mobile-action .stock-token-action, .stock-token-result-actions button { min-height:44px; }
-      .stock-token-watch-list { max-height:350px; }
+      .stock-token-mobile-action .stock-token-market-button, .stock-token-result-actions button { min-height:44px; }
+      .stock-token-watch-list { max-height:none; }
       .stock-token-watch-actions .stock-token-action { min-height:44px; min-width:44px; }
     }
   </style>
@@ -2237,7 +2240,7 @@
             </div>
             <div class="stock-token-result-actions">
               <span class="muted">{{ market.lastUpdated ? formatTimestamp(market.lastUpdated) : '更新时间未知' }}<span v-if="market.stale" class="data-stale-badge">数据待更新</span></span>
-              <button class="stock-token-action" type="button" :aria-label="`加入自选 ${market.displaySymbol} ${market.venue} ${market.exchangeSymbol}`" @click="addStockTokenToWatchlist(market)">{{ isStockTokenWatched(market) ? '已在自选中' : '加入自选' }}</button>
+              <button class="stock-token-action" type="button" :aria-label="`加入自选 ${market.displaySymbol} ${market.venue} ${market.exchangeSymbol}`" @click="addToWatchlist(market)">{{ isInWatchlist(market) ? '已在自选中' : '加入自选' }}</button>
             </div>
           </article>
           <div class="stock-token-watch-empty" v-if="!stockTokenSearchResults.length">{{ stockTokenSearchInput ? '没有匹配的股票代币记录' : '输入代码或“股票代币”查看可添加的市场。' }}</div>
@@ -2267,7 +2270,7 @@
                 <div class="stock-token-watch-actions">
                   <button class="stock-token-action" type="button" :disabled="index === 0" @click="moveStockTokenWatch(market.canonicalId, -1)" :aria-label="`上移 ${market.displaySymbol} ${market.venue}`">↑</button>
                   <button class="stock-token-action" type="button" :disabled="index === stockTokenWatchlist.length - 1" @click="moveStockTokenWatch(market.canonicalId, 1)" :aria-label="`下移 ${market.displaySymbol} ${market.venue}`">↓</button>
-                  <button class="stock-token-action remove" type="button" @click="removeStockTokenFromWatchlist(market.canonicalId)" :aria-label="`从自选移除 ${market.displaySymbol} ${market.venue}`">从自选移除</button>
+                  <button class="stock-token-action remove" type="button" @click="removeFromWatchlist(market)" :aria-label="`从自选移除 ${market.displaySymbol} ${market.venue}`">从自选移除</button>
                 </div>
               </div>
             </div>
@@ -2466,8 +2469,8 @@
             </div>
             <div class="stock-actions stock-token-market-actions">
               <span v-if="market.stale" class="data-stale-badge">数据待更新</span>
-              <span>{{ market.volume24h === null ? '成交量 --' : '成交量 $' + Number(market.volume24h).toLocaleString(undefined, { maximumFractionDigits: 0 }) }}</span>
-              <button class="stock-token-action" type="button" :disabled="isStockTokenWatched(market)" @click.stop="addStockTokenToWatchlist(market)" :aria-label="`${isStockTokenWatched(market) ? '已加入自选' : '加入自选'} ${market.displaySymbol} ${market.venue}`">{{ isStockTokenWatched(market) ? '已自选' : '+ 自选' }}</button>
+              <span class="stock-token-volume">{{ market.volume24h === null ? '成交量 --' : '成交量 $' + Number(market.volume24h).toLocaleString(undefined, { maximumFractionDigits: 0 }) }}</span>
+              <button class="stock-token-action stock-token-market-button" :class="{ selected: isInWatchlist(market) }" type="button" :disabled="isInWatchlist(market)" @click.stop="addToWatchlist(market)" :aria-label="`${isInWatchlist(market) ? '已加入自选' : '加入自选'} ${market.displaySymbol} ${market.venue}`">{{ isInWatchlist(market) ? '已自选' : '+ 自选' }}</button>
             </div>
             <div class="stock-mobile-meta">
               <span>{{ market.venue }} · {{ market.issuer }}</span>
@@ -2475,7 +2478,7 @@
               <span>{{ market.volume24h === null ? '成交量 --' : '成交量 $' + Number(market.volume24h).toLocaleString(undefined, { maximumFractionDigits: 0 }) }}</span>
               <span v-if="market.underlyingReferencePrice">底层参考 ${{ Number(market.underlyingReferencePrice).toFixed(2) }}</span>
               <span>{{ market.lastUpdated ? formatTimestamp(market.lastUpdated) : '更新时间未知' }}<span v-if="market.stale" class="data-stale-badge">数据待更新</span></span>
-              <span class="stock-token-mobile-action"><button class="stock-token-action" type="button" :disabled="isStockTokenWatched(market)" @click.stop="addStockTokenToWatchlist(market)" :aria-label="`${isStockTokenWatched(market) ? '已加入自选' : '加入自选'} ${market.displaySymbol} ${market.venue}`">{{ isStockTokenWatched(market) ? '已加入自选' : '加入自选' }}</button></span>
+              <span class="stock-token-mobile-action"><button class="stock-token-action stock-token-market-button" :class="{ selected: isInWatchlist(market) }" type="button" :disabled="isInWatchlist(market)" @click.stop="addToWatchlist(market)" :aria-label="`${isInWatchlist(market) ? '已加入自选' : '加入自选'} ${market.displaySymbol} ${market.venue}`">{{ isInWatchlist(market) ? '已自选' : '+ 自选' }}</button></span>
             </div>
         </div>
         <div v-if="!filteredStockTokenMarkets.length" class="empty-state">{{ stockTokenQuery ? '没有匹配的股票代币市场' : stockTokenStatus }}</div>
@@ -2958,6 +2961,7 @@ new Vue({
     stockRefreshMs: 60000,
     stockTokenMarkets: [],
     stockTokenWatchlist: [],
+    pendingLegacyStockTokens: [],
     stockPanelMode: 'tokens',
     stockTokenQuery: '',
     stockTokenStatus: '正在获取股票代币数据…',
@@ -4648,10 +4652,12 @@ new Vue({
         ? saved
         : [{ type: 'cex', pair: 'BTCUSDT' }, { type: 'cex', pair: 'ETHUSDT' }];
 
-      this.stockTokenWatchlist = Array.from(new Map(configs.filter(item => item?.type === 'stock_token')
+      const savedStockTokens = configs.filter(item => this.isSavedStockToken(item));
+      this.pendingLegacyStockTokens = savedStockTokens.filter(item => !this.stockTokenWatchId(item));
+      this.stockTokenWatchlist = Array.from(new Map(savedStockTokens.filter(item => this.stockTokenWatchId(item))
         .map(item => this.createStockTokenWatchItem({ ...item, stale: true })).filter(Boolean)
         .map(item => [item.canonicalId, item])).values());
-      this.watchedAssets = configs.filter(item => item && item.type !== 'stock_token').slice(0, 60).map(item => {
+      this.watchedAssets = configs.filter(item => item && !this.isSavedStockToken(item)).slice(0, 60).map(item => {
         if (item.type === 'dex' && item.tokenAddress && item.chainId) {
           const chain = CryptoAIAssets.byChain[item.chainId];
           if (!chain || chain.type === 'bitcoin') return null;
@@ -4667,8 +4673,8 @@ new Vue({
         ? { type: 'dex', chainId: asset.chainId, tokenAddress: asset.tokenAddress, metadata: { name: asset.displayName, symbol: asset.symbol, metadataStatus: asset.metadataStatus } }
         : { type: 'cex', pair: asset.pair, canonicalAssetId: asset.canonicalAssetId }
       );
-      const stockTokenPayload = this.stockTokenWatchlist.map(market => ({ ...this.createStockTokenWatchItem(market), type: 'stock_token' }));
-      return [...cryptoPayload, ...stockTokenPayload];
+      const stockTokenPayload = this.getWatchlist().map(market => ({ ...this.createStockTokenWatchItem(market), type: 'stock_token' }));
+      return [...cryptoPayload, ...stockTokenPayload, ...this.pendingLegacyStockTokens];
     },
 
     saveWatchedAssets() {
@@ -5077,7 +5083,7 @@ new Vue({
         return;
       }
       if (candidate.candidateType === 'stock_token_market') {
-        this.addStockTokenToWatchlist(candidate);
+        this.addToWatchlist(candidate);
         this.stockTokenQuery = candidate.displaySymbol;
         this.assetInput = '';
         this.showStockTokens();
@@ -5120,12 +5126,55 @@ new Vue({
     },
 
     stockTokenWatchId(market) {
-      return market?.canonicalId || market?.id || '';
+      const id = market?.canonicalId || market?.marketId || market?.id || '';
+      return String(id).startsWith('stock-token:') ? String(id) : '';
     },
 
-    isStockTokenWatched(market) {
+    getWatchlist() {
+      return this.stockTokenWatchlist;
+    },
+
+    isInWatchlist(market) {
       const id = this.stockTokenWatchId(market);
-      return !!id && this.stockTokenWatchlist.some(item => item.canonicalId === id);
+      return !!id && this.getWatchlist().some(item => this.stockTokenWatchId(item) === id);
+    },
+
+    isSavedStockToken(item) {
+      if (!item || typeof item !== 'object') return false;
+      if (this.stockTokenWatchId(item)) return true;
+      const type = String(item.type || item.assetType || item.asset_type || '').toLowerCase().replace(/[-\s]/g, '_');
+      return ['stock_token', 'stocktoken', 'stocks', 'stock'].includes(type)
+        || (!!(item.venue || item.provider) && !!(item.exchangeSymbol || item.pair) && !!(item.symbol || item.displaySymbol));
+    },
+
+    resolveLegacyStockToken(item) {
+      const directId = this.stockTokenWatchId(item);
+      if (directId) return this.stockTokenMarkets.find(market => market.canonicalId === directId) || item;
+      const venue = String(item.venue || item.provider || '').trim().toLowerCase();
+      const pair = String(item.exchangeSymbol || item.pair || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+      const symbol = String(item.displaySymbol || item.symbol || item.tokenSymbol || '').trim().toUpperCase();
+      const underlying = String(item.underlyingSymbol || item.underlying || '').trim().toUpperCase();
+      let matches = this.stockTokenMarkets.filter(market => (!venue || market.venue.toLowerCase() === venue)
+        && (!pair || String(market.exchangeSymbol || '').replace(/[^a-z0-9]/gi, '').toLowerCase() === pair));
+      if (symbol) matches = matches.filter(market => market.displaySymbol === symbol || market.symbol === symbol);
+      if (!symbol && underlying) matches = matches.filter(market => market.underlyingSymbol === underlying);
+      return matches.length === 1 ? matches[0] : null;
+    },
+
+    migrateLegacyStockTokenWatchlist() {
+      if (!this.pendingLegacyStockTokens.length || !this.stockTokenMarkets.length) return false;
+      const unresolved = [];
+      let migrated = false;
+      for (const legacy of this.pendingLegacyStockTokens) {
+        const market = this.resolveLegacyStockToken(legacy);
+        if (!market || !this.stockTokenWatchId(market)) { unresolved.push(legacy); continue; }
+        const item = this.createStockTokenWatchItem(market);
+        if (item && !this.isInWatchlist(item)) this.stockTokenWatchlist.push(item);
+        migrated = true;
+      }
+      this.pendingLegacyStockTokens = unresolved;
+      if (migrated) this.saveWatchedAssets();
+      return migrated;
     },
 
     createStockTokenWatchItem(market) {
@@ -5144,10 +5193,10 @@ new Vue({
       };
     },
 
-    addStockTokenToWatchlist(market) {
+    addToWatchlist(market) {
       const item = this.createStockTokenWatchItem(market);
       if (!item) return;
-      if (this.isStockTokenWatched(item)) {
+      if (this.isInWatchlist(item)) {
         this.showToast(`${item.displaySymbol} 已在自选中`);
         return;
       }
@@ -5157,9 +5206,10 @@ new Vue({
       this.showToast(`${item.displaySymbol} 已加入股票代币自选`);
     },
 
-    removeStockTokenFromWatchlist(canonicalId) {
-      const removed = this.stockTokenWatchlist.find(item => item.canonicalId === canonicalId);
-      this.stockTokenWatchlist = this.stockTokenWatchlist.filter(item => item.canonicalId !== canonicalId);
+    removeFromWatchlist(market) {
+      const canonicalId = typeof market === 'string' ? market : this.stockTokenWatchId(market);
+      const removed = this.getWatchlist().find(item => this.stockTokenWatchId(item) === canonicalId);
+      this.stockTokenWatchlist = this.getWatchlist().filter(item => this.stockTokenWatchId(item) !== canonicalId);
       this.saveWatchedAssets();
       this.showToast(`${removed?.displaySymbol || '股票代币'} 已从自选移除`);
     },
@@ -5177,6 +5227,13 @@ new Vue({
       const marketById = new Map(this.stockTokenMarkets.map(market => [market.canonicalId, market]));
       this.stockTokenWatchlist = this.stockTokenWatchlist.map(saved =>
         this.createStockTokenWatchItem(marketById.get(saved.canonicalId) || { ...saved, stale: true })).filter(Boolean);
+      this.migrateLegacyStockTokenWatchlist();
+    },
+
+    handleWatchlistStorage(event) {
+      if (event.key !== this.storageKey) return;
+      this.loadWatchedAssets();
+      if (this.stockTokenReady) this.hydrateStockTokenWatchlist();
     },
 
     handleAssetSearchInput() {
@@ -6912,6 +6969,7 @@ new Vue({
     if (this.rafId) cancelAnimationFrame(this.rafId);
     if (this.ws) this.ws.close();
     window.removeEventListener('resize', this.resizeGauge);
+    window.removeEventListener('storage', this.handleWatchlistStorage);
   },
   mounted() {
     this.initEcharts();
@@ -6920,6 +6978,7 @@ new Vue({
     this.loadStocks();
     this.loadPriceAlerts();
     this.initWatchlistMarket();
+    window.addEventListener('storage', this.handleWatchlistStorage);
     this.binanceWatchdogTimer = setInterval(() => this.moveStaleBinanceToFallback(), 5000);
     this.fetchCrypto();
     this.fetchUSStocks();

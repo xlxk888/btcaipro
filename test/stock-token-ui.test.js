@@ -61,17 +61,17 @@ test('AAPLX and AAPLON share one watch state but independent market IDs, removal
   const appleX = market('Gate', { canonicalId: 'stock-token:xstocks:aaplx:gate:aaplxusdt::', displaySymbol: 'AAPLX', underlyingSymbol: 'AAPL', exchangeSymbol: 'AAPLX_USDT' });
   const appleOn = market('Gate', { canonicalId: 'stock-token:ondo:aaplon:gate:aaplonusdt::', displaySymbol: 'AAPLON', underlyingSymbol: 'AAPL', issuer: 'Ondo', exchangeSymbol: 'AAPLON_USDT' });
   app.stockTokenMarkets = [appleX, appleOn];
-  app.addStockTokenToWatchlist(appleX); app.addStockTokenToWatchlist(appleOn);
+  app.addToWatchlist(appleX); app.addToWatchlist(appleOn);
   assert.equal(app.assetSearchMode, 'stock_tokens');
-  assert.equal(app.isStockTokenWatched(appleX), true); assert.equal(app.isStockTokenWatched(appleOn), true);
+  assert.equal(app.isInWatchlist(appleX), true); assert.equal(app.isInWatchlist(appleOn), true);
   app.moveStockTokenWatch(appleX.canonicalId, -1);
   assert.deepEqual(ids(app.stockTokenWatchlist), [appleX.canonicalId, appleOn.canonicalId]);
   const { app: reloaded } = fixture(storage); reloaded.loadWatchedAssets();
   assert.deepEqual(ids(reloaded.stockTokenWatchlist), [appleX.canonicalId, appleOn.canonicalId]);
-  app.removeStockTokenFromWatchlist(appleX.canonicalId);
-  assert.equal(app.isStockTokenWatched(appleX), false); assert.equal(app.isStockTokenWatched(appleOn), true);
-  app.addStockTokenToWatchlist(appleX); app.removeStockTokenFromWatchlist(appleOn.canonicalId);
-  assert.equal(app.isStockTokenWatched(appleX), true); assert.equal(app.isStockTokenWatched(appleOn), false);
+  app.removeFromWatchlist(appleX);
+  assert.equal(app.isInWatchlist(appleX), false); assert.equal(app.isInWatchlist(appleOn), true);
+  app.addToWatchlist(appleX); app.removeFromWatchlist(appleOn);
+  assert.equal(app.isInWatchlist(appleX), true); assert.equal(app.isInWatchlist(appleOn), false);
   assert.equal(app.stockTokenMarkets.length, 2);
 });
 
@@ -80,9 +80,90 @@ test('only the upper watch section owns the Stock Token watchlist; the lower pan
   const lower = html.slice(html.indexOf('<div id="stock-market-card"'), html.indexOf('<script>'));
   assert.equal((html.match(/aria-label="股票代币自选"/g) || []).length, 1);
   assert.match(upper, /aria-label="股票代币自选"/);
-  assert.doesNotMatch(lower, /我的股票代币自选|removeStockTokenFromWatchlist/);
-  assert.match(lower, /isStockTokenWatched\(market\)/);
-  assert.match(lower, /addStockTokenToWatchlist\(market\)/);
+  assert.doesNotMatch(lower, /我的股票代币自选|removeFromWatchlist/);
+  assert.match(lower, /isInWatchlist\(market\)/);
+  assert.match(lower, /addToWatchlist\(market\)/);
+  assert.match(html, /\.stock-token-watch-list \{[^}]*max-height:none;[^}]*overflow:visible;/);
+});
+
+test('market browser and top cards use the same helpers and canonical-ID source of truth', () => {
+  const { app } = fixture();
+  const gate = market();
+  app.stockTokenMarkets = [gate];
+  assert.strictEqual(app.getWatchlist(), app.stockTokenWatchlist);
+  assert.equal(app.isInWatchlist(gate), false);
+  app.addToWatchlist(gate);
+  assert.equal(app.isInWatchlist(gate), true);
+  assert.deepEqual(ids(app.getWatchlist()), [gate.canonicalId]);
+  app.removeFromWatchlist(gate);
+  assert.equal(app.isInWatchlist(gate), false);
+  assert.equal(app.getWatchlist().length, 0);
+});
+
+test('market browser keeps volume and equal watch buttons in a dedicated responsive action area', () => {
+  const lower = html.slice(html.indexOf('<div id="stock-market-card"'), html.indexOf('<script>'));
+  assert.match(lower, /class="stock-token-volume"/);
+  assert.match(lower, /class="stock-token-action stock-token-market-button" :class="\{ selected: isInWatchlist\(market\) \}"/);
+  assert.equal((lower.match(/stock-token-market-button/g) || []).length, 2);
+  assert.doesNotMatch(lower, /removeFromWatchlist/);
+  assert.match(html, /\.stock-token-market-actions \{[^}]*width:128px;[^}]*align-items:stretch;[^}]*justify-content:center;/);
+  assert.match(html, /\.stock-token-market-button \{[^}]*width:100%;[^}]*height:36px;[^}]*border-radius:8px;/);
+  assert.match(html, /\.stock-token-market-button\.selected \{[^}]*background:rgba\(51,65,85,\.34\);[^}]*color:#a7b5ca;/);
+  assert.match(html, /\.stock-token-mobile-action \{[^}]*justify-content:flex-end;[^}]*border-top:/);
+  assert.match(html, /\.stock-token-mobile-action \.stock-token-market-button \{[^}]*width:112px;[^}]*min-width:112px;/);
+});
+
+test('legacy Stock Token variants migrate only unambiguous registry markets without clearing Crypto', async () => {
+  const storage = memoryStorage();
+  const { app } = fixture(storage);
+  const pons = { type: 'dex', chainId: 'robinhood', tokenAddress: `0x${'a'.repeat(40)}`,
+    metadata: { name: 'Pons', symbol: 'PONS' } };
+  storage.setItem(app.storageKey, JSON.stringify([
+    { type: 'cex', pair: 'BTCUSDT' }, { type: 'cex', pair: 'ZECUSDT' },
+    { type: 'cex', pair: 'UNIUSDT' }, { type: 'cex', pair: 'XMRUSDT' }, pons,
+    { type: 'stock-token', symbol: 'CRCLX', venue: 'Gate', pair: 'CRCLX_USDT' },
+    { assetType: 'stockToken', symbol: 'AAPLX', venue: 'Gate', exchangeSymbol: 'AAPLX_USDT' },
+    { type: 'stocks', underlying: 'AAPL' }
+  ]));
+  app.loadWatchedAssets();
+  assert.deepEqual(Array.from(app.watchedAssets, item => item.symbol), ['BTC', 'ZEC', 'UNI', 'XMR', 'PONS']);
+  assert.equal(app.stockTokenWatchlist.length, 0);
+  assert.equal(app.pendingLegacyStockTokens.length, 3);
+  const appleX = market('Gate', { canonicalId: 'stock-token:xstocks:aaplx:gate:aaplxusdt::',
+    symbol: 'AAPLX', displaySymbol: 'AAPLX', underlyingSymbol: 'AAPL', exchangeSymbol: 'AAPLX_USDT' });
+  const appleOn = market('Gate', { canonicalId: 'stock-token:ondo:aaplon:gate:aaplonusdt::',
+    symbol: 'AAPLON', displaySymbol: 'AAPLON', underlyingSymbol: 'AAPL', issuer: 'Ondo', exchangeSymbol: 'AAPLON_USDT' });
+  app.stockTokenMarkets = [market(), appleX, appleOn];
+  assert.equal(app.migrateLegacyStockTokenWatchlist(), true);
+  assert.deepEqual(ids(app.getWatchlist()), [market().canonicalId, appleX.canonicalId]);
+  assert.equal(app.pendingLegacyStockTokens.length, 1);
+  assert.equal(app.isInWatchlist(appleOn), false);
+  const saved = JSON.parse(storage.getItem(app.storageKey));
+  assert.equal(saved.filter(item => item.type === 'cex').length, 4);
+  assert.equal(saved.filter(item => item.type === 'dex').length, 1);
+  assert.equal(saved.filter(item => item.type === 'stock_token').length, 2);
+  assert.equal(saved.some(item => item.type === 'stocks' && item.underlying === 'AAPL'), true);
+  const { app: reloaded } = fixture(storage);
+  reloaded.loadWatchedAssets();
+  reloaded.stockTokenMarkets = app.stockTokenMarkets;
+  reloaded.hydrateStockTokenWatchlist();
+  assert.deepEqual(ids(reloaded.getWatchlist()), ids(app.getWatchlist()));
+  assert.deepEqual(Array.from(reloaded.watchedAssets, item => item.symbol), ['BTC', 'ZEC', 'UNI', 'XMR', 'PONS']);
+});
+
+test('a storage event reloads the one persisted watchlist for every page region', () => {
+  const storage = memoryStorage();
+  const { app } = fixture(storage);
+  const gate = market();
+  app.stockTokenMarkets = [gate]; app.stockTokenReady = true;
+  storage.setItem(app.storageKey, JSON.stringify([{ ...gate, type: 'stock_token' }]));
+  app.handleWatchlistStorage({ key: app.storageKey });
+  assert.equal(app.isInWatchlist(gate), true);
+  assert.deepEqual(ids(app.getWatchlist()), [gate.canonicalId]);
+  storage.setItem(app.storageKey, '[]');
+  app.handleWatchlistStorage({ key: app.storageKey });
+  assert.equal(app.isInWatchlist(gate), false);
+  assert.equal(app.getWatchlist().length, 0);
 });
 
 test('shared storage round-trips Crypto and separate venues without duplicate Stock Token additions', async () => {
@@ -96,10 +177,10 @@ test('shared storage round-trips Crypto and separate venues without duplicate St
   const cryptoIds = Array.from(app.watchedAssets, asset => asset.id);
   const gate = market();
   const bybit = market('Bybit');
-  app.addStockTokenToWatchlist(gate);
-  app.addStockTokenToWatchlist(bybit);
+  app.addToWatchlist(gate);
+  app.addToWatchlist(bybit);
   const writes = storage.writes;
-  app.addStockTokenToWatchlist({ ...gate, price: 96 });
+  app.addToWatchlist({ ...gate, price: 96 });
   assert.equal(app.stockTokenWatchlist.length, 2);
   assert.equal(storage.writes, writes);
   assert.match(messages.at(-1), /已在自选中/);
@@ -127,13 +208,13 @@ test('Stock Token removal persists, an empty list stays empty, and registry asse
   const bybit = market('Bybit');
   app.stockTokenMarkets = [gate, bybit];
   const registryBefore = JSON.stringify(app.stockTokenMarkets);
-  app.addStockTokenToWatchlist(gate);
-  app.addStockTokenToWatchlist(bybit);
-  app.removeStockTokenFromWatchlist(gate.canonicalId);
+  app.addToWatchlist(gate);
+  app.addToWatchlist(bybit);
+  app.removeFromWatchlist(gate);
   const { app: reloaded } = fixture(storage);
   reloaded.loadWatchedAssets();
   assert.deepEqual(ids(reloaded.stockTokenWatchlist), [bybit.canonicalId]);
-  reloaded.removeStockTokenFromWatchlist(bybit.canonicalId);
+  reloaded.removeFromWatchlist(bybit);
   assert.equal(storage.getItem(app.storageKey), '[]');
   const { app: empty } = fixture(storage);
   empty.loadWatchedAssets();
@@ -142,7 +223,7 @@ test('Stock Token removal persists, an empty list stays empty, and registry asse
   assert.equal(JSON.stringify(app.stockTokenMarkets), registryBefore);
   const results = context.CryptoAIStockTokenSearch.search(app.stockTokenMarkets, 'CRCLX');
   assert.equal(results.length, 2);
-  empty.addStockTokenToWatchlist(results.find(item => item.canonicalId === gate.canonicalId));
+  empty.addToWatchlist(results.find(item => item.canonicalId === gate.canonicalId));
   const { app: addedAgain } = fixture(storage);
   addedAgain.loadWatchedAssets();
   assert.deepEqual(ids(addedAgain.stockTokenWatchlist), [gate.canonicalId]);
@@ -164,8 +245,8 @@ test('quote hydration updates matching markets and marks missing markets stale w
   const { app, storage } = fixture();
   const gate = market();
   const bybit = market('Bybit');
-  app.addStockTokenToWatchlist(gate);
-  app.addStockTokenToWatchlist(bybit);
+  app.addToWatchlist(gate);
+  app.addToWatchlist(bybit);
   // Another tab has removed its selection while this tab still has an older view.
   storage.setItem(app.storageKey, '[]');
   const writes = storage.writes;
@@ -184,7 +265,7 @@ test('quote hydration updates matching markets and marks missing markets stale w
 test('initial registry errors are unavailable rather than a ready zero-market result, and retry recovers', async () => {
   const { app } = fixture();
   const gate = market();
-  app.addStockTokenToWatchlist(gate);
+  app.addToWatchlist(gate);
   const failedResponses = [
     async () => { throw new Error('Connection refused'); },
     async () => ({ ok: false, status: 503 }),
@@ -218,7 +299,7 @@ test('failed registry refresh retains cached markets and watchlist as stale unti
   const gate = market();
   app.fetchWithSoftTimeout = async () => response([gate]);
   await app.fetchStockTokens();
-  app.addStockTokenToWatchlist(gate);
+  app.addToWatchlist(gate);
   app.fetchWithSoftTimeout = async () => ({ ok: false, status: 500 });
   await app.fetchStockTokens();
   assert.equal(app.stockTokenReady, true);
