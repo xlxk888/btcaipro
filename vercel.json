@@ -5,8 +5,12 @@
     "api/assets/discovery-health.js": { "maxDuration": 10 },
     "api/assets/market.js": { "maxDuration": 15 },
     "api/stock-tokens/markets.js": { "maxDuration": 10 },
+    "api/stock-tokens/refresh.js": { "maxDuration": 60 },
     "api/monero/network.js": { "maxDuration": 15 }
   },
+  "crons": [
+    { "path": "/api/stock-tokens/refresh", "schedule": "*/5 * * * *" }
+  ],
   "rewrites": [
     { "source": "/sources", "destination": "/sources.html" }
   ]

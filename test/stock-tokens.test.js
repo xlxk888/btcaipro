@@ -8,6 +8,7 @@ import { GateStockTokenAdapter, RobinhoodStockTokenAdapter } from '../src/stock-
 import { MemoryStockTokenRepository, SharedStockTokenRepository } from '../src/stock-tokens/repository.js';
 import { StockTokenWorker } from '../src/stock-tokens/worker.js';
 import { createStockTokenMarketsHandler } from '../api/stock-tokens/markets.js';
+import { createStockTokenRefreshHandler } from '../api/stock-tokens/refresh.js';
 import '../asset-registry.js';
 
 const response = value => ({ ok: true, async json() { return value; } });
@@ -94,6 +95,28 @@ test('SQLite registry survives restart and the serverless API reads only persist
   assert.equal(body.health.discovered, 1);
   await reader.close();
   fs.rmSync(directory, { recursive: true, force: true });
+});
+
+test('scheduled refresh authenticates when configured, polls providers and closes the registry', async () => {
+  let closed = false;
+  const repository = new MemoryStockTokenRepository();
+  repository.close = async () => { closed = true; };
+  const handler = createStockTokenRefreshHandler({
+    databaseUrl: 'configured', cronSecret: 'secret', repositoryFactory: async () => repository,
+    workerFactory: value => ({ async poll() {
+      assert.equal(value, repository);
+      await value.saveProviderState('test-provider', { status: 'ok', discovered: 0, lastDiscoveryAt: 1, updatedAt: 1 });
+      return [{ provider: 'test-provider', status: 'ok', discovered: 0 }];
+    } })
+  });
+  const denied = await handler.fetch(new Request('https://example.test/api/stock-tokens/refresh'));
+  assert.equal(denied.status, 401);
+  const result = await handler.fetch(new Request('https://example.test/api/stock-tokens/refresh', {
+    headers: { authorization: 'Bearer secret' }
+  }));
+  assert.equal(result.status, 200);
+  assert.equal((await result.json()).providers[0].status, 'ok');
+  assert.equal(closed, true);
 });
 
 test('stock-token work does not change canonical crypto identities', () => {
