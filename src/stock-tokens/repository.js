@@ -20,13 +20,14 @@ export class MemoryStockTokenRepository {
       this.markets.set(market.canonicalId, { ...previous, ...market,
         discoveredAt: previous?.discoveredAt || market.discoveredAt || at });
     }
-    await this.persist();
+    await this.persist({ venue });
   }
-  async saveProviderState(provider, state) { this.providers.set(provider, { provider, ...state }); await this.persist(); }
+  async saveProviderState(provider, state) { this.providers.set(provider, { provider, ...state }); await this.persist({ provider }); }
+  async withRefreshLock(task) { await task(this); return true; }
   async list({ underlying, venue, active = true, now = Date.now() } = {}) {
     return [...this.markets.values()].filter(market => (!underlying || market.underlyingSymbol === underlying.toUpperCase())
       && (!venue || market.venue.toLowerCase() === venue.toLowerCase()) && (!active || market.marketStatus === 'active'))
-      .map(market => ({ ...market, stale: now - market.lastUpdated > this.staleAfterMs }))
+      .map(market => ({ ...market, stale: !(market.lastUpdated > 0) || now - market.lastUpdated > this.staleAfterMs }))
       .sort((a, b) => a.underlyingSymbol.localeCompare(b.underlyingSymbol) || a.venue.localeCompare(b.venue));
   }
   async health({ now = Date.now() } = {}) {
@@ -82,15 +83,35 @@ export class SharedStockTokenRepository extends MemoryStockTokenRepository {
     }]));
     return this;
   }
-  async persist() {
+  async withRefreshLock(task) {
+    if (!this.pool) return super.withRefreshLock(task);
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await client.query('SELECT pg_try_advisory_xact_lock(78324, 1) AS acquired');
+      if (!result.rows[0].acquired) { await client.query('ROLLBACK'); return false; }
+      const locked = await new SharedStockTokenRepository({ pool: client, staleAfterMs: this.staleAfterMs }).load();
+      await task(locked);
+      await client.query('COMMIT');
+      this.markets = locked.markets; this.providers = locked.providers;
+      return true;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally { client.release(); }
+  }
+  async persist({ venue, provider } = {}) {
+    // A provider refresh must never write an old snapshot of another provider.
+    const marketValues = provider ? [] : [...this.markets.values()].filter(market => !venue || market.venue === venue);
+    const stateValues = venue ? [] : [...this.providers.values()].filter(state => !provider || state.provider === provider);
     if (this.pool) {
-      const markets = [...this.markets.values()].map(market => ({
+      const markets = marketValues.map(market => ({
         market_id: market.canonicalId, venue: market.venue, issuer: market.issuer,
         underlying_symbol: market.underlyingSymbol, asset_type: market.assetType,
         market_status: market.marketStatus, price: market.price, last_updated: market.lastUpdated,
         payload: market
       }));
-      const states = [...this.providers.values()].map(state => ({
+      const states = stateValues.map(state => ({
         provider: state.provider, endpoint: state.endpoint || null, status: state.status,
         discovered: state.discovered || 0, last_discovery_at: state.lastDiscoveryAt || null,
         last_price_update_at: state.lastPriceUpdateAt || null, error: state.error || null,
@@ -122,12 +143,12 @@ export class SharedStockTokenRepository extends MemoryStockTokenRepository {
     }
     if (this.db) this.db.exec('BEGIN IMMEDIATE');
     try {
-      for (const market of this.markets.values()) {
+      for (const market of marketValues) {
         const values = [market.canonicalId, market.venue, market.issuer, market.underlyingSymbol,
           market.assetType, market.marketStatus, market.price, market.lastUpdated, JSON.stringify(market)];
         this.db.prepare('INSERT OR REPLACE INTO stock_token_markets VALUES(?,?,?,?,?,?,?,?,?)').run(...values);
       }
-      for (const state of this.providers.values()) {
+      for (const state of stateValues) {
         const values = [state.provider, state.endpoint || null, state.status, state.discovered || 0,
           state.lastDiscoveryAt || null, state.lastPriceUpdateAt || null,
           state.error ? JSON.stringify(state.error) : null, state.updatedAt || Date.now()];

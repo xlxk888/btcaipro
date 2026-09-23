@@ -71,7 +71,7 @@ export class GateStockTokenAdapter extends StockTokenAdapter {
         marketType: item.type, name: item.base_name, venue: this.venue, exchangeSymbol: item.id,
         baseAsset: item.base, quoteAsset: item.quote, marketStatus: item.trade_status === 'tradable' ? 'active' : 'inactive',
         price: quote.last, change24h: quote.change_percentage, volume24h: quote.quote_volume,
-        source: this.venue, lastUpdated: now, lastTradeTime: null,
+        source: this.venue, lastUpdated: Number(quote.last) > 0 ? now : 0, lastTradeTime: null,
         verified: /\b(xStock|Ondo Tokenized)\b/i.test(item.base_name || '')
       }, { now });
     }).filter(Boolean);
@@ -119,7 +119,8 @@ export class RobinhoodStockTokenAdapter extends StockTokenAdapter {
       const bid = Number(quote.bid), ask = Number(quote.ask), multiplier = Number(asset.currentMultiplier);
       const reference = bid > 0 && ask > 0 ? (bid + ask) / 2 : null;
       const tokenPrice = reference && multiplier > 0 ? reference * multiplier : null;
-      const lastUpdated = Date.parse(quote.generatedAt) || now;
+      // Reference freshness belongs to the quote, never to discovery time.
+      const lastUpdated = Date.parse(quote.generatedAt) || 0;
       return (asset.deployments || []).map(deployment => createStockTokenMarket({
         productType: 'stock_token', issuer: 'Robinhood Assets (Jersey)',
         assetType: /\b(ETF|fund|trust)\b/i.test(asset.tokenName || '') ? 'etf_token' : undefined,

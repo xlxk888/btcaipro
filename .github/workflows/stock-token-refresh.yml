@@ -6,7 +6,7 @@ on:
     paths:
       - .github/workflows/stock-token-refresh.yml
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '2-59/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -29,16 +29,21 @@ jobs:
           if [ -n "$STOCK_TOKEN_CRON_SECRET" ]; then
             args+=(--header "Authorization: Bearer $STOCK_TOKEN_CRON_SECRET")
           fi
-          providers=(bybit-xstocks gate-stock-tokens robinhood-stock-tokens okx-stock-tokens kraken-stock-tokens)
-          successes=0
+          # Active production sources only; Bybit remains independently unavailable.
+          providers=(gate-stock-tokens robinhood-stock-tokens)
+          failures=0
           for provider in "${providers[@]}"; do
-            if curl "${args[@]}" "https://btcaipro.vercel.app/api/stock-tokens/refresh?provider=$provider"; then
-              successes=$((successes + 1))
+            if result=$(curl "${args[@]}" "https://www.btcaipro.com/api/stock-tokens/refresh?provider=$provider"); then
+              echo "$result" | jq '{ok, skipped, providers, health: {active: .health.active, stale: .health.stale, lastPriceUpdateAt: .health.lastPriceUpdateAt}}'
+              if ! echo "$result" | jq -e --arg provider "$provider" '.ok == true and (.skipped == "refresh_in_progress" or any(.providers[]?; .provider == $provider and .status == "ok" and .discovered > 0))' >/dev/null; then
+                failures=$((failures + 1))
+              fi
             else
               echo "Provider refresh failed: $provider" >&2
+              failures=$((failures + 1))
             fi
           done
-          if [ "$successes" -eq 0 ]; then
-            echo "Every stock-token provider refresh failed" >&2
+          if [ "$failures" -gt 0 ]; then
+            echo "An active production provider failed to refresh" >&2
             exit 1
           fi

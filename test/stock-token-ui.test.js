@@ -56,6 +56,35 @@ function market(venue = 'Gate', overrides = {}) {
 const ids = items => Array.from(items, item => item.canonicalId);
 const response = markets => ({ ok: true, json: async () => ({ data: markets, health: {} }) });
 
+test('AAPLX and AAPLON share one watch state but independent market IDs, removal and persistent ordering', () => {
+  const { app, storage } = fixture();
+  const appleX = market('Gate', { canonicalId: 'stock-token:xstocks:aaplx:gate:aaplxusdt::', displaySymbol: 'AAPLX', underlyingSymbol: 'AAPL', exchangeSymbol: 'AAPLX_USDT' });
+  const appleOn = market('Gate', { canonicalId: 'stock-token:ondo:aaplon:gate:aaplonusdt::', displaySymbol: 'AAPLON', underlyingSymbol: 'AAPL', issuer: 'Ondo', exchangeSymbol: 'AAPLON_USDT' });
+  app.stockTokenMarkets = [appleX, appleOn];
+  app.addStockTokenToWatchlist(appleX); app.addStockTokenToWatchlist(appleOn);
+  assert.equal(app.assetSearchMode, 'stock_tokens');
+  assert.equal(app.isStockTokenWatched(appleX), true); assert.equal(app.isStockTokenWatched(appleOn), true);
+  app.moveStockTokenWatch(appleX.canonicalId, -1);
+  assert.deepEqual(ids(app.stockTokenWatchlist), [appleX.canonicalId, appleOn.canonicalId]);
+  const { app: reloaded } = fixture(storage); reloaded.loadWatchedAssets();
+  assert.deepEqual(ids(reloaded.stockTokenWatchlist), [appleX.canonicalId, appleOn.canonicalId]);
+  app.removeStockTokenFromWatchlist(appleX.canonicalId);
+  assert.equal(app.isStockTokenWatched(appleX), false); assert.equal(app.isStockTokenWatched(appleOn), true);
+  app.addStockTokenToWatchlist(appleX); app.removeStockTokenFromWatchlist(appleOn.canonicalId);
+  assert.equal(app.isStockTokenWatched(appleX), true); assert.equal(app.isStockTokenWatched(appleOn), false);
+  assert.equal(app.stockTokenMarkets.length, 2);
+});
+
+test('only the upper watch section owns the Stock Token watchlist; the lower panel remains a market browser', () => {
+  const upper = html.slice(html.indexOf('<nav class="asset-section-tabs"'), html.indexOf('<div id="stock-market-card"'));
+  const lower = html.slice(html.indexOf('<div id="stock-market-card"'), html.indexOf('<script>'));
+  assert.equal((html.match(/aria-label="股票代币自选"/g) || []).length, 1);
+  assert.match(upper, /aria-label="股票代币自选"/);
+  assert.doesNotMatch(lower, /我的股票代币自选|removeStockTokenFromWatchlist/);
+  assert.match(lower, /isStockTokenWatched\(market\)/);
+  assert.match(lower, /addStockTokenToWatchlist\(market\)/);
+});
+
 test('shared storage round-trips Crypto and separate venues without duplicate Stock Token additions', async () => {
   const { app, storage, messages } = fixture();
   for (const symbol of ['BTC', 'ZEC']) {
@@ -174,7 +203,7 @@ test('initial registry errors are unavailable rather than a ready zero-market re
   }
   app.fetchWithSoftTimeout = async (url, timeout) => {
     assert.equal(url, '/api/stock-tokens/markets');
-    assert.equal(timeout, 10000);
+    assert.equal(timeout, 25000);
     return response([gate]);
   };
   await app.fetchStockTokens();

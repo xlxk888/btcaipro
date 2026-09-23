@@ -1,8 +1,10 @@
 import { SharedStockTokenRepository } from '../../src/stock-tokens/repository.js';
+import { refreshDueStockTokens } from '../../src/stock-tokens/refresh.js';
 
 export function createStockTokenMarketsHandler({ databaseUrl = process.env.DATABASE_URL,
-  repositoryFactory = () => SharedStockTokenRepository.create({ databaseUrl, migrate: false }) } = {}) {
-  let repository, initialization;
+  repositoryFactory = () => SharedStockTokenRepository.create({ databaseUrl, migrate: false }),
+  refresh = refreshDueStockTokens } = {}) {
+  let repository, initialization, reading;
   return {
     async fetch(request) {
       if (request.method !== 'GET') return Response.json({ error: 'method_not_allowed' }, { status: 405 });
@@ -10,10 +12,19 @@ export function createStockTokenMarketsHandler({ databaseUrl = process.env.DATAB
       try {
         initialization ||= repositoryFactory().then(value => { repository = value; return value; });
         const url = new URL(request.url);
-        const markets = await (await initialization).list({ underlying: url.searchParams.get('underlying') || undefined,
-          venue: url.searchParams.get('venue') || undefined });
-        return Response.json({ data: markets, count: markets.length, health: await repository.health() }, {
-          headers: { 'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=120' }
+        reading ||= (async () => {
+          const current = await initialization;
+          await current.load();
+          await refresh(current);
+          return { data: await current.list(), health: await current.health() };
+        })().finally(() => { reading = null; });
+        const snapshot = await reading;
+        const underlying = url.searchParams.get('underlying')?.toUpperCase();
+        const venue = url.searchParams.get('venue')?.toLowerCase();
+        const markets = snapshot.data.filter(market => (!underlying || market.underlyingSymbol === underlying)
+          && (!venue || market.venue.toLowerCase() === venue));
+        return Response.json({ data: markets, count: markets.length, health: snapshot.health }, {
+          headers: { 'Cache-Control': 'no-store' }
         });
       } catch (_) {
         try { await repository?.close?.(); } catch (_) {}

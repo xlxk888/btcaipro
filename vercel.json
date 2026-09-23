@@ -4,7 +4,7 @@
     "api/assets/search.js": { "maxDuration": 10 },
     "api/assets/discovery-health.js": { "maxDuration": 10 },
     "api/assets/market.js": { "maxDuration": 15 },
-    "api/stock-tokens/markets.js": { "maxDuration": 10 },
+    "api/stock-tokens/markets.js": { "maxDuration": 30 },
     "api/stock-tokens/refresh.js": { "maxDuration": 60 },
     "api/monero/network.js": { "maxDuration": 15 }
   },

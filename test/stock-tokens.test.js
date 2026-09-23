@@ -103,7 +103,7 @@ test('SQLite registry survives restart and the serverless API reads only persist
     lastPriceUpdateAt: 2_000, updatedAt: 2_000 });
   await writer.close();
   const reader = await SharedStockTokenRepository.create({ databasePath, migrate: false, staleAfterMs: 10_000 });
-  const handler = createStockTokenMarketsHandler({ databaseUrl: 'configured', repositoryFactory: async () => reader });
+  const handler = createStockTokenMarketsHandler({ databaseUrl: 'configured', repositoryFactory: async () => reader, refresh: async () => {} });
   const result = await handler.fetch(new Request('https://example.test/api/stock-tokens/markets?underlying=CRCL'));
   const body = await result.json();
   assert.equal(result.status, 200);

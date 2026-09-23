@@ -40,7 +40,8 @@ export function classifyStockToken(raw = {}) {
 export function createStockTokenMarket(raw, { now = Date.now(), staleAfterMs = 5 * 60_000 } = {}) {
   const classification = classifyStockToken(raw);
   if (!classification) return null;
-  const updatedAt = Number(raw.lastUpdated || raw.updatedAt || now);
+  const timestamp = Number('lastUpdated' in raw ? raw.lastUpdated : raw.updatedAt ?? now);
+  const updatedAt = Number.isFinite(timestamp) && timestamp > 0 ? timestamp : 0;
   const venue = String(raw.venue || raw.source || '').trim();
   const exchangeSymbol = String(raw.exchangeSymbol || '').trim();
   const baseAsset = String(raw.baseAsset || '').trim().toUpperCase();
@@ -85,7 +86,7 @@ export function createStockTokenMarket(raw, { now = Date.now(), staleAfterMs = 5
     lastUpdated: updatedAt,
     lastTradeTime: raw.lastTradeTime ? Number(raw.lastTradeTime) : null,
     discoveredAt: Number(raw.discoveredAt || now),
-    stale: now - updatedAt > staleAfterMs,
+    stale: !updatedAt || now - updatedAt > staleAfterMs,
     verified: raw.verified !== false
   };
 }

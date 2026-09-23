@@ -30,7 +30,15 @@ export function createStockTokenRefreshHandler({
           return Response.json({ error: 'unknown_stock_token_provider', provider }, { status: 400 });
         }
         repository = await repositoryFactory();
-        const providers = await workerFactory(repository, adapters).poll();
+        let providers, refreshError;
+        const acquired = await repository.withRefreshLock(async locked => {
+          try { providers = await workerFactory(locked, adapters).poll(); }
+          catch (error) { refreshError = error; }
+        });
+        if (!acquired) return Response.json({ ok: true, skipped: 'refresh_in_progress' }, {
+          status: 202, headers: { 'Cache-Control': 'private, no-store' }
+        });
+        if (refreshError) throw refreshError;
         return Response.json({
           ok: true,
           durationMs: Date.now() - startedAt,
