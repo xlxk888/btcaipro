@@ -21,7 +21,7 @@ vm.runInContext(inlineScript, context);
 const registry = context.CryptoAIAssets;
 
 function fixture() {
-  const app = { ...options.data, ...options.methods, watchedAssets: [], pendingUpdates: {}, rafId: null };
+  const app = { ...options.data, ...options.methods, watchedAssets: [], stockTokenMarkets: [], stockTokenWatchlist: [], pendingUpdates: {}, rafId: null };
   app.backendIsActive = () => false;
   app.showToast = () => {};
   app.routeWatchedAssets = () => {};
