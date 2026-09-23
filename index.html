@@ -1725,7 +1725,7 @@
     .radar-body { grid-template-columns: minmax(180px,.55fr) minmax(0,1.45fr); gap: 18px; }
     .radar-meter { padding: 16px; border-color: rgba(96,165,250,.2); background: rgba(7,14,26,.62); }
     .radar-state { font-size: 1.8rem; letter-spacing: -.04em; }
-    .radar-status-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
+    .radar-status-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
     .radar-status-grid > div { padding: 10px; border-radius: 10px; background: rgba(7,14,26,.54); }
     .radar-status-grid span { display: block; color: #7f8da3; font-size: .7rem; font-weight: 700; }
     .radar-status-grid strong { display: block; margin-top: 4px; color: #e5e7eb; font-size: .9rem; }
@@ -1738,7 +1738,7 @@
     .radar-reasons { margin-top: 14px; border-top: 1px solid rgba(148,163,184,.14); }
     .radar-reasons summary { padding: 12px 2px 4px; color: #dbeafe; font-size: .82rem; font-weight: 850; cursor: pointer; }
     .radar-reasons summary span { margin-left: 6px; color: #77869d; font-size: .7rem; font-weight: 650; }
-    .reason-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+    .reason-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin-top: 10px; }
     .reason-item { min-width: 0; padding: 10px; border-radius: 10px; background: rgba(7,14,26,.58); }
     .reason-item > span, .reason-item small { display: block; color: #77869d; font-size: .68rem; }
     .reason-item strong { display: block; margin: 4px 0; color: #e5e7eb; font-size: .86rem; overflow-wrap: anywhere; }
@@ -2039,7 +2039,6 @@
       .top-strip { gap: 8px; }
       .pulse-item { min-height: 80px; padding: 10px; }
       .radar-status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .radar-status-grid > div:last-child { grid-column: 1 / -1; }
       .alert-form { grid-template-columns: 1fr; }
       .alert-form button { grid-column: auto; }
       .watch-row .mobile-card-meta, .stock-mobile-meta { grid-template-columns: 1fr; }
@@ -2175,7 +2174,7 @@
   <div class="top-strip">
     <div class="pulse-item brand-pulse">
       <div>
-        <div class="pulse-label">市场状态</div>
+        <div class="pulse-label">综合市场状态</div>
         <div class="pulse-value" :class="marketRadar.className">{{ marketRadar.state }}</div>
       </div>
       <div class="pulse-value small">规则模型 · 基于实时市场数据</div>
@@ -2222,15 +2221,16 @@
       </h2>
       <div class="radar-body">
         <div class="radar-meter">
-          <div class="radar-score">当前市场状态</div>
+          <div class="radar-score">综合市场状态</div>
           <div class="radar-state" :class="marketRadar.className">{{ marketRadar.state }}</div>
-          <div class="radar-score">{{ watchedAssets.length }} 个自选 · {{ marketRadar.upCount }} 涨 / {{ marketRadar.downCount }} 跌</div>
+          <div class="radar-score">{{ marketRadar.inputCount }} 个新鲜维度参与判断</div>
         </div>
         <div>
           <div class="radar-status-grid">
-            <div><span>市场状态</span><strong :class="marketRadar.className">{{ marketRadar.state }}</strong></div>
-            <div><span>风险等级</span><strong :class="marketRadar.riskClass">{{ marketRadar.risk }}</strong></div>
-            <div><span>数据质量</span><strong :class="sourceHealthClass">{{ marketRadar.dataQuality }}</strong></div>
+            <div><span>市场情绪</span><strong :class="marketRadar.sentimentClass">{{ marketRadar.sentiment }}</strong></div>
+            <div><span>短期动量</span><strong :class="marketRadar.momentumClass">{{ marketRadar.momentum }}</strong></div>
+            <div><span>估值状态</span><strong :class="marketRadar.valuationClass">{{ marketRadar.valuation }}</strong></div>
+            <div><span>综合风险</span><strong :class="marketRadar.riskClass">{{ marketRadar.risk }}</strong></div>
           </div>
           <div class="radar-summary">{{ marketRadar.summary }}</div>
         </div>
@@ -2810,6 +2810,7 @@
 
 <script src="asset-registry.js"></script>
 <script src="stock-token-search.js"></script>
+<script src="market-radar.js"></script>
 <script>
 new Vue({
   el: '#app',
@@ -2921,7 +2922,7 @@ new Vue({
       dex: { name: '链上行情', status: '暂停', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10s', staleMs: 45000, expireMs: 180000 },
       tencentStocks: { name: '美股行情', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '60s', staleMs: 180000, expireMs: 900000 },
       tencentGlobal: { name: '环球金融', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '30s', staleMs: 120000, expireMs: 600000 },
-      fearGreed: { name: '恐惧贪婪', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1h', staleMs: 2 * 60 * 60 * 1000, expireMs: 6 * 60 * 60 * 1000 },
+      fearGreed: { name: '恐惧贪婪', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1h', staleMs: 36 * 60 * 60 * 1000, expireMs: 48 * 60 * 60 * 1000 },
       ahr999: { name: 'AHR999 本地估算', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '1m', staleMs: 5 * 60 * 1000, expireMs: 30 * 60 * 1000 },
       mempool: { name: '减半数据', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 20 * 60 * 1000, expireMs: 60 * 60 * 1000 },
       dxy: { name: 'DXY 美元指数（估算）', status: '等待', lastUpdate: null, lastAttempt: null, errorCount: 0, interval: '10m', staleMs: 6 * 60 * 60 * 1000, expireMs: 24 * 60 * 60 * 1000, optional: true },
@@ -2941,7 +2942,7 @@ new Vue({
       { label: '全部', value: 'ALL' }
     ],
     ahrValue: '--',
-    fgValue: null, fgText: '数据加载中', fgColor: '#94a3b8',
+    fgValue: null, fgText: '数据加载中', fgColor: '#94a3b8', fgOfficialClassification: '',
     fgStale: true,
     fgDataTime: '',
     fgReceivedAt: '',
@@ -3310,100 +3311,75 @@ new Vue({
     marketRadar() {
       const btc = this.watchedAssets.find(asset => asset.pair === 'BTCUSDT');
       const eth = this.watchedAssets.find(asset => asset.pair === 'ETHUSDT');
-      const btcChange = this.isAssetUsable(btc) ? Number(btc.changePct) : null;
-      const ethChange = this.isAssetUsable(eth) ? Number(eth.changePct) : null;
+      const btcFresh = this.isAssetUsable(btc);
+      const ethFresh = this.isAssetUsable(eth);
+      const btcChange = btcFresh ? Number(btc.changePct) : null;
+      const ethChange = ethFresh ? Number(eth.changePct) : null;
       const ahr = Number(this.ahrValue);
-      const fg = Number(this.fgValue);
       const fgUsable = this.fgValue !== null && !this.fgDisplayStale;
       const ahrUsable = Number.isFinite(ahr) && this.sourceBadge(this.dataSources.ahr999) === 'ok';
-      const spx = this.usableGlobalChange('spx');
-      const nasdaq = this.usableGlobalChange('ixic');
-      const gold = this.usableGlobalChange('gc');
-      const oil = this.usableGlobalChange('cl');
-      const freshAssets = this.watchedAssets.filter(asset => this.isAssetUsable(asset));
-      const upCount = freshAssets.filter(asset => Number(asset.changePct) > 0).length;
-      const downCount = freshAssets.filter(asset => Number(asset.changePct) < 0).length;
-      const weakestMiner = this.miners.reduce((min, miner) => Math.min(min, Number(miner.shutdownPrice)), Infinity);
-      const minerGap = !this.minerDataStale && this.isAssetUsable(btc) && Number.isFinite(weakestMiner) && this.btcPrice ? ((this.btcPrice - weakestMiner) / weakestMiner) * 100 : null;
-
-      let score = 0;
-      let scoreInputs = 0;
-      if (fgUsable) { score += fg <= 25 ? -2 : fg <= 45 ? -1 : fg >= 75 ? 2 : fg >= 60 ? 1 : 0; scoreInputs += 1; }
-      if (ahrUsable) { score += ahr < 0.45 ? -2 : ahr < 1.2 ? -1 : ahr > 5 ? 2 : 0; scoreInputs += 1; }
-      if (Number.isFinite(btcChange)) score += btcChange > 2 ? 1 : btcChange < -2 ? -1 : 0;
-      if (Number.isFinite(ethChange)) score += ethChange > 2 ? 1 : ethChange < -2 ? -1 : 0;
-      if (Number.isFinite(spx)) score += spx > 0 ? 0.5 : spx < -0.8 ? -0.5 : 0;
-      if (Number.isFinite(nasdaq)) score += nasdaq > 0 ? 0.5 : nasdaq < -0.8 ? -0.5 : 0;
-      if (minerGap !== null && minerGap < 18) score -= 1;
-      if (Number.isFinite(btcChange)) scoreInputs += 1;
-      if (Number.isFinite(ethChange)) scoreInputs += 1;
-      if (Number.isFinite(spx)) scoreInputs += 1;
-      if (Number.isFinite(nasdaq)) scoreInputs += 1;
-      if (minerGap !== null) scoreInputs += 1;
-      if (freshAssets.length) { score += upCount > downCount ? 0.5 : downCount > upCount ? -0.5 : 0; scoreInputs += 1; }
-
-      let state = '中性观察';
-      let badge = 'warn';
-      let className = '';
-      if (scoreInputs < 2) { state = '数据不足'; badge = 'warn'; className = ''; }
-      else if (score <= -3) { state = '极度恐慌'; badge = 'bad'; className = 'down'; }
-      else if (score <= -1) { state = '偏弱防守'; badge = 'warn'; className = 'down'; }
-      else if (score < 2) { state = '修复观察'; badge = 'ok'; className = 'up'; }
-      else if (score < 4) { state = '强势修复'; badge = 'ok'; className = 'up'; }
-      else { state = '阶段过热'; badge = 'warn'; className = 'up'; }
-
-      const risk = badge === 'bad' ? '高' : badge === 'warn' ? '中' : '低';
-      const riskClass = badge === 'bad' ? 'down' : badge === 'warn' ? 'warn-text' : 'up';
+      const model = CryptoAIMarketRadar.evaluate({
+        fearGreed: { value: this.fgValue, classification: this.fgOfficialClassification || this.fgText, fresh: fgUsable },
+        btc: { change24h: btcChange, fresh: btcFresh },
+        eth: { change24h: ethChange, fresh: ethFresh },
+        ahr999: { value: ahr, fresh: ahrUsable }
+      });
+      const sentimentValue = this.fgValue !== null ? this.fgValue + ' · ' + this.fgText : '数据暂不可用';
+      const momentumValue = model.momentum?.label || '数据不足';
+      const valuationValue = model.valuation?.label || (Number.isFinite(ahr) ? '旧数据' : '数据暂不可用');
+      const assetSourceNote = (asset, fresh) => [
+        asset?.source || '当前行情源', asset?.dataTime || asset?.receivedAt || '',
+        fresh ? '新鲜 · 参与综合风险' : '旧数据/异常 · 不参与综合风险'
+      ].filter(Boolean).join(' · ');
       const basis = [
+        {
+          label: '市场情绪',
+          value: sentimentValue,
+          note: ['Alternative.me', this.fgDataTime || '', fgUsable ? '新鲜 · 参与综合风险' : '旧数据/缺失 · 不参与综合风险'].filter(Boolean).join(' · '),
+          status: fgUsable ? (model.sentiment?.key.includes('fear') ? 'down' : model.sentiment?.key.includes('greed') ? 'up' : 'neutral-text') : (this.fgValue !== null ? 'warn-text' : 'muted-text')
+        },
         {
           label: 'BTC 24H',
           value: Number.isFinite(btcChange) ? this.formatSignedPercent(btcChange) : (btc && btc.stale ? '旧数据' : '数据暂不可用'),
-          note: Number.isFinite(btcChange) ? `${btc.source || '行情源'} · 参与判断` : '不参与实时判断',
+          note: assetSourceNote(btc, btcFresh),
           status: Number.isFinite(btcChange) ? (btcChange >= 0 ? 'up' : 'down') : (btc && btc.stale ? 'warn-text' : 'muted-text')
         },
         {
           label: 'ETH 24H',
           value: Number.isFinite(ethChange) ? this.formatSignedPercent(ethChange) : (eth && eth.stale ? '旧数据' : '数据暂不可用'),
-          note: Number.isFinite(ethChange) ? `${eth.source || '行情源'} · 参与判断` : '不参与实时判断',
+          note: assetSourceNote(eth, ethFresh),
           status: Number.isFinite(ethChange) ? (ethChange >= 0 ? 'up' : 'down') : (eth && eth.stale ? 'warn-text' : 'muted-text')
         },
         {
-          label: 'Fear & Greed',
-          value: fgUsable ? String(this.fgValue) : (this.fgValue !== null ? '旧数据' : '数据暂不可用'),
-          note: fgUsable ? 'Alternative.me · 参与判断' : '不参与实时判断',
-          status: fgUsable ? 'neutral-text' : (this.fgValue !== null ? 'warn-text' : 'muted-text')
-        },
-        {
-          label: 'AHR999',
+          label: '估值状态',
           value: ahrUsable ? ahr.toFixed(4) : (Number.isFinite(ahr) ? '旧数据' : '数据暂不可用'),
-          note: ahrUsable ? '本地估算 · 参与判断' : '本地估算 · 不参与实时判断',
+          note: ['AHR999 本地估算', valuationValue, this.dataSources.ahr999.lastUpdate ? this.formatDateTime(this.dataSources.ahr999.lastUpdate) : '', ahrUsable ? '新鲜 · 参与综合风险' : '旧数据/缺失 · 不参与综合风险'].filter(Boolean).join(' · '),
           status: ahrUsable ? 'neutral-text' : (Number.isFinite(ahr) ? 'warn-text' : 'muted-text')
-        },
-        {
-          label: '美股',
-          value: Number.isFinite(spx) || Number.isFinite(nasdaq) ? `标普 ${this.formatSignedPercent(spx)} · 纳指 ${this.formatSignedPercent(nasdaq)}` : '数据暂不可用',
-          note: Number.isFinite(spx) || Number.isFinite(nasdaq) ? '有效项参与判断' : '不参与实时判断',
-          status: Number.isFinite(spx) || Number.isFinite(nasdaq) ? 'neutral-text' : 'muted-text'
         }
       ];
-      const summary = `当前市场处于${state}，BTC ${this.formatSignedPercent(btcChange)}，ETH ${this.formatSignedPercent(ethChange)}，恐惧贪婪 ${fgUsable ? this.fgValue : '暂无有效数据'}，AHR999 ${ahrUsable ? ahr.toFixed(4) : '暂无有效数据'}。已使用 ${scoreInputs} 组有效数据，旧数据和异常数据不参与评分。`;
+      const summary = model.risk.key === 'unavailable'
+        ? '当前新鲜维度不足，综合风险暂无法判断；旧数据和异常数据不参与计算。'
+        : '市场情绪' + (fgUsable ? sentimentValue : '暂无新鲜数据')
+          + '；BTC / ETH 短期动量' + momentumValue
+          + '；AHR999 ' + (ahrUsable ? ahr.toFixed(4) + ' · ' + valuationValue : '暂无新鲜数据')
+          + '；当前综合风险为“' + model.risk.label + '”。';
       return {
-        state,
-        badge,
-        className,
-        risk,
-        riskClass,
+        state: model.risk.label,
+        badge: model.risk.badge,
+        className: model.risk.className,
+        risk: model.risk.label,
+        riskClass: model.risk.className,
+        riskScore: model.risk.score,
+        sentiment: sentimentValue,
+        sentimentClass: basis[0].status,
+        momentum: momentumValue,
+        momentumClass: model.momentum?.className || 'muted-text',
+        valuation: valuationValue,
+        valuationClass: ahrUsable ? 'neutral-text' : 'muted-text',
+        inputCount: model.usedIndicators.length,
         dataQuality: this.sourceHealthText,
         basis,
-        upCount,
-        downCount,
-        summary,
-        focus: [
-          { title: 'BTC / ETH', text: '观察主流币是否重新站稳关键价格。' },
-          { title: '风险资产', text: `标普 ${this.formatSignedPercent(spx)}，纳指 ${this.formatSignedPercent(nasdaq)}。` },
-          { title: '宏观商品', text: `黄金 ${this.formatSignedPercent(gold)}，原油 ${this.formatSignedPercent(oil)}。` },
-          { title: '矿机压力', text: minerGap === null ? '等待BTC价格刷新。' : `距最低关机价约 ${minerGap.toFixed(1)}%。` }
-        ]
+        summary
       };
     },
     wsStatusText() {
@@ -3588,20 +3564,26 @@ new Vue({
         const fearGreed = snapshot.sentiment && snapshot.sentiment.fearGreed;
         if (fearGreed && fearGreed.value !== null && !fearGreed.stale) {
           const val = Number(fearGreed.value);
-          this.fgValue = val; this.fgStale = false;
+          if (!this.applyFearGreed(val, fearGreed.metadata?.classification || '')) throw new Error('Fear Greed invalid');
+          this.fgStale = false;
           this.fgDataTime = this.formatDateTime(fearGreed.dataTime); this.fgReceivedAt = this.formatDateTime(fearGreed.receivedAt);
-          if (val <= 25) { this.fgText = '极度恐慌'; this.fgColor = '#ef4444'; this.fearNote = '市场极度恐慌，可能是买入机会'; }
-          else if (val <= 45) { this.fgText = '恐慌'; this.fgColor = '#fb923c'; this.fearNote = '市场偏恐慌，适合分批观察'; }
-          else if (val <= 55) { this.fgText = '中立'; this.fgColor = '#facc15'; this.fearNote = '情绪中性，等待方向确认'; }
-          else if (val <= 75) { this.fgText = '贪婪'; this.fgColor = '#4ade80'; this.fearNote = '市场偏贪婪，注意追高风险'; }
-          else { this.fgText = '极度贪婪'; this.fgColor = '#22c55e'; this.fearNote = '市场极度贪婪，注意阶段性过热'; }
           if (this.gaugeChart) this.gaugeChart.setOption({ series: [{ data: [{ value: val }] }] });
-          this.markSource('fearGreed', '后台');
+          this.markSource('fearGreed', '后台', null, { success: true, lastUpdate: Date.parse(fearGreed.dataTime) });
+        } else if (fearGreed && fearGreed.value !== null) {
+          this.applyFearGreed(fearGreed.value, fearGreed.metadata?.classification || '');
+          this.fgStale = true;
+          this.fgDataTime = this.formatDateTime(fearGreed.dataTime); this.fgReceivedAt = this.formatDateTime(fearGreed.receivedAt);
+          this.markSource('fearGreed', '旧数据');
+          this.dataSources.fearGreed.lastUpdate = Date.parse(fearGreed.dataTime) || this.dataSources.fearGreed.lastUpdate;
         }
         const ahr999 = snapshot.sentiment && snapshot.sentiment.ahr999;
         if (ahr999 && ahr999.value !== null && !ahr999.stale) {
           this.ahrValue = Number(ahr999.value).toFixed(4);
-          this.markSource('ahr999', '后台估算');
+          this.markSource('ahr999', '后台估算', null, { success: true, lastUpdate: Date.parse(ahr999.dataTime) });
+        } else if (ahr999 && ahr999.value !== null) {
+          this.ahrValue = Number(ahr999.value).toFixed(4);
+          this.markSource('ahr999', '旧数据');
+          this.dataSources.ahr999.lastUpdate = Date.parse(ahr999.dataTime) || this.dataSources.ahr999.lastUpdate;
         }
         this.markSource('backend', '后台', false, { success: true });
       } catch (error) {
@@ -3628,6 +3610,24 @@ new Vue({
         this.backendSourceStatusLoaded = false;
         this.backendSourceSummary = null;
       }
+    },
+
+    applyFearGreed(value, officialClassification = '') {
+      const result = CryptoAIMarketRadar.classifyFearGreed(value, officialClassification);
+      if (!result) return false;
+      this.fgValue = result.value;
+      this.fgText = result.label;
+      this.fgColor = result.color;
+      this.fgOfficialClassification = officialClassification || '';
+      const notes = {
+        extreme_fear: '市场情绪极度恐慌，注意流动性与波动风险',
+        fear: '市场情绪偏恐慌，关注风险释放',
+        neutral: '市场情绪中性，等待方向确认',
+        greed: '市场情绪偏贪婪，注意追高风险',
+        extreme_greed: '市场情绪极度贪婪，注意阶段性过热'
+      };
+      this.fearNote = notes[result.key];
+      return true;
     },
 
     formatClock(value) {
@@ -7149,18 +7149,13 @@ new Vue({
         const d = await res.json();
         if (d && d.data && d.data.length) {
           const val = parseInt(d.data[0].value, 10);
-          if (!Number.isFinite(val)) throw new Error('Fear Greed invalid');
-          this.fgValue = val;
+          if (!this.applyFearGreed(val, d.data[0].value_classification || '')) throw new Error('Fear Greed invalid');
           this.fgStale = false;
-          this.fgDataTime = d.data[0].timestamp ? this.formatDateTime(Number(d.data[0].timestamp) * 1000) : '';
+          const observedAt = d.data[0].timestamp ? Number(d.data[0].timestamp) * 1000 : Date.now();
+          this.fgDataTime = this.formatDateTime(observedAt);
           this.fgReceivedAt = this.formatTimestamp(Date.now());
-          if (val <= 25) { this.fgText = "极度恐慌"; this.fgColor = "#ef4444"; this.fearNote = "市场极度恐慌，可能是买入机会"; }
-          else if (val <= 45) { this.fgText = "恐慌"; this.fgColor = "#fb923c"; this.fearNote = "市场偏恐慌，适合分批观察"; }
-          else if (val <= 55) { this.fgText = "中立"; this.fgColor = "#facc15"; this.fearNote = "情绪中性，等待方向确认"; }
-          else if (val <= 75) { this.fgText = "贪婪"; this.fgColor = "#4ade80"; this.fearNote = "市场偏贪婪，注意追高风险"; }
-          else { this.fgText = "极度贪婪"; this.fgColor = "#22c55e"; this.fearNote = "市场极度贪婪，注意阶段性过热"; }
           if (this.gaugeChart) this.gaugeChart.setOption({ series: [{ data: [{ value: val }] }] });
-          this.markSource('fearGreed', '轮询');
+          this.markSource('fearGreed', '轮询', null, { success: true, lastUpdate: observedAt });
         } else {
           throw new Error('Fear Greed empty');
         }

@@ -66,6 +66,7 @@ test('dashboard assets and Sources page are served', async () => {
   for (const [url, expectedType, marker] of [
     ['/asset-registry.js', 'application/javascript', 'CryptoAIAssets'],
     ['/stock-token-search.js', 'application/javascript', 'CryptoAIStockTokenSearch'],
+    ['/market-radar.js', 'application/javascript', 'CryptoAIMarketRadar'],
     ['/sources', 'text/html', '多链支持范围'],
     ['/sources.html', 'text/html', '多链支持范围']
   ]) {

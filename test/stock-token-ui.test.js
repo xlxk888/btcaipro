@@ -6,6 +6,7 @@ import vm from 'node:vm';
 const root = new URL('../', import.meta.url);
 const registrySource = fs.readFileSync(new URL('asset-registry.js', root), 'utf8');
 const searchSource = fs.readFileSync(new URL('stock-token-search.js', root), 'utf8');
+const radarSource = fs.readFileSync(new URL('market-radar.js', root), 'utf8');
 const html = fs.readFileSync(new URL('index.html', root), 'utf8');
 const inlineScript = html.split('<script>')[1].split('</script>')[0];
 
@@ -26,6 +27,7 @@ function fixture(storage = memoryStorage()) {
   });
   vm.runInContext(registrySource, context);
   vm.runInContext(searchSource, context);
+  vm.runInContext(radarSource, context);
   vm.runInContext(inlineScript, context);
   const app = structuredClone(options.data);
   for (const [name, method] of Object.entries(options.methods)) app[name] = method.bind(app);
@@ -229,6 +231,39 @@ test('data sources panel is centered, responsive, provider-accurate, and shares 
   assert.match(html, /Kraken/);
   assert.match(html, /GeckoTerminal/);
   assert.match(html, /\.add-btn \{[^}]*height: 38px;[^}]*border-radius: 8px;[^}]*background: #1f8f62;/);
+});
+
+test('Market Radar UI separates official sentiment, momentum, valuation, and aggregate risk', () => {
+  const { app } = fixture();
+  const now = Date.now();
+  app.clockNow = now;
+  app.fgValue = 71;
+  app.fgText = '贪婪';
+  app.fgOfficialClassification = 'Greed';
+  app.fgStale = false;
+  app.fgDataTime = '2026/9/24 00:00:00';
+  Object.assign(app.dataSources.fearGreed, { status: '轮询', lastUpdate: now });
+  app.ahrValue = '0.5700';
+  Object.assign(app.dataSources.ahr999, { status: '估算', lastUpdate: now });
+  app.watchedAssets = [
+    { id: 'btc', pair: 'BTCUSDT', price: 84000, changePct: -2.3, stale: false, sourceType: 'binance', source: 'Binance WS', dataTime: '2026/9/24 00:00:01' },
+    { id: 'eth', pair: 'ETHUSDT', price: 2600, changePct: -2.6, stale: false, sourceType: 'binance', source: 'Binance WS', dataTime: '2026/9/24 00:00:02' }
+  ];
+  assert.equal(app.marketRadar.sentiment, '71 · 贪婪');
+  assert.equal(app.marketRadar.momentum, '偏弱');
+  assert.equal(app.marketRadar.valuation, '定投区间');
+  assert.equal(app.marketRadar.state, '中等风险');
+  const before = app.marketRadar.state;
+  app.watchedAssets.push(
+    { id: 'a', pair: 'AUSDT', price: 1, changePct: -10, stale: false, sourceType: 'dex' },
+    { id: 'b', pair: 'BUSDT', price: 1, changePct: -10, stale: false, sourceType: 'dex' }
+  );
+  assert.equal(app.marketRadar.state, before);
+  assert.match(app.marketRadar.basis[0].note, /Alternative\.me.*参与综合风险/);
+  assert.match(app.marketRadar.basis[1].note, /Binance WS.*参与综合风险/);
+  assert.doesNotMatch(html, /marketRadar\.upCount|marketRadar\.downCount/);
+  assert.match(html, /综合市场状态/);
+  assert.match(html, /市场情绪[\s\S]*短期动量[\s\S]*估值状态[\s\S]*综合风险/);
 });
 
 test('Stock Token scale is explicitly underlying market cap, ETF AUM, or unavailable', () => {

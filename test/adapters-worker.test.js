@@ -5,6 +5,7 @@ import { MarketWorker } from '../src/worker/market-worker.js';
 import { MemoryCache } from '../src/cache/memory-cache.js';
 import { MemoryEventStore } from '../src/store/memory-store.js';
 import { ResilientCache } from '../src/cache/resilient-cache.js';
+import { FearGreedAdapter } from '../src/adapters/fear-greed.js';
 
 const logger = { info() {}, warn() {}, error() {}, debug() {} };
 const config = { symbols: ['BTCUSDT'], requestTimeoutMs: 1000, spotPollMs: 5_000, derivativesPollMs: 10_000, snapshotIntervalMs: 10_000, snapshotRetentionDays: 7, eventRetentionDays: 90 };
@@ -13,6 +14,15 @@ test('AHR999 calculation records finite traceable inputs', () => {
   const closes = Array.from({ length: 200 }, (_, index) => 20_000 + index);
   const result = calculateAhr999(closes, 30_000, Date.parse('2026-01-01T00:00:00Z'));
   assert.ok(result.value > 0); assert.ok(result.geoMean200 > 20_000); assert.match(AHR999_FORMULA_VERSION, /geom200/);
+});
+
+test('Fear & Greed adapter preserves the official classification', async () => {
+  const adapter = new FearGreedAdapter();
+  adapter.request = async () => ({ json: async () => ({ data: [{ value: '71', value_classification: 'Greed', timestamp: '1790179200' }] }) });
+  const rows = await adapter.fetch();
+  assert.equal(rows[0].value, '71');
+  assert.equal(rows[0].metadata.classification, 'Greed');
+  assert.equal(rows[0].source, 'Alternative.me');
 });
 
 test('worker spot collection falls back after primary failure', async () => {

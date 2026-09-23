@@ -104,6 +104,10 @@ export function createApp({ store, cache, worker, discovery, nativeMarket, moner
       const body = fs.readFileSync(path.join(root, 'stock-token-search.js'));
       response.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8', 'content-length': body.length }); return response.end(body);
     }
+    if (url.pathname === '/market-radar.js') {
+      const body = fs.readFileSync(path.join(root, 'market-radar.js'));
+      response.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8', 'content-length': body.length }); return response.end(body);
+    }
     return send(response, 404, { error: 'not_found' }, cors);
   };
 }
