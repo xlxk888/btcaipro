@@ -1,6 +1,10 @@
 name: Refresh stock token registry
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/stock-token-refresh.yml
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
