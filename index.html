@@ -584,14 +584,22 @@
     }
     .bottom-notice-body { margin-top: 10px; display:grid; gap:8px; }
     .bottom-notice-desc { color:#8fa0ba; font-size:.74rem; }
-    .source-group-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:18px 22px; padding:5px 0 2px; }
-    .source-group { min-width:0; }
+    .sources-notice { max-width:1200px; margin:18px auto 0; padding:16px 18px; }
+    .sources-notice .bottom-notice-head,
+    .sources-notice .bottom-notice-body { width:100%; max-width:1100px; margin-left:auto; margin-right:auto; }
+    .sources-notice .bottom-notice-body { margin-top:12px; gap:10px; }
+    .source-group-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; padding:2px 0; }
+    .source-group { min-width:0; padding:10px; border:1px solid rgba(96,165,250,.12); border-radius:9px; background:rgba(7,14,26,.28); }
     .source-group h3 { margin:0 0 8px; color:#94a3b8; font-size:.7rem; font-weight:800; }
-    .source-items { display:flex; flex-wrap:wrap; gap:6px; }
-    .source-item { display:inline-flex; align-items:center; min-height:24px; max-width:100%; padding:3px 7px; border:1px solid rgba(96,165,250,.18); border-radius:6px; background:rgba(15,23,42,.42); color:#cbd5e1; font-size:.69rem; line-height:1.3; text-decoration:none; overflow-wrap:anywhere; }
+    .source-items { display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start; }
+    .source-item { display:inline-flex; align-items:center; min-height:28px; max-width:100%; padding:4px 9px; border:1px solid rgba(96,165,250,.2); border-radius:7px; background:rgba(15,23,42,.54); color:#cbd5e1; font-size:.69rem; line-height:1.25; text-decoration:none; overflow-wrap:anywhere; }
     a.source-item:hover { color:#fff; border-color:rgba(96,165,250,.45); background:rgba(30,41,59,.7); }
-    @media(max-width:1100px) { .source-group-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
-    @media(max-width:650px) { .source-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:17px 12px; } .source-group:last-child { grid-column:1 / -1; } .sources-notice .bottom-notice-head { flex-wrap:wrap; } .sources-notice .bottom-notice-title { flex-basis:100%; } }
+    .sources-notice .bottom-notice-desc { text-align:center; color:#7f90aa; font-size:.71rem; }
+    .bottom-notice-link.sources-link { min-height:36px; padding:6px 12px; border-radius:8px; background:rgba(30,41,59,.62); border-color:rgba(96,165,250,.34); color:#bfdbfe; box-shadow:none; }
+    .bottom-notice-link.sources-link:hover { background:rgba(37,55,82,.78); border-color:rgba(125,211,252,.58); box-shadow:none; }
+    @media(max-width:900px) { .source-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media(max-width:650px) { .sources-notice { padding:14px 12px; } .sources-notice .bottom-notice-head { flex-wrap:wrap; } .sources-notice .bottom-notice-title { flex-basis:100%; } .sources-link { margin-left:auto; } }
+    @media(max-width:350px) { .source-group-grid { grid-template-columns:1fr; } }
     .bottom-notice-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     .bottom-notice-item { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border:1px solid rgba(147,197,253,.16); border-radius:10px; background:rgba(7,14,26,.42); }
     .bottom-notice-copy { min-width:0; color:#cbd5e1; font-size:.78rem; line-height:1.45; overflow-wrap:anywhere; }
@@ -867,14 +875,18 @@
     .asset-input:focus, .chain-select:focus { border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(56,189,248,.14); }
     .add-btn {
       height: 38px;
-      border: 0;
+      border: 1px solid rgba(52,211,153,.5);
       border-radius: 8px;
-      background: linear-gradient(135deg, #f59e0b, #22c55e);
-      color: #07111f;
+      background: #1f8f62;
+      color: #f0fdf4;
       font-size: .84rem;
       font-weight: 900;
+      padding: 0 14px;
       cursor: pointer;
+      box-shadow: 0 3px 10px rgba(3,41,30,.2);
     }
+    .add-btn:hover { background:#25a370; border-color:rgba(110,231,183,.72); }
+    .add-btn:active { transform:translateY(1px); background:#1d8059; }
     .watch-error { color: #fca5a5; font-size: .78rem; margin-bottom: 6px; }
     .asset-candidates { display:grid; gap:6px; margin:0 0 9px; }
     .asset-candidate { width:100%; text-align:left; padding:8px 10px; border:1px solid rgba(96,165,250,.35); border-radius:8px; background:#101d31; color:#e2e8f0; cursor:pointer; }
@@ -2421,7 +2433,7 @@
             <div :class="asset.changePct >= 0 ? 'up' : 'down'">{{ formatPercent(asset.changePct) }}</div>
             <div class="metric-cell"><span class="metric-label">成交</span>{{ formatVolume(asset.volume24h) }}</div>
             <div class="metric-cell market-cap-cell" :title="asset.marketCapDetail"><span class="metric-label">流通市值</span>{{ formatMarketCap(asset.marketCap) }}<small v-if="asset.marketCapSource" class="market-cap-source">{{ asset.marketCapSource }}</small></div>
-            <div class="crypto-spark" :class="asset.changePct < 0 ? 'down' : 'up'" :title="cryptoSparklinePoints(asset) ? `${asset.symbol} 真实 24h 小时收盘价` : '暂无可靠历史价格序列'">
+            <div class="crypto-spark" :class="asset.changePct < 0 ? 'down' : 'up'" :title="cryptoKlineTitle(asset)">
               <svg v-if="cryptoSparklinePoints(asset)" viewBox="0 0 84 30" preserveAspectRatio="none"><polyline :points="cryptoSparklinePoints(asset)" /></svg><span v-else>{{ cryptoMiniLoading[asset.id] ? '加载中' : '暂无K线' }}</span>
             </div>
             <div class="metric-cell time-cell" :title="assetTimeTitle(asset)"><span class="metric-label">时间</span>{{ assetTimeText(asset) }}<span v-if="asset.stale" class="data-stale-badge">旧数据</span></div>
@@ -2777,7 +2789,7 @@
   <div class="bottom-notice sources-notice">
     <div class="bottom-notice-head">
       <strong class="bottom-notice-title">数据与信息来源</strong>
-      <a class="bottom-notice-link" href="/sources.html">查看完整来源与计算说明</a>
+      <a class="bottom-notice-link sources-link" href="/sources.html">ⓘ 来源与计算说明</a>
     </div>
     <div class="bottom-notice-body">
       <div class="source-group-grid" aria-label="数据来源">
@@ -2817,11 +2829,14 @@ new Vue({
         { name: 'CoinGecko', url: 'https://www.coingecko.com/', description: '资产图片、流通市值与备用行情' },
         { name: 'CoinPaprika', url: 'https://coinpaprika.com/', description: '已核对资产 ID 的流通市值备用来源' },
         { name: 'CoinLore', url: 'https://www.coinlore.com/', description: '已核对资产 ID 与流通量的市值备用来源' },
+        { name: 'Hyperliquid', url: 'https://hyperliquid.xyz/', description: 'HYPE 官方市场 K 线' },
+        { name: 'Kraken', url: 'https://www.kraken.com/', description: 'XMR 现货 OHLC' },
         { name: 'DEX Screener', url: 'https://dexscreener.com/', description: '链上交易池行情' },
         { name: '腾讯行情', url: 'https://gu.qq.com/', description: '美股与传统市场公开报价' }
       ] },
       { name: '链上数据', sources: [
         { name: 'mempool.space', url: 'https://mempool.space/', description: '比特币链上区块与难度数据' },
+        { name: 'GeckoTerminal', url: 'https://www.geckoterminal.com/', description: '按链、合约与交易池核验的链上 OHLCV' },
         { name: '各链公开 RPC', url: '/sources.html', description: '合约及 Mint 元数据核验，见完整来源说明' }
       ] },
       { name: '市场情绪', sources: [{ name: 'Alternative.me', url: 'https://alternative.me/crypto/fear-and-greed-index/', description: '恐惧与贪婪指数' }] },
@@ -3014,6 +3029,8 @@ new Vue({
     stockTokenMiniLoading: {},
     cryptoSparklines: {},
     cryptoMiniLoading: {},
+    cryptoKlineMeta: {},
+    cryptoKlineFetchedAt: {},
     stockTokenKlines: [],
     stockTokenKlineLoading: false,
     stockTokenKlineError: '',
@@ -5253,48 +5270,63 @@ new Vue({
     },
 
     cryptoSparklinePoints(asset) {
-      const closes = (this.cryptoSparklines[asset?.id] || []).map(Number).filter(Number.isFinite);
+      const closes = (this.cryptoSparklines[asset?.id] || []).map(item => Number(item?.close)).filter(Number.isFinite);
       if (closes.length < 2) return '';
       const min = Math.min(...closes), max = Math.max(...closes), range = max - min || 1;
       return closes.map((value, index) => `${(index / (closes.length - 1) * 82 + 1).toFixed(1)},${(28 - (value - min) / range * 26).toFixed(1)}`).join(' ');
     },
 
+    resolveKlineProvider(asset) {
+      const params = new URLSearchParams();
+      if (asset?.type === 'dex') {
+        params.set('type', 'dex');
+        params.set('chain', asset.chainId || '');
+        params.set('contract', asset.tokenAddress || '');
+        if (asset.dexPairAddress) params.set('pool', asset.dexPairAddress);
+      } else {
+        params.set('type', 'cex');
+        params.set('assetId', asset?.canonicalAssetId || '');
+        params.set('pair', asset?.pair || '');
+      }
+      return `/api/crypto/klines?${params}`;
+    },
+
+    cryptoKlineTitle(asset) {
+      const meta = this.cryptoKlineMeta[asset?.id];
+      if (meta?.status === 'ok') return `${meta.source} · ${meta.market} · ${meta.candleCount} candles`;
+      return meta?.reason ? `暂无K线 · ${meta.reason}` : '暂无可靠历史价格序列';
+    },
+
     async loadCryptoMiniKline(asset) {
-      if (!asset?.id || asset.type !== 'cex' || this.cryptoSparklines[asset.id] || this.cryptoMiniLoading[asset.id]) return;
+      if (!asset?.id || this.cryptoMiniLoading[asset.id]) return;
+      const fetchedAt = Number(this.cryptoKlineFetchedAt[asset.id] || 0);
+      if (fetchedAt && Date.now() - fetchedAt < 5 * 60 * 1000) return;
       this.$set(this.cryptoMiniLoading, asset.id, true);
       try {
-        let closes = [];
-        if (asset.canonicalAssetId === 'monero') {
-          const response = await this.fetchWithSoftTimeout('https://www.okx.com/api/v5/market/candles?instId=XMR-USDT&bar=1H&limit=24', 8000);
-          if (!response.ok) throw new Error(`OKX Kline ${response.status}`);
-          const payload = await response.json();
-          closes = (Array.isArray(payload.data) ? payload.data : []).map(row => Number(row?.[4])).filter(Number.isFinite).reverse();
-        } else {
-          const pair = String(asset.pair || '').replace(/[^A-Z0-9]/g, '');
-          if (!pair) throw new Error('Crypto Kline pair unavailable');
-          let payload = null;
-          let lastError = null;
-          for (const endpoint of [
-            `https://data-api.binance.vision/api/v3/klines?symbol=${encodeURIComponent(pair)}&interval=1h&limit=24`,
-            `https://api.binance.com/api/v3/klines?symbol=${encodeURIComponent(pair)}&interval=1h&limit=24`
-          ]) {
-            try {
-              const response = await this.fetchWithSoftTimeout(endpoint, 8000);
-              if (!response.ok) throw new Error(`Binance Kline ${response.status}`);
-              const candidate = await response.json();
-              if (!Array.isArray(candidate)) throw new Error('Binance Kline invalid');
-              payload = candidate;
-              break;
-            } catch (error) { lastError = error; }
-          }
-          if (!payload) throw lastError || new Error('Crypto Kline unavailable');
-          closes = payload.map(row => Number(row?.[4])).filter(Number.isFinite);
+        const response = await this.fetchWithSoftTimeout(this.resolveKlineProvider(asset), 12000);
+        const payload = await response.json().catch(() => ({}));
+        const candles = Array.isArray(payload.candles) ? payload.candles : [];
+        if (!response.ok || payload.status !== 'ok' || candles.length < 2) {
+          throw Object.assign(new Error(payload.reason || `Kline HTTP ${response.status}`), { payload });
         }
-        if (closes.length < 2) throw new Error('Crypto Kline incomplete');
-        this.$set(this.cryptoSparklines, asset.id, closes.slice(-24));
-      } catch (_) {
+        this.$set(this.cryptoSparklines, asset.id, candles);
+        this.$set(this.cryptoKlineMeta, asset.id, {
+          status: 'ok',
+          source: payload.source,
+          market: payload.market,
+          pool: payload.pool || '',
+          candleCount: candles.length,
+          lastTimestamp: payload.lastTimestamp || candles[candles.length - 1]?.timestamp
+        });
+      } catch (error) {
         this.$set(this.cryptoSparklines, asset.id, []);
+        this.$set(this.cryptoKlineMeta, asset.id, {
+          status: 'unavailable',
+          reason: error?.payload?.reason || error?.message || 'no_supported_ohlcv_provider',
+          attempts: error?.payload?.attempts || []
+        });
       } finally {
+        this.$set(this.cryptoKlineFetchedAt, asset.id, Date.now());
         this.$delete(this.cryptoMiniLoading, asset.id);
       }
     },

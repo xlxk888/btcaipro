@@ -159,36 +159,76 @@ test('Crypto and Stock Tokens share the nine-column desktop grid and real mini K
   assert.match(html, /币种<\/div>[\s\S]*24h走势<\/div>[\s\S]*数据源<\/div>[\s\S]*操作<\/div>/);
   assert.match(html, /\.watch-row \{[^}]*grid-template-columns:\s*minmax\(190px,22fr\)[^}]*min-width:\s*980px;[^}]*min-height:\s*54px;/);
   assert.match(html, /@media \(min-width: 769px\) and \(max-width: 1024px\)[\s\S]*\.watch-row, \.stock-token-table-row \{[^}]*minmax\(190px,22fr\)/);
-  assert.match(html, /class="crypto-spark"[^>]*cryptoSparklinePoints\(asset\)/);
+  assert.match(html, /class="crypto-spark"[^>]*cryptoKlineTitle\(asset\)[\s\S]*?<svg v-if="cryptoSparklinePoints\(asset\)"/);
   assert.match(html, /@media \(max-width: 768px\)[\s\S]*grid-template-areas:"token price change" "mobileMeta mobileMeta action"/);
 
   const { app } = fixture();
   const btc = { id: 'cex:BTCUSDT', type: 'cex', pair: 'BTCUSDT', canonicalAssetId: 'bitcoin' };
   app.fetchWithSoftTimeout = async url => {
-    assert.match(url, /binance\.vision\/api\/v3\/klines\?symbol=BTCUSDT&interval=1h&limit=24/);
-    return { ok: true, json: async () => Array.from({ length: 24 }, (_, index) => [index, 0, 0, 0, 100 + index]) };
+    assert.match(url, /^\/api\/crypto\/klines\?type=cex&assetId=bitcoin&pair=BTCUSDT$/);
+    return { ok: true, json: async () => ({
+      status: 'ok', source: 'Binance Spot Klines', market: 'BTCUSDT', lastTimestamp: 24,
+      candles: Array.from({ length: 24 }, (_, index) => ({
+        timestamp: index + 1, open: 100 + index, high: 102 + index,
+        low: 99 + index, close: 101 + index, volume: 10
+      }))
+    }) };
   };
   await app.loadCryptoMiniKline(btc);
   assert.equal(app.cryptoSparklines[btc.id].length, 24);
   assert.match(app.cryptoSparklinePoints(btc), /,/);
+  assert.match(app.cryptoKlineTitle(btc), /Binance Spot Klines · BTCUSDT · 24 candles/);
 
-  const pons = { id: 'evm:robinhood:pons', type: 'dex', pair: 'PONS/USDC' };
+  const pons = {
+    id: 'evm:robinhood:pons', type: 'dex', pair: 'PONS/USDC', chainId: 'robinhood',
+    tokenAddress: '0x39dbed3a2bd333467115de45665cc57f813c4571',
+    dexPairAddress: '0xed50bdeea8adc232f159486192a4157281d722ff'
+  };
+  app.fetchWithSoftTimeout = async url => {
+    assert.match(url, /type=dex&chain=robinhood&contract=0x39dbed/);
+    assert.match(url, /pool=0xed50bdee/);
+    return { ok: true, json: async () => ({
+      status: 'ok', source: 'GeckoTerminal Pool OHLCV', market: 'robinhood:0xed50',
+      candles: [
+        { timestamp: 1, open: 1, high: 2, low: 1, close: 1.5, volume: 10 },
+        { timestamp: 2, open: 1.5, high: 2, low: 1.2, close: 1.8, volume: 12 }
+      ]
+    }) };
+  };
   await app.loadCryptoMiniKline(pons);
-  assert.equal(app.cryptoSparklines[pons.id], undefined);
+  assert.equal(app.cryptoSparklines[pons.id].length, 2);
 });
 
-test('XMR mini Kline reuses OKX and Crypto timestamps render HH:mm:ss without milliseconds', async () => {
+test('XMR mini Kline uses the normalized server resolver and Crypto timestamps render HH:mm:ss without milliseconds', async () => {
   const { app } = fixture();
   const xmr = { id: 'cex:XMRUSDT', type: 'cex', pair: 'XMRUSDT', canonicalAssetId: 'monero' };
   app.fetchWithSoftTimeout = async url => {
-    assert.match(url, /okx\.com\/api\/v5\/market\/candles\?instId=XMR-USDT&bar=1H&limit=24/);
-    return { ok: true, json: async () => ({ data: [[2, 0, 0, 0, '202'], [1, 0, 0, 0, '200']] }) };
+    assert.match(url, /^\/api\/crypto\/klines\?type=cex&assetId=monero&pair=XMRUSDT$/);
+    return { ok: true, json: async () => ({
+      status: 'ok', source: 'Kraken Spot OHLC', market: 'XMR/USD',
+      candles: [
+        { timestamp: 1, open: 199, high: 201, low: 198, close: 200, volume: 2 },
+        { timestamp: 2, open: 200, high: 203, low: 199, close: 202, volume: 3 }
+      ]
+    }) };
   };
   await app.loadCryptoMiniKline(xmr);
-  assert.deepEqual(Array.from(app.cryptoSparklines[xmr.id]), [200, 202]);
+  assert.deepEqual(Array.from(app.cryptoSparklines[xmr.id], candle => candle.close), [200, 202]);
   assert.equal(app.assetTimeText({ dataTime: '2026/9/23 17:09:51.760' }), '17:09:51');
   assert.equal(app.assetTimeText({ dataTime: '2026-09-23T17:09:51.760Z' }), '17:09:51');
   assert.equal(app.assetTimeTitle({ dataTime: '2026/9/23 17:09:51.760' }), '数据 2026/9/23 17:09:51.760');
+});
+
+test('data sources panel is centered, responsive, provider-accurate, and shares the restrained primary button', () => {
+  assert.match(html, /\.sources-notice \{ max-width:1200px; margin:18px auto 0;/);
+  assert.match(html, /\.source-group-grid \{[^}]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(html, /@media\(max-width:900px\) \{ \.source-group-grid \{ grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(html, /@media\(max-width:350px\) \{ \.source-group-grid \{ grid-template-columns:1fr/);
+  assert.match(html, /class="bottom-notice-link sources-link"[^>]*>ⓘ 来源与计算说明</);
+  assert.match(html, /Hyperliquid/);
+  assert.match(html, /Kraken/);
+  assert.match(html, /GeckoTerminal/);
+  assert.match(html, /\.add-btn \{[^}]*height: 38px;[^}]*border-radius: 8px;[^}]*background: #1f8f62;/);
 });
 
 test('Stock Token scale is explicitly underlying market cap, ETF AUM, or unavailable', () => {
