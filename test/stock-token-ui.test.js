@@ -221,12 +221,14 @@ test('XMR mini Kline uses the normalized server resolver and Crypto timestamps r
   assert.equal(app.assetTimeTitle({ dataTime: '2026/9/23 17:09:51.760' }), '数据 2026/9/23 17:09:51.760');
 });
 
-test('data sources panel is centered, responsive, provider-accurate, and shares the restrained primary button', () => {
-  assert.match(html, /\.sources-notice \{ max-width:1200px; margin:18px auto 0;/);
-  assert.match(html, /\.source-group-grid \{[^}]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
-  assert.match(html, /@media\(max-width:900px\) \{ \.source-group-grid \{ grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
-  assert.match(html, /@media\(max-width:350px\) \{ \.source-group-grid \{ grid-template-columns:1fr/);
-  assert.match(html, /class="bottom-notice-link sources-link"[^>]*>ⓘ 来源与计算说明</);
+test('data sources footer is lightweight, full-width, responsive, and provider-accurate', () => {
+  assert.match(html, /<footer class="sources-notice" aria-labelledby="sources-title">/);
+  assert.match(html, /\.sources-notice \{[\s\S]*?width:100%;[\s\S]*?border-top:1px solid/);
+  assert.match(html, /\.source-group-grid \{[^}]*grid-template-columns:auto auto;[^}]*justify-content:center/);
+  assert.match(html, /@media\(max-width:650px\)[\s\S]*?\.source-group-grid \{ grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(html, /class="sources-link"[^>]*>ⓘ 来源与计算说明</);
+  assert.doesNotMatch(html, /<div class="bottom-notice sources-notice">/);
+  assert.match(html, /\.source-item \{[^}]*text-decoration:none/);
   assert.match(html, /Hyperliquid/);
   assert.match(html, /Kraken/);
   assert.match(html, /GeckoTerminal/);

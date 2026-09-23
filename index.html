@@ -584,22 +584,36 @@
     }
     .bottom-notice-body { margin-top: 10px; display:grid; gap:8px; }
     .bottom-notice-desc { color:#8fa0ba; font-size:.74rem; }
-    .sources-notice { max-width:1200px; margin:18px auto 0; padding:16px 18px; }
-    .sources-notice .bottom-notice-head,
-    .sources-notice .bottom-notice-body { width:100%; max-width:1100px; margin-left:auto; margin-right:auto; }
-    .sources-notice .bottom-notice-body { margin-top:12px; gap:10px; }
-    .source-group-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; padding:2px 0; }
-    .source-group { min-width:0; padding:10px; border:1px solid rgba(96,165,250,.12); border-radius:9px; background:rgba(7,14,26,.28); }
-    .source-group h3 { margin:0 0 8px; color:#94a3b8; font-size:.7rem; font-weight:800; }
-    .source-items { display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start; }
-    .source-item { display:inline-flex; align-items:center; min-height:28px; max-width:100%; padding:4px 9px; border:1px solid rgba(96,165,250,.2); border-radius:7px; background:rgba(15,23,42,.54); color:#cbd5e1; font-size:.69rem; line-height:1.25; text-decoration:none; overflow-wrap:anywhere; }
-    a.source-item:hover { color:#fff; border-color:rgba(96,165,250,.45); background:rgba(30,41,59,.7); }
-    .sources-notice .bottom-notice-desc { text-align:center; color:#7f90aa; font-size:.71rem; }
-    .bottom-notice-link.sources-link { min-height:36px; padding:6px 12px; border-radius:8px; background:rgba(30,41,59,.62); border-color:rgba(96,165,250,.34); color:#bfdbfe; box-shadow:none; }
-    .bottom-notice-link.sources-link:hover { background:rgba(37,55,82,.78); border-color:rgba(125,211,252,.58); box-shadow:none; }
-    @media(max-width:900px) { .source-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    @media(max-width:650px) { .sources-notice { padding:14px 12px; } .sources-notice .bottom-notice-head { flex-wrap:wrap; } .sources-notice .bottom-notice-title { flex-basis:100%; } .sources-link { margin-left:auto; } }
-    @media(max-width:350px) { .source-group-grid { grid-template-columns:1fr; } }
+    .sources-notice {
+      width:100%;
+      margin:24px 0 0;
+      padding:20px 12px;
+      border-top:1px solid rgba(148,163,184,.18);
+      text-align:center;
+    }
+    .sources-title { margin:0 0 10px; color:#d5deea; font-size:.94rem; font-weight:600; line-height:1.3; }
+    .source-group-grid { display:grid; grid-template-columns:auto auto; justify-content:center; gap:7px 38px; }
+    .source-group { min-width:0; display:flex; align-items:baseline; justify-content:center; gap:6px; color:#8493aa; }
+    .source-group:first-child { grid-column:1 / -1; }
+    .source-group h3 { flex:0 0 auto; margin:0; color:#b8c4d5; font-size:.74rem; font-weight:600; line-height:1.45; }
+    .source-items { min-width:0; display:flex; flex-wrap:wrap; justify-content:center; gap:0; }
+    .source-item { color:#8493aa; font-size:.74rem; line-height:1.45; text-decoration:none; overflow-wrap:anywhere; }
+    .source-item + .source-item::before { content:'·'; margin:0 7px; color:#526078; }
+    a.source-item:hover { color:#dbeafe; text-decoration:underline; text-underline-offset:3px; }
+    .sources-link { display:inline-block; margin-top:10px; color:#8fb6dc; font-size:.75rem; line-height:1.35; text-decoration:none; }
+    .sources-link:hover { color:#c7e2ff; text-decoration:underline; text-underline-offset:3px; }
+    .sources-disclaimer { margin:8px 0 0; color:#68778d; font-size:.71rem; line-height:1.4; text-align:center; }
+    @media(max-width:650px) {
+      .sources-notice { margin-top:18px; padding:23px 8px 25px; }
+      .sources-title { margin-bottom:15px; }
+      .source-group-grid { grid-template-columns:minmax(0,1fr); gap:12px; }
+      .source-group:first-child { grid-column:auto; }
+      .source-group { display:block; }
+      .source-group h3 { margin-bottom:2px; }
+      .source-items { line-height:1.65; }
+      .sources-link { margin-top:16px; }
+      .sources-disclaimer { margin-top:12px; padding:0 4px; }
+    }
     .bottom-notice-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     .bottom-notice-item { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border:1px solid rgba(147,197,253,.16); border-radius:10px; background:rgba(7,14,26,.42); }
     .bottom-notice-copy { min-width:0; color:#cbd5e1; font-size:.78rem; line-height:1.45; overflow-wrap:anywhere; }
@@ -2786,23 +2800,19 @@
     </div>
   </div>
 
-  <div class="bottom-notice sources-notice">
-    <div class="bottom-notice-head">
-      <strong class="bottom-notice-title">数据与信息来源</strong>
-      <a class="bottom-notice-link sources-link" href="/sources.html">ⓘ 来源与计算说明</a>
+  <footer class="sources-notice" aria-labelledby="sources-title">
+    <h2 class="sources-title" id="sources-title">数据与信息来源</h2>
+    <div class="source-group-grid" aria-label="数据来源">
+      <section class="source-group" v-for="group in sourceGroups" :key="group.name">
+        <h3>{{ group.name }}：</h3>
+        <div class="source-items">
+          <a class="source-item" v-for="source in group.sources" :key="source.name" :href="source.url" :title="source.description" target="_blank" rel="noopener noreferrer">{{ source.name }}</a>
+        </div>
+      </section>
     </div>
-    <div class="bottom-notice-body">
-      <div class="source-group-grid" aria-label="数据来源">
-        <section class="source-group" v-for="group in sourceGroups" :key="group.name">
-          <h3>{{ group.name }}</h3>
-          <div class="source-items">
-            <a class="source-item" v-for="source in group.sources" :key="source.name" :href="source.url" :title="source.description" target="_blank" rel="noopener noreferrer">{{ source.name }}</a>
-          </div>
-        </section>
-      </div>
-      <div class="bottom-notice-desc">部分指标由 Crypto AI 基于公开数据本地计算或估算；估算不会伪装成官方实时数据。</div>
-    </div>
-  </div>
+    <a class="sources-link" href="/sources.html">ⓘ 来源与计算说明</a>
+    <p class="sources-disclaimer">部分指标由 Crypto AI 基于公开数据本地计算或估算；估算不会伪装成官方实时数据。</p>
+  </footer>
 
   <div class="toast" v-if="toastText">{{ toastText }}</div>
 
