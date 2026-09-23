@@ -5,6 +5,8 @@ import { createEventStore } from './store/repository.js';
 import { MarketWorker } from './worker/market-worker.js';
 import { createDiscoveryRuntime } from './discovery/worker.js';
 import { createNativeMarketService, MoneroNativeAssetAdapter } from './market/native-asset.js';
+import { SharedStockTokenRepository } from './stock-tokens/repository.js';
+import { StockTokenWorker } from './stock-tokens/worker.js';
 
 export async function createRuntime(overrides = {}) {
   const config = overrides.config || loadConfig();
@@ -22,5 +24,11 @@ export async function createRuntime(overrides = {}) {
     set: (key, value, options) => cache.set(`native:${key}`, JSON.stringify(value), options.ttl * 1000)
   } });
   const moneroNetwork = overrides.moneroNetwork || new MoneroNativeAssetAdapter();
-  return { config, logger, cache, store, worker, discovery, nativeMarket, moneroNetwork };
+  const stockTokenRepository = overrides.stockTokenRepository || await SharedStockTokenRepository.create({
+    databaseUrl: config.databaseUrl, databasePath: config.databasePath, staleAfterMs: config.stockTokenStaleMs
+  });
+  const stockTokenWorker = overrides.stockTokenWorker || new StockTokenWorker({ repository: stockTokenRepository,
+    logger, intervalMs: config.stockTokenPollMs, timeoutMs: config.requestTimeoutMs });
+  const stockTokens = { repository: stockTokenRepository, worker: stockTokenWorker };
+  return { config, logger, cache, store, worker, discovery, nativeMarket, moneroNetwork, stockTokens };
 }

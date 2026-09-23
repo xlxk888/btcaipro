@@ -114,6 +114,7 @@ Events store `eventId`, asset, type, direction, severity, time window, detection
 ## API
 
 - `GET /api/assets/search?q=PONS&chain=robinhood` (canonical, shared onchain index, then DEX market suggestions)
+- `GET /api/stock-tokens/markets?underlying=CRCL&venue=Bybit`
 - `GET /api/health`
 - `GET /api/market/snapshot`
 - `GET /api/market/quotes?symbols=BTCUSDT,ETHUSDT`
@@ -124,6 +125,14 @@ Events store `eventId`, asset, type, direction, severity, time window, detection
 - `GET /api/miners/catalog`
 
 The source observations returned by snapshot and quote endpoints retain timing, staleness, source and confidence fields.
+
+## Stock Token registry
+
+The standalone worker discovers Stock Token markets from official bulk metadata and ticker endpoints and persists them in `stock_token_markets` and `stock_token_state`. The frontend only reads `/api/stock-tokens/markets`; it never fans out to exchanges. Bybit uses the official `symbolType=xstocks` classification, Gate uses official `xStock` / `Ondo Tokenized` product names, and Robinhood Chain uses its official asset/deployment registry. OKX and Kraken adapters intentionally return zero when their regional public market metadata does not explicitly identify Stock Tokens. Binance bStocks support is enabled only when `BINANCE_API_KEY` is configured because Binance's official tokenized-assets metadata endpoint requires a key; the ordinary exchange-info `B` suffix is not trusted as classification.
+
+`STOCK_TOKEN_POLL_MS` defaults to five minutes and `STOCK_TOKEN_STALE_MS` to ten minutes. Requests have a timeout, bounded retry, sequential provider concurrency and scheduler backoff. A failed provider keeps its last stored markets, marks them stale by timestamp, records provider/endpoint/error/time, and does not prevent other venues from updating. `/api/assets/discovery-health` exposes the registry counts, priced/stale totals, provider errors, and last discovery/price timestamps.
+
+Exchange ticker data is `sourceType=exchange`. Robinhood `/rhj/prices` is explicitly `sourceType=issuer_reference`: the underlying midpoint and corporate-action multiplier are retained separately and the result is never described as an exchange trade. Stock/ETF tokens remain separate from perpetuals, CFDs, traditional shares and leveraged tokens.
 
 ## Shared token and pool discovery
 

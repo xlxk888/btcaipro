@@ -12,7 +12,7 @@ const send = (response, status, payload, headers = {}) => {
   response.end(body);
 };
 
-export function createApp({ store, cache, worker, discovery, nativeMarket, moneroNetwork, config, startedAt = Date.now() }) {
+export function createApp({ store, cache, worker, discovery, nativeMarket, moneroNetwork, stockTokens, config, startedAt = Date.now() }) {
   return async function app(request, response) {
     const url = new URL(request.url, 'http://localhost');
     const cors = config.corsOrigin ? { 'access-control-allow-origin': config.corsOrigin } : {};
@@ -24,8 +24,23 @@ export function createApp({ store, cache, worker, discovery, nativeMarket, moner
         { ...cors, 'cache-control': 'public, max-age=0, s-maxage=60' });
     }
     if (url.pathname === '/api/assets/discovery-health') {
-      try { return send(response, 200, await discovery.repository.health(), { ...cors, 'cache-control': 'no-store' }); }
+      try {
+        const health = await discovery.repository.health();
+        let stockTokenHealth = null;
+        try { stockTokenHealth = stockTokens?.repository ? await stockTokens.repository.health() : null; }
+        catch (_) { stockTokenHealth = { discovered: 0, active: 0, withPrice: 0, stale: 0,
+          errors: [{ provider: 'registry', error: 'unavailable', timestamp: Date.now() }],
+          lastDiscoveryAt: null, lastPriceUpdateAt: null }; }
+        return send(response, 200, { ...health, stockTokens: stockTokenHealth }, { ...cors, 'cache-control': 'no-store' });
+      }
       catch (_) { return send(response, 200, { database: 'disconnected', workerRunning: false, status: 'degraded' }, { ...cors, 'cache-control': 'no-store' }); }
+    }
+    if (url.pathname === '/api/stock-tokens/markets') {
+      if (!stockTokens?.repository) return send(response, 503, { error: 'stock_token_registry_unavailable' }, cors);
+      const markets = await stockTokens.repository.list({ underlying: url.searchParams.get('underlying') || undefined,
+        venue: url.searchParams.get('venue') || undefined });
+      return send(response, 200, { data: markets, count: markets.length, health: await stockTokens.repository.health() },
+        { ...cors, 'cache-control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=120' });
     }
     if (url.pathname === '/api/assets/market') {
       const result = await nativeMarket.read(url.searchParams.get('assetId'));
