@@ -3032,7 +3032,9 @@ new Vue({
       return CryptoAIStockTokenSearch.filter(this.stockTokenMarkets, this.stockTokenSearchInput);
     },
     stockTokenDisplayRows() {
-      return this.stockTokenSearchInput.trim() ? this.stockTokenSearchResults : this.stockTokenWatchlist;
+      if (!this.stockTokenSearchInput.trim()) return this.stockTokenWatchlist;
+      const watchedById = new Map(this.stockTokenWatchlist.map(item => [this.stockTokenWatchId(item), item]));
+      return this.stockTokenSearchResults.map(market => watchedById.get(this.stockTokenWatchId(market)) || market);
     },
     activeChartIntervals() {
       return this.chartAsset?.type === 'stock_token' ? this.stockTokenChartPeriods : this.chartIntervals;
@@ -5156,6 +5158,11 @@ new Vue({
       return this.stockTokenWatchlist;
     },
 
+    commitStockTokenWatchlist(nextWatchlist) {
+      this.stockTokenWatchlist = Array.from(nextWatchlist);
+      this.saveWatchedAssets();
+    },
+
     stockTokenWatchIndex(market) {
       const id = this.stockTokenWatchId(market);
       return this.getWatchlist().findIndex(item => this.stockTokenWatchId(item) === id);
@@ -5311,9 +5318,9 @@ new Vue({
         this.showToast(`${item.displaySymbol} 已在自选中`);
         return;
       }
-      this.stockTokenWatchlist.unshift(item);
+      this.commitStockTokenWatchlist([item, ...this.getWatchlist()]);
+      this.stockTokenSearchInput = '';
       this.assetSearchMode = 'stock_tokens';
-      this.saveWatchedAssets();
       this.loadStockTokenMiniKline(market);
       this.showToast(`${item.displaySymbol} 已加入股票代币自选`);
     },
@@ -5321,8 +5328,7 @@ new Vue({
     removeFromWatchlist(market) {
       const canonicalId = typeof market === 'string' ? market : this.stockTokenWatchId(market);
       const removed = this.getWatchlist().find(item => this.stockTokenWatchId(item) === canonicalId);
-      this.stockTokenWatchlist = this.getWatchlist().filter(item => this.stockTokenWatchId(item) !== canonicalId);
-      this.saveWatchedAssets();
+      this.commitStockTokenWatchlist(this.getWatchlist().filter(item => this.stockTokenWatchId(item) !== canonicalId));
       this.showToast(`${removed?.displaySymbol || '股票代币'} 已从自选移除`);
     },
 
@@ -5330,9 +5336,10 @@ new Vue({
       const index = this.stockTokenWatchlist.findIndex(item => item.canonicalId === canonicalId);
       const target = index + direction;
       if (index < 0 || target < 0 || target >= this.stockTokenWatchlist.length || ![-1, 1].includes(direction)) return;
-      const [item] = this.stockTokenWatchlist.splice(index, 1);
-      this.stockTokenWatchlist.splice(target, 0, item);
-      this.saveWatchedAssets();
+      const nextWatchlist = [...this.getWatchlist()];
+      const [item] = nextWatchlist.splice(index, 1);
+      nextWatchlist.splice(target, 0, item);
+      this.commitStockTokenWatchlist(nextWatchlist);
     },
 
     hydrateStockTokenWatchlist() {

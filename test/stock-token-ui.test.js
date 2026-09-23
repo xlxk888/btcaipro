@@ -102,6 +102,42 @@ test('market browser and top cards use the same helpers and canonical-ID source 
   assert.equal(app.getWatchlist().length, 0);
 });
 
+test('search rows react immediately to add, remove, reorder, and persisted Stock Token state', () => {
+  const { app, storage } = fixture();
+  const amdon = market('Gate', { canonicalId: 'stock-token:ondo:amdon:gate:amdonusdt::', displaySymbol: 'AMDON', underlyingSymbol: 'AMD', issuer: 'Ondo', exchangeSymbol: 'AMDON_USDT' });
+  const appleX = market('Gate', { canonicalId: 'stock-token:xstocks:aaplx:gate:aaplxusdt::', displaySymbol: 'AAPLX', underlyingSymbol: 'AAPL', exchangeSymbol: 'AAPLX_USDT' });
+  const crclX = market();
+  app.stockTokenMarkets = [amdon, appleX, crclX];
+  app.stockTokenReady = true;
+  app.stockTokenSearchInput = 'AMD';
+
+  assert.strictEqual(app.stockTokenDisplayRows[0], amdon);
+  app.addToWatchlist(amdon);
+  assert.equal(app.stockTokenSearchInput, '');
+  assert.equal(app.isInWatchlist(amdon), true);
+  assert.strictEqual(app.stockTokenDisplayRows[0], app.stockTokenWatchlist[0]);
+  assert.equal(app.stockTokenSearchResults.length, 0);
+
+  app.removeFromWatchlist(amdon);
+  assert.equal(app.isInWatchlist(amdon), false);
+  assert.equal(app.stockTokenDisplayRows.length, 0);
+  app.stockTokenSearchInput = 'AMD';
+  assert.strictEqual(app.stockTokenDisplayRows[0], amdon);
+
+  app.addToWatchlist(crclX);
+  app.addToWatchlist(appleX);
+  app.addToWatchlist(amdon);
+  app.stockTokenSearchInput = '';
+  const beforeMove = app.stockTokenWatchlist;
+  app.moveStockTokenWatch(amdon.canonicalId, 1);
+  assert.notStrictEqual(app.stockTokenWatchlist, beforeMove);
+  assert.deepEqual(ids(app.stockTokenDisplayRows), [appleX.canonicalId, amdon.canonicalId, crclX.canonicalId]);
+
+  const { app: reloaded } = fixture(storage);
+  reloaded.loadWatchedAssets();
+  assert.deepEqual(ids(reloaded.stockTokenWatchlist), ids(app.stockTokenWatchlist));
+});
+
 test('Stock Token search and watchlist use one responsive market-row component', () => {
   const upper = html.slice(html.indexOf('<section v-else class="stock-token-terminal"'), html.indexOf('<div v-show="assetSearchMode === \'crypto\'"'));
   assert.match(upper, /v-for="market in stockTokenDisplayRows"/);
