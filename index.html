@@ -433,28 +433,34 @@
     .stock-token-terminal { min-width:0; }
     .stock-token-table { min-width:0; overflow:auto; border:1px solid rgba(72,99,150,.35); border-radius:9px; background:#0a111f; scrollbar-width:none; }
     .stock-token-table::-webkit-scrollbar { display:none; }
-    .stock-token-table-row { display:grid; grid-template-columns:minmax(180px,1.55fr) minmax(82px,.72fr) 66px minmax(88px,.7fr) minmax(105px,.82fr) 90px minmax(86px,.72fr) minmax(84px,.68fr) 86px; gap:8px; align-items:center; min-width:970px; min-height:58px; padding:6px 9px; border-bottom:1px solid rgba(72,99,150,.22); font-size:.75rem; }
+    .stock-token-table-row { display:grid; grid-template-columns:minmax(230px,1.9fr) 94px 72px 100px 108px 100px 96px 78px 88px; gap:8px; align-items:center; min-width:1050px; min-height:52px; padding:4px 10px; border-bottom:1px solid rgba(72,99,150,.22); font-size:.74rem; }
     .stock-token-table-row:last-child { border-bottom:0; }
-    .stock-token-table-row:not(.stock-token-table-head):hover { background:rgba(15,23,42,.72); }
-    .stock-token-table-head { position:sticky; top:0; z-index:2; min-height:32px; background:#111a2a; color:#91a4c0; font-size:.68rem; font-weight:900; }
+    .stock-token-table-row:not(.stock-token-table-head):hover { background:rgba(30,41,59,.38); }
+    .stock-token-table-head { position:sticky; top:0; z-index:2; min-height:30px; background:#111a2a; color:#91a4c0; font-size:.67rem; font-weight:900; }
+    .stock-token-table-row > :nth-child(2), .stock-token-table-row > :nth-child(3), .stock-token-table-row > :nth-child(4), .stock-token-table-row > :nth-child(5), .stock-token-table-row > :nth-child(7) { text-align:right; }
     .stock-token-identity, .us-stock-identity { min-width:0; padding:0; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
-    .stock-token-identity strong, .us-stock-identity strong { display:block; color:#e2e8f0; font-size:.88rem; font-weight:900; }
-    .stock-token-identity span, .us-stock-identity span { display:block; color:#b6c3d6; font-size:.69rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .stock-token-identity small { display:block; color:#71839e; font-size:.6rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .stock-token-identity .stock-token-price-kind { min-height:16px; margin-top:2px; padding:0 5px; font-size:.54rem; font-style:normal; }
+    .stock-token-identity strong, .us-stock-identity strong { display:block; color:#e2e8f0; font-size:.84rem; line-height:1.12; font-weight:900; }
+    .stock-token-identity > span, .us-stock-identity span { display:block; color:#b6c3d6; font-size:.66rem; line-height:1.18; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .stock-token-identity small { display:flex; align-items:center; gap:5px; min-width:0; color:#71839e; font-size:.58rem; line-height:1.15; white-space:nowrap; }
+    .stock-token-market-meta { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+    .stock-token-identity .stock-token-price-kind { flex:0 0 auto; min-height:14px; margin:0; padding:0 5px; font-size:.52rem; line-height:13px; font-style:normal; }
     .stock-token-price { color:#f8fafc; font-size:.9rem; font-weight:900; white-space:nowrap; }
-    .stock-token-scale { min-width:0; }
-    .stock-token-scale span { display:block; color:#71839e; font-size:.58rem; font-weight:800; }
-    .stock-token-scale strong { display:block; color:#cbd5e1; font-size:.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .stock-token-source { display:block; margin-top:2px; color:#71839e; font-size:.58rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .stock-token-spark { width:84px; height:32px; display:flex; align-items:center; justify-content:center; padding:0; border:0; background:transparent; color:#64748b; cursor:pointer; }
+    .stock-token-scale { min-width:0; text-align:right; }
+    .stock-token-scale span { display:block; color:#71839e; font-size:.56rem; font-weight:800; }
+    .stock-token-scale strong { display:block; color:#cbd5e1; font-size:.71rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .stock-token-source-cell { min-width:0; line-height:1.1; }
+    .stock-token-source { display:block; margin-top:2px; color:#71839e; font-size:.57rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .stock-token-spark { width:100px; height:30px; display:flex; align-items:center; justify-content:center; padding:0; border:0; background:transparent; color:#64748b; font-size:.59rem; cursor:pointer; }
     .stock-token-spark:disabled { cursor:default; }
-    .stock-token-spark svg { width:84px; height:30px; overflow:visible; }
+    .stock-token-spark svg { width:100px; height:28px; overflow:visible; }
     .stock-token-spark polyline { fill:none; stroke:#38bdf8; stroke-width:1.8; vector-effect:non-scaling-stroke; }
     .stock-token-row-actions { display:flex; justify-content:flex-end; gap:4px; }
-    .stock-token-row-actions button { min-width:24px; height:25px; padding:0 6px; border:1px solid rgba(148,163,184,.34); border-radius:6px; background:#111a2a; color:#cbd5e1; font-size:.68rem; font-weight:900; cursor:pointer; white-space:nowrap; }
+    .stock-token-row-actions button { width:26px; min-width:26px; height:26px; padding:0; border:1px solid rgba(148,163,184,.24); border-radius:6px; background:rgba(15,23,42,.54); color:#91a4c0; font-size:.66rem; font-weight:900; cursor:pointer; white-space:nowrap; }
+    .stock-token-row-actions button:hover:not(:disabled) { border-color:rgba(148,163,184,.46); color:#e2e8f0; }
+    .stock-token-row-actions .delete-btn { border-color:rgba(148,163,184,.24); background:rgba(15,23,42,.54); color:#91a4c0; }
+    .stock-token-row-actions .delete-btn:hover { border-color:rgba(248,113,113,.58); background:rgba(127,29,29,.2); color:#fca5a5; }
     .stock-token-row-actions button:disabled { opacity:.35; cursor:default; }
-    .stock-token-row-actions.add button { min-width:70px; border-color:rgba(34,197,94,.46); background:rgba(34,197,94,.12); color:#bbf7d0; }
+    .stock-token-row-actions.add button { width:70px; min-width:70px; border-color:rgba(34,197,94,.46); background:rgba(34,197,94,.12); color:#bbf7d0; }
     .stock-token-mobile-meta { display:none; }
     .us-stock-table { min-width:0; overflow:auto; border:1px solid rgba(72,99,150,.35); border-radius:9px; background:#0a111f; scrollbar-width:none; }
     .us-stock-table::-webkit-scrollbar { display:none; }
@@ -2056,15 +2062,17 @@
       .stock-token-watch-actions .stock-token-action { min-height:44px; min-width:44px; }
       .stock-token-table, .us-stock-table { overflow:visible; border:0; background:transparent; }
       .stock-token-table-head, .us-stock-head { display:none; }
-      .stock-token-table-row { min-width:0; grid-template-columns:minmax(0,1fr) minmax(82px,auto) 66px auto; grid-template-areas:"identity price change action" "meta meta meta meta"; gap:5px 8px; min-height:88px; margin-bottom:6px; padding:9px; border:1px solid #1f2d45; border-radius:9px; background:#111a2a; }
+      .stock-token-table-row { min-width:0; grid-template-columns:minmax(0,1fr) minmax(76px,auto) 58px; grid-template-areas:"identity price change" "meta meta action"; gap:7px 7px; min-height:68px; margin-bottom:6px; padding:8px; border:1px solid #1f2d45; border-radius:9px; background:#111a2a; }
       .stock-token-table-row > :nth-child(1) { grid-area:identity; }
       .stock-token-table-row > :nth-child(2) { grid-area:price; text-align:right; }
       .stock-token-table-row > :nth-child(3) { grid-area:change; text-align:right; }
       .stock-token-table-row > :nth-child(4), .stock-token-table-row > :nth-child(5), .stock-token-table-row > :nth-child(6), .stock-token-table-row > :nth-child(7), .stock-token-table-row > :nth-child(8) { display:none; }
       .stock-token-table-row > :nth-child(9) { grid-area:action; }
       .stock-token-table-row > :nth-child(10) { grid-area:meta; }
-      .stock-token-mobile-meta { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px 8px; padding-top:6px; border-top:1px solid rgba(72,99,150,.22); color:#8fa0ba; font-size:.62rem; }
-      .stock-token-row-actions button { min-width:36px; height:36px; }
+      .stock-token-identity > span, .stock-token-identity small { display:none; }
+      .stock-token-mobile-meta { display:flex; align-items:center; gap:4px 8px; min-width:0; overflow:hidden; color:#8fa0ba; font-size:.58rem; white-space:nowrap; }
+      .stock-token-mobile-meta span { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+      .stock-token-row-actions button { width:28px; min-width:28px; height:28px; }
       .stock-token-row-actions.add button { min-width:72px; }
       .us-stock-row { min-width:0; grid-template-columns:minmax(0,1fr) minmax(82px,auto) 66px auto; grid-template-areas:"identity price change action" "meta meta meta meta"; gap:5px 8px; min-height:82px; margin-bottom:6px; padding:9px; border:1px solid #1f2d45; border-radius:9px; background:#111a2a; }
       .us-stock-row > :nth-child(1) { grid-area:identity; }
@@ -2284,7 +2292,7 @@
           <span>{{ stockTokenLoading ? '正在获取股票代币数据…' : stockTokenLoadMessage }}</span>
           <button v-if="stockTokenLoadError" class="stock-token-action" type="button" :disabled="stockTokenLoading" @click="fetchStockTokens">重试</button>
         </div>
-        <p class="watch-hint">搜索结果与自选使用同一行情表。交易市场显示真实成交数据；参考资产没有成交数据时显示 --。</p>
+        <p class="watch-hint">搜索股票代币或底层股票，结果可直接加入自选。</p>
         <div v-if="stockTokenReady" class="stock-token-table" aria-label="股票代币行情表">
           <div class="stock-token-table-row stock-token-table-head">
             <div>股票代币</div><div>最新价</div><div>24h涨跌</div><div>24h成交量</div><div>市值 / 规模</div><div>走势图</div><div>更新时间</div><div>数据源</div><div>操作</div>
@@ -2294,18 +2302,17 @@
             <button class="stock-token-identity" type="button" @click="openStockTokenDetail(market)">
               <strong>{{ market.displaySymbol }}</strong>
               <span>{{ market.underlyingSymbol }} · {{ market.underlyingName }}</span>
-              <small>{{ market.venue }} · {{ market.issuer }} · {{ market.exchangeSymbol }}</small>
-              <em class="stock-token-price-kind" :class="{ reference: market.sourceType === 'issuer_reference' }">{{ market.sourceType === 'issuer_reference' ? '参考价' : '成交价' }}</em>
+              <small :title="`${market.venue} · ${market.issuer} · ${market.exchangeSymbol}`"><span class="stock-token-market-meta">{{ market.venue }} · {{ market.issuer }} · {{ market.exchangeSymbol }}</span><em class="stock-token-price-kind" :class="{ reference: market.sourceType === 'issuer_reference' }">{{ market.sourceType === 'issuer_reference' ? '参考价' : '成交价' }}</em></small>
             </button>
             <div class="stock-token-price">{{ formatPrice(market.price) }}</div>
             <div :class="market.change24h === null ? 'muted' : market.change24h >= 0 ? 'up' : 'down'">{{ formatPercent(market.change24h) }}</div>
             <div class="metric-cell">{{ formatVolume(market.volume24h) }}</div>
             <div class="stock-token-scale" :title="stockTokenScale(market).detail"><span>{{ stockTokenScale(market).label }}</span><strong>{{ stockTokenScale(market).value }}</strong></div>
             <button class="stock-token-spark" type="button" :disabled="!stockTokenHasKline(market)" @click="openStockTokenDetail(market)" :aria-label="`查看 ${market.displaySymbol} K线`">
-              <svg v-if="stockTokenSparklinePoints(market)" viewBox="0 0 84 30" preserveAspectRatio="none"><polyline :points="stockTokenSparklinePoints(market)" /></svg><span v-else>--</span>
+              <svg v-if="stockTokenSparklinePoints(market)" viewBox="0 0 84 30" preserveAspectRatio="none"><polyline :points="stockTokenSparklinePoints(market)" /></svg><span v-else>{{ stockTokenMiniLoading[market.canonicalId] ? '加载中' : '暂无K线' }}</span>
             </button>
-            <div class="metric-cell time-cell">{{ market.lastUpdated ? formatTimestamp(market.lastUpdated) : '--' }}<span v-if="market.stale" class="data-stale-badge">旧数据</span></div>
-            <div><span class="source-pill" :class="market.sourceType === 'issuer_reference' ? 'fallback' : 'binance'">{{ market.venue }}</span><small class="stock-token-source">{{ market.issuer }}</small></div>
+            <div class="metric-cell time-cell" :title="market.lastUpdated ? new Date(market.lastUpdated).toISOString() : ''">{{ market.lastUpdated ? formatTimestamp(market.lastUpdated).split('.')[0] : '--' }}<span v-if="market.stale" class="data-stale-badge">旧数据</span></div>
+            <div class="stock-token-source-cell" :title="`${market.venue} · ${market.issuer}`"><span class="source-pill" :class="market.sourceType === 'issuer_reference' ? 'fallback' : 'binance'">{{ market.venue === 'Robinhood Chain' ? 'Robinhood' : market.venue }}</span><small class="stock-token-source">{{ market.sourceType === 'issuer_reference' ? '参考价' : market.issuer }}</small></div>
             <div class="stock-token-row-actions" v-if="isInWatchlist(market)">
               <button type="button" :disabled="stockTokenWatchIndex(market) === 0" @click="moveStockTokenWatch(market.canonicalId, -1)" :aria-label="`上移 ${market.displaySymbol} ${market.venue}`">↑</button>
               <button type="button" :disabled="stockTokenWatchIndex(market) === stockTokenWatchlist.length - 1" @click="moveStockTokenWatch(market.canonicalId, 1)" :aria-label="`下移 ${market.displaySymbol} ${market.venue}`">↓</button>
@@ -2313,9 +2320,9 @@
             </div>
             <div class="stock-token-row-actions add" v-else><button type="button" @click="addToWatchlist(market)" :aria-label="`加入自选 ${market.displaySymbol} ${market.venue}`">+ 自选</button></div>
             <div class="stock-token-mobile-meta">
-              <span>{{ market.venue }} · 成交量 {{ formatVolume(market.volume24h) }}</span>
+              <span>{{ market.venue === 'Robinhood Chain' ? 'Robinhood' : market.venue }}</span>
+              <span>量 {{ formatVolume(market.volume24h) }}</span>
               <span>{{ stockTokenScale(market).label }} {{ stockTokenScale(market).value }}</span>
-              <span>{{ market.lastUpdated ? formatTimestamp(market.lastUpdated) : '--' }}</span>
             </div>
           </div>
         </div>

@@ -110,8 +110,13 @@ test('Stock Token search and watchlist use one responsive market-row component',
   assert.match(upper, /moveStockTokenWatch/);
   assert.match(upper, /removeFromWatchlist/);
   assert.match(upper, /v-else><button[^>]*addToWatchlist/);
-  assert.match(html, /\.stock-token-table-row \{[^}]*grid-template-columns:[^}]*min-width:970px;/);
-  assert.match(html, /@media \(max-width: 1024px\)[\s\S]*\.stock-token-table-row \{[^}]*grid-template-areas:"identity price change action" "meta meta meta meta";/);
+  assert.match(html, /\.stock-token-table-row \{[^}]*grid-template-columns:minmax\(230px,1\.9fr\)[^}]*min-width:1050px;[^}]*min-height:52px;/);
+  assert.match(html, /@media \(max-width: 1024px\)[\s\S]*\.stock-token-table-row \{[^}]*grid-template-areas:"identity price change" "meta meta action";[^}]*min-height:68px;/);
+  assert.match(upper, /搜索股票代币或底层股票，结果可直接加入自选。/);
+  assert.match(upper, /formatTimestamp\(market\.lastUpdated\)\.split\('\.'\)\[0\]/);
+  assert.match(upper, /暂无K线/);
+  assert.match(upper, /market\.venue === 'Robinhood Chain' \? 'Robinhood' : market\.venue/);
+  assert.match(upper, /market\.sourceType === 'issuer_reference' \? '参考价' : market\.issuer/);
 });
 
 test('Stock Token scale is explicitly underlying market cap, ETF AUM, or unavailable', () => {
