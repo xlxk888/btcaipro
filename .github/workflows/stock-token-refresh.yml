@@ -1,0 +1,28 @@
+name: Refresh stock token registry
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stock-token-registry-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Refresh production registry
+        env:
+          STOCK_TOKEN_CRON_SECRET: ${{ secrets.STOCK_TOKEN_CRON_SECRET }}
+        run: |
+          args=(--fail-with-body --silent --show-error --retry 1 --max-time 75)
+          if [ -n "$STOCK_TOKEN_CRON_SECRET" ]; then
+            args+=(--header "Authorization: Bearer $STOCK_TOKEN_CRON_SECRET")
+          fi
+          curl "${args[@]}" https://btcaipro.vercel.app/api/stock-tokens/refresh
