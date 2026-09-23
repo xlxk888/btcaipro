@@ -4,8 +4,10 @@ import { fileURLToPath } from 'node:url';
 import { getSourceHealthSummary } from './core/source-health.js';
 import { SOURCE_DEFINITIONS } from './provenance/source-definitions.js';
 import { MINER_CATALOG } from './miners/catalog.js';
+import { createStockTokenKlinesHandler } from '../api/stock-tokens/klines.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const stockTokenKlines = createStockTokenKlinesHandler();
 const send = (response, status, payload, headers = {}) => {
   const body = JSON.stringify(payload);
   response.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'content-length': Buffer.byteLength(body), ...headers });
@@ -41,6 +43,10 @@ export function createApp({ store, cache, worker, discovery, nativeMarket, moner
         venue: url.searchParams.get('venue') || undefined });
       return send(response, 200, { data: markets, count: markets.length, health: await stockTokens.repository.health() },
         { ...cors, 'cache-control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=120' });
+    }
+    if (url.pathname === '/api/stock-tokens/klines') {
+      const result = await stockTokenKlines.fetch(new Request(`http://localhost${url.pathname}${url.search}`));
+      return send(response, result.status, await result.json(), { ...cors, 'cache-control': result.headers.get('cache-control') || 'no-store' });
     }
     if (url.pathname === '/api/assets/market') {
       const result = await nativeMarket.read(url.searchParams.get('assetId'));

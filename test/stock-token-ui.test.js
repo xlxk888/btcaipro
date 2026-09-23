@@ -22,7 +22,7 @@ function fixture(storage = memoryStorage()) {
   let options;
   const context = vm.createContext({
     Vue: function Vue(config) { options = config; },
-    localStorage: storage, TextDecoder, Uint8Array, BigInt, Map, Object, Number, Array, String
+    localStorage: storage, TextDecoder, Uint8Array, BigInt, Map, Object, Number, Array, String, URLSearchParams
   });
   vm.runInContext(registrySource, context);
   vm.runInContext(searchSource, context);
@@ -34,6 +34,8 @@ function fixture(storage = memoryStorage()) {
   }
   const messages = [];
   app.showToast = message => messages.push(message);
+  app.$set = (target, key, value) => { target[key] = value; return value; };
+  app.$delete = (target, key) => { delete target[key]; };
   // Prevent market streams and background polling; persistence and asset logic stay real.
   app.routeWatchedAssets = () => {};
   app.startFallbackPolling = () => {};
@@ -75,15 +77,15 @@ test('AAPLX and AAPLON share one watch state but independent market IDs, removal
   assert.equal(app.stockTokenMarkets.length, 2);
 });
 
-test('only the upper watch section owns the Stock Token watchlist; the lower panel remains a market browser', () => {
+test('Stock Tokens exist only in the upper unified terminal and the lower panel is US stocks only', () => {
   const upper = html.slice(html.indexOf('<nav class="asset-section-tabs"'), html.indexOf('<div id="stock-market-card"'));
-  const lower = html.slice(html.indexOf('<div id="stock-market-card"'), html.indexOf('<script>'));
-  assert.equal((html.match(/aria-label="股票代币自选"/g) || []).length, 1);
-  assert.match(upper, /aria-label="股票代币自选"/);
-  assert.doesNotMatch(lower, /我的股票代币自选|removeFromWatchlist/);
-  assert.match(lower, /isInWatchlist\(market\)/);
-  assert.match(lower, /addToWatchlist\(market\)/);
-  assert.match(html, /\.stock-token-watch-list \{[^}]*max-height:none;[^}]*overflow:visible;/);
+  const lower = html.slice(html.indexOf('<div id="stock-market-card"'), html.indexOf('<div class="card span-3 global-card"'));
+  assert.equal((html.match(/aria-label="股票代币行情表"/g) || []).length, 1);
+  assert.match(upper, /aria-label="股票代币行情表"/);
+  assert.match(lower, /<h2><span>美股<\/span>/);
+  assert.match(lower, /class="us-stock-table"/);
+  assert.doesNotMatch(lower, /股票代币|stockToken|isInWatchlist|addToWatchlist|removeFromWatchlist/);
+  assert.doesNotMatch(lower, /stock-panel-tabs/);
 });
 
 test('market browser and top cards use the same helpers and canonical-ID source of truth', () => {
@@ -100,17 +102,59 @@ test('market browser and top cards use the same helpers and canonical-ID source 
   assert.equal(app.getWatchlist().length, 0);
 });
 
-test('market browser keeps volume and equal watch buttons in a dedicated responsive action area', () => {
-  const lower = html.slice(html.indexOf('<div id="stock-market-card"'), html.indexOf('<script>'));
-  assert.match(lower, /class="stock-token-volume"/);
-  assert.match(lower, /class="stock-token-action stock-token-market-button" :class="\{ selected: isInWatchlist\(market\) \}"/);
-  assert.equal((lower.match(/stock-token-market-button/g) || []).length, 2);
-  assert.doesNotMatch(lower, /removeFromWatchlist/);
-  assert.match(html, /\.stock-token-market-actions \{[^}]*width:128px;[^}]*align-items:stretch;[^}]*justify-content:center;/);
-  assert.match(html, /\.stock-token-market-button \{[^}]*width:100%;[^}]*height:36px;[^}]*border-radius:8px;/);
-  assert.match(html, /\.stock-token-market-button\.selected \{[^}]*background:rgba\(51,65,85,\.34\);[^}]*color:#a7b5ca;/);
-  assert.match(html, /\.stock-token-mobile-action \{[^}]*justify-content:flex-end;[^}]*border-top:/);
-  assert.match(html, /\.stock-token-mobile-action \.stock-token-market-button \{[^}]*width:112px;[^}]*min-width:112px;/);
+test('Stock Token search and watchlist use one responsive market-row component', () => {
+  const upper = html.slice(html.indexOf('<section v-else class="stock-token-terminal"'), html.indexOf('<div v-show="assetSearchMode === \'crypto\'"'));
+  assert.match(upper, /v-for="market in stockTokenDisplayRows"/);
+  assert.match(upper, /股票代币<\/div><div>最新价<\/div><div>24h涨跌<\/div><div>24h成交量<\/div><div>市值 \/ 规模<\/div><div>走势图/);
+  assert.match(upper, /v-if="isInWatchlist\(market\)"/);
+  assert.match(upper, /moveStockTokenWatch/);
+  assert.match(upper, /removeFromWatchlist/);
+  assert.match(upper, /v-else><button[^>]*addToWatchlist/);
+  assert.match(html, /\.stock-token-table-row \{[^}]*grid-template-columns:[^}]*min-width:970px;/);
+  assert.match(html, /@media \(max-width: 1024px\)[\s\S]*\.stock-token-table-row \{[^}]*grid-template-areas:"identity price change action" "meta meta meta meta";/);
+});
+
+test('Stock Token scale is explicitly underlying market cap, ETF AUM, or unavailable', () => {
+  const { app } = fixture();
+  app.stocks = [{ symbol: 'AAPL', marketCap: 4.95e12, assetType: 'stock' }];
+  const apple = market('Gate', { underlyingSymbol: 'AAPL', assetType: 'stock_token' });
+  const etf = market('Gate', { underlyingSymbol: 'SPY', assetType: 'etf_token' });
+  const unknown = market('Gate', { underlyingSymbol: 'XYZ', assetType: 'stock_token' });
+  assert.equal(app.stockTokenScale(apple).label, '底层市值');
+  assert.match(app.stockTokenScale(apple).value, /万亿/);
+  assert.match(app.stockTokenScale(apple).detail, /Underlying Market Cap/);
+  assert.equal(app.stockTokenScale(etf).label, 'AUM');
+  assert.equal(app.stockTokenScale(etf).value, '--');
+  assert.equal(app.stockTokenScale(unknown).value, '--');
+});
+
+test('US stock table maps Tencent quote amount and market cap without confusing turnover rate', () => {
+  assert.match(html, /const quoteVolume = parseFloat\(arr\[37\]\);/);
+  assert.match(html, /const marketCapHundredMillion = parseFloat\(arr\[45\]\);/);
+  assert.match(html, /marketCapHundredMillion \* 100_000_000/);
+  assert.match(html, /stock\.assetType === 'etf' \? '--' : formatMarketCap\(stock\.marketCap\)/);
+});
+
+test('Gate markets expose real Kline periods while issuer references never fabricate OHLC', async () => {
+  const { app } = fixture();
+  const gate = market();
+  const reference = market('Robinhood Chain', { sourceType: 'issuer_reference', exchangeSymbol: 'CRCL' });
+  assert.equal(app.stockTokenHasKline(gate), true);
+  assert.equal(app.stockTokenHasKline(reference), false);
+  app.chartAsset = { ...gate, type: 'stock_token' };
+  app.chartInterval = '4H';
+  app.fetchWithSoftTimeout = async url => {
+    assert.match(url, /venue=Gate/); assert.match(url, /pair=CRCLX_USDT/); assert.match(url, /period=4H/);
+    return { ok: true, json: async () => ({ data: [
+      { time: 1, open: 90, high: 96, low: 89, close: 95, quoteVolume: 100, baseVolume: 1 },
+      { time: 2, open: 95, high: 98, low: 94, close: 97, quoteVolume: 120, baseVolume: 2 }
+    ] }) };
+  };
+  await app.loadStockTokenKlines();
+  assert.equal(app.stockTokenKlines.length, 2);
+  assert.match(app.stockTokenSparklinePoints(gate), /,/);
+  app.chartAsset = { ...reference, type: 'stock_token' };
+  assert.match(app.chartNotice, /参考价/);
 });
 
 test('legacy Stock Token variants migrate only unambiguous registry markets without clearing Crypto', async () => {
@@ -318,6 +362,7 @@ test('failed registry refresh retains cached markets and watchlist as stale unti
 
 test('Stock Tokens submission only uses registry data and mode switches clear old Crypto errors and candidates', async () => {
   const { app, context } = fixture();
+  app.loadStockTokenMiniKline = async () => {};
   const gate = market();
   const ondo = market('Gate', { canonicalId: 'stock-token:ondo:crclon:gate:crclonusdt::', symbol: 'CRCLON', displaySymbol: 'CRCLON', issuer: 'Ondo', exchangeSymbol: 'CRCLON_USDT' });
   const reference = market('Robinhood Chain', {
