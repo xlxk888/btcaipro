@@ -3640,7 +3640,10 @@ new Vue({
     },
     localizedSourceLabel(source) {
       const label = this.sourceDisplayLabel(source);
-      const code = { '异常': 'error', '旧数据': 'stale', '延迟': 'delayed', '等待': 'waiting', '备用': 'backup', '日线': 'daily', '已刷新': 'refreshed', '未启用': 'disabled', '待接入': 'notConnected' }[label];
+      const code = { '异常': 'error', '旧数据': 'stale', '延迟': 'delayed', '等待': 'waiting', '备用': 'backup',
+        '日线': 'daily', '已刷新': 'refreshed', '未启用': 'disabled', '待接入': 'notConnected',
+        '暂停': 'paused', '连接中': 'connecting', '重连中': 'reconnecting', '轮询中': 'polling',
+        '列表已读取': 'ready', '等待推送': 'waitingStream', '等待数据': 'waitingData' }[label];
       return code ? this.t(`sourceStatus.${code}`) : label;
     },
     marketCapDetailDisplay(asset) {
@@ -5497,7 +5500,8 @@ new Vue({
     cryptoKlineTitle(asset) {
       const meta = this.cryptoKlineMeta[asset?.id];
       if (meta?.status === 'ok') return `${meta.source} · ${meta.market} · ${meta.candleCount} candles`;
-      return meta?.reason ? `暂无K线 · ${meta.reason}` : '暂无可靠历史价格序列';
+      if (this.locale === 'zh-CN') return meta?.reason ? `暂无K线 · ${meta.reason}` : this.t('chart.noReliableHistory');
+      return meta?.reason ? this.t('common.noKline') : this.t('chart.noReliableHistory');
     },
 
     async loadCryptoMiniKline(asset) {
