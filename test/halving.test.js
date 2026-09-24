@@ -5,6 +5,7 @@ import vm from 'node:vm';
 
 const root = new URL('../', import.meta.url);
 const registrySource = fs.readFileSync(new URL('asset-registry.js', root), 'utf8');
+const i18nSource = fs.readFileSync(new URL('i18n.js', root), 'utf8');
 const html = fs.readFileSync(new URL('index.html', root), 'utf8');
 const inlineScript = html.split('<script>')[1].split('</script>')[0];
 let options;
@@ -13,6 +14,8 @@ const context = vm.createContext({
   TextDecoder, Uint8Array, BigInt, Map, Object, Number, Array, String
 });
 vm.runInContext(registrySource, context);
+vm.runInContext(i18nSource, context);
+context.CryptoAIi18n.setLocale('zh-CN', { persist: false, navigate: false });
 vm.runInContext(inlineScript, context);
 
 function fixture(saved = new Map()) {
