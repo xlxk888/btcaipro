@@ -6,6 +6,7 @@ import { SOURCE_DEFINITIONS } from './provenance/source-definitions.js';
 import { MINER_CATALOG } from './miners/catalog.js';
 import { createStockTokenKlinesHandler } from '../api/stock-tokens/klines.js';
 import { createCryptoKlinesHandler } from '../api/crypto/klines.js';
+import { localizeHtmlHead } from './i18n/html-head.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const stockTokenKlines = createStockTokenKlinesHandler();
@@ -89,11 +90,15 @@ export function createApp({ store, cache, worker, discovery, nativeMarket, moner
     if (url.pathname === '/api/sources/definitions') return send(response, 200, { data: SOURCE_DEFINITIONS }, cors);
     if (url.pathname === '/api/miners/catalog') return send(response, 200, { data: MINER_CATALOG, provenance: { sourceId: 'miner_catalog', sourceName: 'Crypto AI Miner Catalog', sourceType: 'official', calculationMethod: null } }, cors);
     if (['/', '/index.html', '/zh', '/en'].includes(url.pathname)) {
-      const body = fs.readFileSync(path.join(root, 'index.html'));
+      const shell = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+      const locale = /^\/(zh|en)$/.exec(url.pathname)?.[1];
+      const body = Buffer.from(locale ? localizeHtmlHead(shell, { locale }) : shell);
       response.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-length': body.length }); return response.end(body);
     }
     if (['/sources', '/sources.html', '/zh/sources', '/en/sources'].includes(url.pathname)) {
-      const body = fs.readFileSync(path.join(root, 'sources.html'));
+      const shell = fs.readFileSync(path.join(root, 'sources.html'), 'utf8');
+      const locale = /^\/(zh|en)\/sources$/.exec(url.pathname)?.[1];
+      const body = Buffer.from(locale ? localizeHtmlHead(shell, { locale, page: 'sources' }) : shell);
       response.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-length': body.length }); return response.end(body);
     }
     if (url.pathname === '/asset-registry.js') {

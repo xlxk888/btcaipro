@@ -10,9 +10,9 @@
   },
   "rewrites": [
     { "source": "/sources", "destination": "/sources.html" },
-    { "source": "/zh/sources", "destination": "/sources.html" },
-    { "source": "/en/sources", "destination": "/sources.html" },
-    { "source": "/zh", "destination": "/index.html" },
-    { "source": "/en", "destination": "/index.html" }
+    { "source": "/zh/sources", "destination": "/api/locale-page?locale=zh&page=sources" },
+    { "source": "/en/sources", "destination": "/api/locale-page?locale=en&page=sources" },
+    { "source": "/zh", "destination": "/api/locale-page?locale=zh" },
+    { "source": "/en", "destination": "/api/locale-page?locale=en" }
   ]
 }

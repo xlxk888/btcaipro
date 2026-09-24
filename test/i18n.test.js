@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import '../i18n.js';
+import { localizeHtmlHead } from '../src/i18n/html-head.js';
 
 const i18n = globalThis.CryptoAIi18n;
 const store = value => ({ getItem: () => value });
@@ -51,4 +53,20 @@ test('compact, currency, percent and dates follow locale', () => {
   assert.equal(i18n.formatCompactNumber(1.69e12), '1.69T');
   assert.equal(i18n.formatCurrency(83932.01), '$83,932.01');
   assert.equal(i18n.formatDate('2026-09-24T12:00:00Z', { timeZone: 'UTC' }), '9/24/2026');
+});
+
+test('explicit locale routes have localized initial HTML metadata before JavaScript', () => {
+  for (const [file, page] of [['index.html', 'dashboard'], ['sources.html', 'sources']]) {
+    const shell = fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
+    for (const locale of ['zh', 'en']) {
+      const html = localizeHtmlHead(shell, { locale, page });
+      const suffix = page === 'sources' ? '/sources' : '';
+      assert.match(html, new RegExp(`<html lang="${locale === 'zh' ? 'zh-CN' : 'en'}">`));
+      assert.match(html, new RegExp(`<link rel="canonical" href="https://www.btcaipro.com/${locale}${suffix}"`));
+      assert.match(html, /hreflang="zh-CN"/);
+      assert.match(html, /hreflang="en"/);
+      assert.match(html, /hreflang="x-default"/);
+      assert.match(html, locale === 'en' ? /<title>(?:Crypto AI \| Crypto Market Intelligence Dashboard|Sources & Methodology \| Crypto AI)<\/title>/ : /<title>(?:Crypto AI｜加密市场智能仪表盘|数据与计算说明 · Crypto AI)<\/title>/);
+    }
+  }
 });
