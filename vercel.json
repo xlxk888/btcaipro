@@ -9,6 +9,10 @@
     "api/monero/network.js": { "maxDuration": 15 }
   },
   "rewrites": [
-    { "source": "/sources", "destination": "/sources.html" }
+    { "source": "/sources", "destination": "/sources.html" },
+    { "source": "/zh/sources", "destination": "/api/locale-page?locale=zh&page=sources" },
+    { "source": "/en/sources", "destination": "/api/locale-page?locale=en&page=sources" },
+    { "source": "/zh", "destination": "/api/locale-page?locale=zh" },
+    { "source": "/en", "destination": "/api/locale-page?locale=en" }
   ]
 }
