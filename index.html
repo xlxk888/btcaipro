@@ -3682,9 +3682,16 @@ new Vue({
       return CryptoAIi18n.hasTranslation(`global.name.${item.id}`) ? this.t(`global.name.${item.id}`) : item.name;
     },
     globalSource(item) {
-      if (item.source === '腾讯行情') return this.t('sources.tencent');
-      if (item.source === 'Frankfurter 汇率篮子估算') return this.t('global.source.fxProxy');
-      if (item.source === '美国财政部') return this.t('global.source.treasury');
+      const sourceKeys = {
+        '腾讯行情': 'sources.tencent',
+        'Frankfurter 汇率篮子估算': 'global.source.fxProxy',
+        '美国财政部': 'global.source.treasury',
+        'Cboe 官方延迟行情': 'global.source.cboeOfficialDelayed',
+        'Cboe 延迟行情': 'global.source.cboeDelayed',
+        'FRED / Cboe 日线': 'global.source.cboeDaily',
+        '腾讯 VIX 兜底': 'global.source.tencentVixBackup'
+      };
+      if (sourceKeys[item.source]) return this.t(sourceKeys[item.source]);
       return item.source || (item.status === '等待数据' ? this.t('global.waiting') : item.status);
     },
     t(key, params, fallback) {
